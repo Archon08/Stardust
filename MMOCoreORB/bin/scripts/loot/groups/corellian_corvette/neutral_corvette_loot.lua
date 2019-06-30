@@ -10,6 +10,8 @@ neutral_corvette_loot = {
 		{itemTemplate = "pistol_fwg5", weight = 1000000},
 		{itemTemplate = "veh_power_plant_av21", weight = 500000},
 		{itemTemplate = "rifle_e11", weight = 1000000},
+		{itemTemplate = "berserker_schematic", weight = 500000},
+		{itemTemplate = "corvette_rifle_barrel", weight = 500000},
 		{itemTemplate = "one_handed_ryyk_blade", weight = 1000000},
 		{itemTemplate = "spice_crash_n_burn", weight = 1500000},
 		{itemTemplate = "spice_giggledust", weight = 1500000},
