@@ -35,7 +35,7 @@ axkva_min = Creature:new {
 				{group = "armor_attachments", chance = 500000},
 				{group = "clothing_attachments", chance = 500000},
 				{group = "wearables_rare", chance = 500000}
-				{group = "lance", chance = 25000000}
+				{group = "lance", chance = 5000000}
 			},
 			lootChance = 100000000
 		},
