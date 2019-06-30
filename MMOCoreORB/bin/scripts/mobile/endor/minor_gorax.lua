@@ -30,11 +30,11 @@ minor_gorax = Creature:new {
 	lootGroups = {
 	    {
 	        groups = {
-				{group = "minor_gorax", chance = 42000000},
-				{group = "armor_attachments", chance = 4000000},
-				{group = "clothing_attachments", chance = 4000000}
+				{group = "minor_gorax", chance = 6000000},
+				{group = "armor_attachments", chance = 2000000},
+				{group = "clothing_attachments", chance = 2000000}
 			},
-			lootChance = 500000000
+			lootChance = 7000000
 		}
 	},
 	weapons = {},
