@@ -476,6 +476,7 @@ includeFile("groups/dungeon/exar_kun/nge_jedi_cloaks.lua")
 includeFile("groups/dungeon/exar_kun/jedi_house_deeds.lua")
 includeFile("groups/dungeon/exar_kun/exar_kun_furniture.lua")
 includeFile("groups/dungeon/axkva_min/ns_clothing.lua")
+includeFile("groups/npc/nightsister/lance.lua")
 
 -- Race Tracks
 includeFile("groups/race_tracks/mos_espa.lua")
