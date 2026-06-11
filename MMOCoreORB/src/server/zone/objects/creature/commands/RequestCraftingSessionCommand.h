@@ -70,7 +70,7 @@ public:
 		}
 
 		/// If they are both null, we can't craft
-		if(craftingTool == NULL && craftingStation == NULL) {
+		if(craftingTool == nullptr && craftingStation == nullptr) {
 			creature->sendSystemMessage("Error starting crafting session, no tool or station found.  Please report this error");
 			return GENERALERROR;
 		}
@@ -82,21 +82,21 @@ public:
 		 */
 
 		/// Check if tool is in initiating creatures inventory
-		if(craftingTool != NULL && !craftingTool->isASubChildOf(creature)) {
+		if(craftingTool != nullptr && !craftingTool->isASubChildOf(creature)) {
 			return GENERALERROR;
 		}
 
 		// Make sure station is in a building or outdoors and within range
-		if(craftingStation != NULL) {
+		if(craftingStation != nullptr) {
 			ManagedReference<SceneObject*> parent = craftingStation->getParent().get();
 
-			if ((parent != NULL && !parent->isCellObject()) || !creature->isInRange(craftingStation, 7.0)) {
+			if ((parent != nullptr && !parent->isCellObject()) || !creature->isInRange(craftingStation, 7.0)) {
 				return GENERALERROR;
 			}
 		}
 
 		/// Its a station, find the tool
-		if(craftingStation != NULL) {
+		if(craftingStation != nullptr) {
 			craftingTool = cast<CraftingTool*>(craftingStation->findCraftingTool(creature));
 		}
 

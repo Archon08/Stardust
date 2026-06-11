@@ -206,7 +206,7 @@ bool ProceduralTerrainAppearance::getWater(float x, float y, float& waterHeight)
 }
 
 Layer* ProceduralTerrainAppearance::getLayerRecursive(float x, float y, Layer* rootParent) {
-	Layer* returnLayer = NULL;
+	Layer* returnLayer = nullptr;
 
 	Vector<Boundary*>* boundaries = rootParent->getBoundaries();
 
@@ -224,7 +224,7 @@ Layer* ProceduralTerrainAppearance::getLayerRecursive(float x, float y, Layer* r
 
 		returnLayer = getLayerRecursive(x, y, layer);
 
-		if (returnLayer != NULL)
+		if (returnLayer != nullptr)
 			return returnLayer;
 	}
 
@@ -232,7 +232,7 @@ Layer* ProceduralTerrainAppearance::getLayerRecursive(float x, float y, Layer* r
 }
 
 Layer* ProceduralTerrainAppearance::getLayer(float x, float y) {
-	Layer* returnLayer = NULL;
+	Layer* returnLayer = nullptr;
 
 	LayersGroup* layersGroup = terrainGenerator->getLayersGroup();
 
@@ -246,7 +246,7 @@ Layer* ProceduralTerrainAppearance::getLayer(float x, float y) {
 
 		returnLayer = getLayerRecursive(x, y, layer);
 
-		if (returnLayer != NULL)
+		if (returnLayer != nullptr)
 			return returnLayer;
 		//Vector<TerrainRule*>* rules = layer->getRules();
 	}
@@ -479,7 +479,7 @@ void ProceduralTerrainAppearance::setHeight(Layer* layer, float height) {
 
 		AffectorHeightConstant* heightAffector = dynamic_cast<AffectorHeightConstant*>(affector);
 
-		if (heightAffector != NULL && (heightAffector->getHeight() == 0) && (heightAffector->getOperationType() == 0)) {
+		if (heightAffector != nullptr && (heightAffector->getHeight() == 0) && (heightAffector->getOperationType() == 0)) {
 			heightAffector->setHeight(height);
 		}
 	}

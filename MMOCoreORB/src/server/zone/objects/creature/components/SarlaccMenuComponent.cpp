@@ -33,7 +33,7 @@ int SarlaccMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject, Creat
 				for (int j=0; j < sco->getContainerObjectsSize(); j++) {
 					SceneObject* child = sco->getContainerObject(j);
 
-					if (child == NULL)
+					if (child == nullptr)
 						continue;
 
 					if (child->getServerObjectCRC() == STRING_HASHCODE("object/tangible/loot/quest/quest_item_sarlacc_bile_jar.iff")) {

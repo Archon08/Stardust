@@ -3605,7 +3605,7 @@ void CreatureObjectImplementation::removePersonalEnemyFlag(uint64 enemyID) {
 	ZoneServer* zoneServer = server->getZoneServer();
 	ManagedReference<CreatureObject*> enemy = zoneServer->getObject(enemyID).castTo<CreatureObject*>();
 
-	if (enemy != NULL)
+	if (enemy != nullptr)
 		sendPvpStatusTo(enemy);
 }
 

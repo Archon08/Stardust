@@ -185,7 +185,7 @@ int CraftingSessionImplementation::clearSession() {
 
 		craftingTool->dropSlottedObject("crafted_components");
 
-		if (prototype != NULL) {
+		if (prototype != nullptr) {
 
 			Locker locker3(prototype);
 
@@ -195,12 +195,12 @@ int CraftingSessionImplementation::clearSession() {
 					prototype->destroyObjectFromWorld(true);
 				}
 
-				this->prototype = NULL;
+				this->prototype = nullptr;
 			}
 		}
 	}
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("*** Clearing crafting session ***");
 	}
 
@@ -231,7 +231,7 @@ void CraftingSessionImplementation::closeCraftingWindow(int clientCounter) {
 
 	crafter->sendMessage(objMsg);
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("*** Closing crafting window ***");
 	}
 }
@@ -265,7 +265,7 @@ void CraftingSessionImplementation::selectDraftSchematic(int index) {
 
 	DraftSchematic* draftschematic = currentSchematicList.get(index);
 
-	if (draftschematic == NULL) {
+	if (draftschematic == nullptr) {
 		crafter->sendSystemMessage("@ui_craft:err_no_draft_schematic");
 		closeCraftingWindow(1);
 		cancelSession();
@@ -274,18 +274,18 @@ void CraftingSessionImplementation::selectDraftSchematic(int index) {
 
 	clearSession();
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("Selected DraftSchematic: " + draftschematic->getCustomName());
 	}
 
 	state = 2;
 
-	if (craftingTool != NULL) {
+	if (craftingTool != nullptr) {
 		Locker locker(craftingTool);
 
 		if (createSessionObjects(draftschematic)) {
 
-			if (prototype == NULL) {
+			if (prototype == nullptr) {
 				crafter->sendSystemMessage("@ui_craft:err_no_prototype");
 				closeCraftingWindow(1);
 				cancelSession();
@@ -329,7 +329,7 @@ bool CraftingSessionImplementation::createManufactureSchematic(DraftSchematic* d
 	manufactureSchematic =
 			 (draftschematic->createManufactureSchematic(craftingTool)).castTo<ManufactureSchematic*>();
 
-	if (manufactureSchematic.get() == NULL) {
+	if (manufactureSchematic.get() == nullptr) {
 		crafter->sendSystemMessage("@ui_craft:err_no_manf_schematic");
 		closeCraftingWindow(1);
 		cancelSession();
@@ -339,7 +339,7 @@ bool CraftingSessionImplementation::createManufactureSchematic(DraftSchematic* d
 	craftingTool->transferObject(manufactureSchematic.get(), 0x4, true);
 	//manufactureSchematic->sendTo(crafter, true);
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("ManufactureSchematic Created");
 	}
 
@@ -361,7 +361,7 @@ bool CraftingSessionImplementation::createPrototypeObject(DraftSchematic* drafts
 
 	ManagedReference<TangibleObject*> strongPrototype = prototype.get();
 
-	if (strongPrototype == NULL) {
+	if (strongPrototype == nullptr) {
 		crafter->sendSystemMessage("@ui_craft:err_no_prototype");
 		closeCraftingWindow(1);
 		cancelSession();
@@ -375,7 +375,7 @@ bool CraftingSessionImplementation::createPrototypeObject(DraftSchematic* drafts
 	craftingTool->transferObject(strongPrototype, -1, false);
 	strongPrototype->sendTo(crafter, true);
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("Prototype Created");
 	}
 
@@ -389,7 +389,7 @@ void CraftingSessionImplementation::sendIngredientForUIListen() {
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<TangibleObject*> prototype = this->prototype.get();
 
-	if (crafter == NULL || craftingTool == NULL || manufactureSchematic == NULL || prototype == NULL) {
+	if (crafter == nullptr || craftingTool == nullptr || manufactureSchematic == nullptr || prototype == nullptr) {
 		return;
 	}
 
@@ -415,7 +415,7 @@ void CraftingSessionImplementation::sendIngredientForUIListen() {
 	for (int i = 0; i < draftSlotCount; i++) {
 		DraftSlot* slot = draftSchematic->getDraftSlot(i);
 
-		if (slot != NULL)
+		if (slot != nullptr)
 			slot->insertToMessage(objMsg);
 	}
 
@@ -423,7 +423,7 @@ void CraftingSessionImplementation::sendIngredientForUIListen() {
 
 	crafter->sendMessage(objMsg);
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("Sent UI Listen");
 	}
 }
@@ -436,28 +436,28 @@ void CraftingSessionImplementation::addIngredient(TangibleObject* tano, int slot
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<TangibleObject*> prototype = this->prototype.get();
 
-	if (crafter == NULL || craftingTool == NULL) {
+	if (crafter == nullptr || craftingTool == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::INVALID);
 		return;
 	}
 
-	if (manufactureSchematic == NULL) {
+	if (manufactureSchematic == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::NOSCHEMATIC);
 		return;
 	}
 
-	if (prototype == NULL) {
+	if (prototype == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::PROTOTYPENOTFOUND);
 		return;
 	}
 
-	if (tano == NULL) {
+	if (tano == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::INVALIDINGREDIENT);
 		return;
 	}
 
 	SceneObject* inventory = crafter->getSlottedObject("inventory");
-	if (inventory == NULL) {
+	if (inventory == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::NOINVENTORY);
 		return;
 	}
@@ -466,14 +466,14 @@ void CraftingSessionImplementation::addIngredient(TangibleObject* tano, int slot
 
 	/// Check if item is on the player, but not in a crafting tool
 	/// Or if the item is in a crafting station to prevent some duping
-	if(!tano->isASubChildOf(crafter) && (craftingStation == NULL || !tano->isASubChildOf(craftingStation))) {
+	if(!tano->isASubChildOf(crafter) && (craftingStation == nullptr || !tano->isASubChildOf(craftingStation))) {
 		sendSlotMessage(clientCounter, IngredientSlot::INVALIDINGREDIENT);
 		return;
 	}
 
 	ManagedReference<SceneObject*> objectsParent = tano->getParent().get();
 
-	if (objectsParent == NULL || !objectsParent->checkContainerPermission(crafter, ContainerPermissions::MOVEOUT)){
+	if (objectsParent == nullptr || !objectsParent->checkContainerPermission(crafter, ContainerPermissions::MOVEOUT)){
 		sendSlotMessage(clientCounter, IngredientSlot::INVALIDINGREDIENT);
 		return;
 	}
@@ -491,7 +491,7 @@ void CraftingSessionImplementation::addIngredient(TangibleObject* tano, int slot
 
 	sendSlotMessage(clientCounter, result);
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("Adding ingredient: " + tano->getDisplayedName());
 	}
 }
@@ -502,28 +502,28 @@ void CraftingSessionImplementation::removeIngredient(TangibleObject* tano, int s
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<TangibleObject*> prototype = this->prototype.get();
 
-	if (crafter == NULL) {
+	if (crafter == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::INVALID);
 		return;
 	}
 
-	if (manufactureSchematic == NULL) {
+	if (manufactureSchematic == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::NOSCHEMATIC);
 		return;
 	}
 
-	if (prototype == NULL) {
+	if (prototype == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::PROTOTYPENOTFOUND);
 		return;
 	}
 
-	if (tano == NULL) {
+	if (tano == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::INVALIDINGREDIENT);
 		return;
 	}
 
 	SceneObject* inventory = crafter->getSlottedObject("inventory");
-	if (inventory == NULL) {
+	if (inventory == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::NOINVENTORY);
 		return;
 	}
@@ -546,7 +546,7 @@ void CraftingSessionImplementation::removeIngredient(TangibleObject* tano, int s
 		// End Object Controller *****************************************
 	}
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage("Removing ingredient: " + tano->getDisplayedName());
 	}
 }
@@ -556,7 +556,7 @@ void CraftingSessionImplementation::nextCraftingStage(int clientCounter) {
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<TangibleObject*> prototype = this->prototype.get();
 
-	if (manufactureSchematic == NULL) {
+	if (manufactureSchematic == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::NOSCHEMATIC);
 		return;
 	}
@@ -577,7 +577,7 @@ void CraftingSessionImplementation::nextCraftingStage(int clientCounter) {
 
 	ManagedReference<SceneObject*> craftingComponents = craftingTool->getSlottedObject("crafted_components");
 
-	if (craftingComponents != NULL) {
+	if (craftingComponents != nullptr) {
 		/// Add Components to crafted object
 		prototype->transferObject(craftingComponents, 4, false);
 		craftingComponents->setSendToClient(false);
@@ -654,11 +654,11 @@ void CraftingSessionImplementation::initialAssembly(int clientCounter) {
 	for (int i = 0; i < manufactureSchematic->getSlotCount(); ++i) {
 
 		ComponentSlot* compSlot = cast<ComponentSlot*>(manufactureSchematic->getSlot(i));
-		if (compSlot == NULL)
+		if (compSlot == nullptr)
 			continue;
 
 		ManagedReference<TangibleObject*> tano = compSlot->getPrototype();
-		if (tano == NULL)
+		if (tano == nullptr)
 			continue;
 
 		uint32 tanoCRC = prototype->getClientObjectCRC();
@@ -984,7 +984,7 @@ void CraftingSessionImplementation::experiment(int rowsAttempted, const String& 
 
 	crafter->notifyObservers(ObserverEventType::CRAFTINGEXPERIMENTATION, crafter, 0);
 
-	if (crafterGhost != NULL && crafterGhost->getDebug()) {
+	if (crafterGhost != nullptr && crafterGhost->getDebug()) {
 		crafter->sendSystemMessage(craftingValues->toString());
 	}
 }
@@ -995,7 +995,7 @@ void CraftingSessionImplementation::customization(const String& name, byte templ
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<TangibleObject*> prototype = this->prototype.get();
 
-	if (manufactureSchematic == NULL) {
+	if (manufactureSchematic == nullptr) {
 		sendSlotMessage(0, IngredientSlot::NOSCHEMATIC);
 		return;
 	}
@@ -1019,7 +1019,7 @@ void CraftingSessionImplementation::customization(const String& name, byte templ
 		Reference<DraftSchematic*> draftSchematic =
 				manufactureSchematic->getDraftSchematic();
 
-		if (draftSchematic != NULL) {
+		if (draftSchematic != nullptr) {
 			if (draftSchematic->getTemplateListSize() >= (int) templateChoice) {
 				String chosenTemplate = draftSchematic->getTemplate((int) templateChoice);
 				uint32 clientCRC = chosenTemplate.hashCode();
@@ -1156,7 +1156,7 @@ void CraftingSessionImplementation::createPrototype(int clientCounter, bool crea
 	ManagedReference<CreatureObject*> crafter = this->crafter.get();
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 
-	if (manufactureSchematic == NULL) {
+	if (manufactureSchematic == nullptr) {
 		sendSlotMessage(clientCounter, IngredientSlot::NOSCHEMATIC);
 		return;
 	}
@@ -1210,14 +1210,14 @@ void CraftingSessionImplementation::startCreationTasks(int timer, bool practice)
 
 	ManagedReference<ZoneServer*> server = crafter->getZoneServer();
 
-	if (server != NULL) {
+	if (server != nullptr) {
 
 		Locker locker(craftingTool);
 		craftingTool->setBusy();
 
 		int timer2 = 1;
 
-		Reference<UpdateToolCountdownTask*> updateToolCountdownTask = NULL;
+		Reference<UpdateToolCountdownTask*> updateToolCountdownTask = nullptr;
 		Reference<CreateObjectTask*> createObjectTask = new CreateObjectTask(crafter, craftingTool, practice);
 
 		while (timer > 0) {
@@ -1244,7 +1244,7 @@ void CraftingSessionImplementation::createManufactureSchematic(int clientCounter
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<TangibleObject*> prototype = this->prototype.get();
 
-	if (manufactureSchematic == NULL) {
+	if (manufactureSchematic == nullptr) {
 		sendSlotMessage(0, IngredientSlot::NOSCHEMATIC);
 		return;
 	}

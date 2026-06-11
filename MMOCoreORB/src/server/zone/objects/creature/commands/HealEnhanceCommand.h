@@ -217,7 +217,7 @@ public:
 
 	uint32 getBuffStrength(Buff* existingbuff, int attribute) const {
 
-		if (existingbuff != NULL) {
+		if (existingbuff != nullptr) {
 
 			if (BuffAttribute::isProtection(attribute))
 				return existingbuff->getSkillModifierValue(BuffAttribute::getProtectionString(attribute));
@@ -262,11 +262,11 @@ public:
 
 		ManagedReference<SceneObject*> object = server->getZoneServer()->getObject(target);
 
-		if (object != NULL) {
+		if (object != nullptr) {
 			if (!object->isCreatureObject()) {
 				TangibleObject* tangibleObject = dynamic_cast<TangibleObject*>(object.get());
 
-				if (tangibleObject != NULL && tangibleObject->isAttackableBy(creature)) {
+				if (tangibleObject != nullptr && tangibleObject->isAttackableBy(creature)) {
 					object = creature;
 				} else {
 					creature->sendSystemMessage("@healing_response:healing_response_77"); //Target must be a player or a creature pet in order to apply enhancements.
@@ -291,16 +291,16 @@ public:
 
 		Locker clocker(patient, creature);
 
-		ManagedReference<EnhancePack*> enhancePack = NULL;
+		ManagedReference<EnhancePack*> enhancePack = nullptr;
 
 		if (objectId != 0) {
 			SceneObject* inventory = creature->getSlottedObject("inventory");
 
-			if (inventory != NULL) {
+			if (inventory != nullptr) {
 				enhancePack = inventory->getContainerObject(objectId).castTo<EnhancePack*>();
 			}
 
-			if (enhancePack == NULL) {
+			if (enhancePack == nullptr) {
 				enhancer->sendSystemMessage("@healing_response:healing_response_76"); // That item does not provide attribute enhancement.
 				return false;
 			}
@@ -332,12 +332,12 @@ public:
 
 					attribute = i;
 					enhancePack = findEnhancePack(creature, i);
-					if(enhancePack != NULL)
+					if(enhancePack != nullptr)
 						break;
 				}
 
 
-				if(enhancePack == NULL) {
+				if(enhancePack == nullptr) {
 
 					// We couldn't find any enhance packs for non-applied buffs.
 					// Loop through the applied buffs and see if one matches our criteria
@@ -347,12 +347,12 @@ public:
 
 						attribute = attributeMap.get(buff);
 						enhancePack = findEnhancePack(creature, attribute);
-						if(enhancePack != NULL) {
+						if(enhancePack != nullptr) {
 							uint32 currentBuff = getBuffStrength(buff, attribute);
 							uint32 newBuff = getEnhancePackStrength(enhancePack, enhancer, patient);
 
 							if(newBuff < currentBuff) {
-								enhancePack = NULL;
+								enhancePack = nullptr;
 								attribute = BuffAttribute::UNKNOWN;
 							} else {
 								break;
@@ -417,7 +417,7 @@ public:
 
 		deactivateWoundTreatment(enhancer);
 
-		if (enhancePack != NULL) {
+		if (enhancePack != nullptr) {
 			Locker locker(enhancePack);
 			enhancePack->decreaseUseCount();
 		}

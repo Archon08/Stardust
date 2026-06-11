@@ -107,21 +107,21 @@ Account* AccountManager::validateAccountCredentials(LoginClient* client, const S
 	if(account == nullptr) {
 
 		//The user name didn't exist, so we check if auto registration is enabled and create a new account
-		if (isAutoRegistrationEnabled() && client != NULL) {
+		if (isAutoRegistrationEnabled() && client != nullptr) {
 			account = createAccount(username, password, passwordStored);
 		} else {
-			if(client != NULL)
+			if(client != nullptr)
 				client->sendErrorMessage("Login Error", "Automatic registration is currently disabled. Please contact the administrators of the server in order to get an authorized account.");
-			return NULL;
+			return nullptr;
 		}
 	}
 
 	if(!account->isActive()) {
 
-		if(client != NULL)
+		if(client != nullptr)
 			client->sendErrorMessage("Account Disabled", "The server administrators have disabled your account.");
 
-		return NULL;
+		return nullptr;
 	}
 
 	//Check hash version
@@ -134,10 +134,10 @@ Account* AccountManager::validateAccountCredentials(LoginClient* client, const S
 
 	if (passwordStored != passwordHashed) {
 
-		if(client != NULL)
+		if(client != nullptr)
 			client->sendErrorMessage("Wrong Password", "The password you entered was incorrect.");
 
-		return NULL;
+		return nullptr;
 	}
 	//update hash if unsalted
 	if(account->getSalt() == "")
@@ -175,10 +175,10 @@ Account* AccountManager::validateAccountCredentials(LoginClient* client, const S
 
 		reason << "Reason: " << account->getBanReason();
 
-		if(client != NULL)
+		if(client != nullptr)
 			client->sendErrorMessage("Account Banned", reason.toString());
 
-		return NULL;
+		return nullptr;
 	}
 
 	return account;
@@ -218,8 +218,8 @@ Account* AccountManager::createAccount(const String& username, const String& pas
 
 	Reference<ResultSet*> result = ServerDatabase::instance()->executeQuery(query.toString());
 
-	if (result == NULL)
-		return NULL;
+	if (result == nullptr)
+		return nullptr;
 
 	uint32 accountID = result->getLastAffectedRow();
 
@@ -228,8 +228,8 @@ Account* AccountManager::createAccount(const String& username, const String& pas
 
 ManagedReference<Account*> AccountManager::getAccount(uint32 accountID, bool forceSqlUpdate) {
 
-	Reference<Account*> account = NULL;
-	ManagedReference<ManagedObject*> accObj = NULL;
+	Reference<Account*> account = nullptr;
+	ManagedReference<ManagedObject*> accObj = nullptr;
 	
 	
 	static uint64 databaseID = ObjectDatabaseManager::instance()->getDatabaseID("accounts");
@@ -238,22 +238,22 @@ ManagedReference<Account*> AccountManager::getAccount(uint32 accountID, bool for
 	
 	accObj = Core::getObjectBroker()->lookUp(oid).castTo<ManagedObject*>();
 	
-	if(accObj == NULL) {
+	if(accObj == nullptr) {
 		
 		// Lazily create account object
 		accObj = ObjectManager::instance()->createObject("Account", 3, "accounts", oid);
 		
-		if(accObj == NULL) {
+		if(accObj == nullptr) {
 			//error("Error creating account object with account ID " + String::hexvalueOf((int64)oid));
-			return NULL;
+			return nullptr;
 		}
 	} else if(!forceSqlUpdate) {
 		return accObj.castTo<Account*>();
 	}
 	
 	account = accObj.castTo<Account*>();
-	if(account == NULL) {
-		return NULL;
+	if(account == nullptr) {
+		return nullptr;
 	}
 	
 	StringBuffer query;
@@ -274,7 +274,7 @@ ManagedReference<Account*> AccountManager::getAccount(uint32 accountID, bool for
 		return account;
 	}
 	
-	return NULL;
+	return nullptr;
 }
 
 ManagedReference<Account*> AccountManager::getAccount(uint32 accountID, String& passwordStored, bool forceSqlUpdate) {
@@ -287,8 +287,8 @@ ManagedReference<Account*> AccountManager::getAccount(uint32 accountID, String& 
 ManagedReference<Account*> AccountManager::getAccount(String query, String& passwordStored, bool forceSqlUpdate) {
 
 	//static Logger logger("AccountManager::getAccount");
-	Reference<Account*> account = NULL;
-	ManagedReference<ManagedObject*> accObj = NULL;
+	Reference<Account*> account = nullptr;
+	ManagedReference<ManagedObject*> accObj = nullptr;
 
 	Reference<ResultSet*> result = ServerDatabase::instance()->executeQuery(query);
 
@@ -300,22 +300,22 @@ ManagedReference<Account*> AccountManager::getAccount(String query, String& pass
 
 		accObj = Core::getObjectBroker()->lookUp(oid).castTo<ManagedObject*>();
 
-		if(accObj == NULL) {
+		if(accObj == nullptr) {
 			
 			// Lazily create account object
 			accObj = ObjectManager::instance()->createObject("Account", 3, "accounts", oid);
 
-			if(accObj == NULL) {
+			if(accObj == nullptr) {
 				//error("Error creating account object with account ID " + String::hexvalueOf((int64)oid));
-				return NULL;
+				return nullptr;
 			}
 		} else if(!forceSqlUpdate) {
 			return accObj.castTo<Account*>();
 		}
 
 		account = accObj.castTo<Account*>();
-		if(account == NULL) {
-			return NULL;
+		if(account == nullptr) {
+			return nullptr;
 		}
 
 		Locker locker(account);
@@ -333,7 +333,7 @@ ManagedReference<Account*> AccountManager::getAccount(String query, String& pass
 		return account;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 

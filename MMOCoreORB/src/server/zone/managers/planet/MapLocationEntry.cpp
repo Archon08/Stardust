@@ -87,10 +87,10 @@ void MapLocationEntry::setObject(SceneObject *obj) {
 		ManagedReference<PlanetManager*> planetManager = zone->getPlanetManager();
 		PlanetTravelPoint* ptp = planetManager->getNearestPlanetTravelPoint(object, 64.f);
 
-		if(ptp != NULL) {
+		if(ptp != nullptr) {
 			newName = ptp->getPointName();
 		}
-	} else if(category->getIndex() == MapLocationType::TERMINAL && (object->getPlanetMapSubCategory() != NULL)) {
+	} else if(category->getIndex() == MapLocationType::TERMINAL && (object->getPlanetMapSubCategory() != nullptr)) {
 		newName = object->getPlanetMapSubCategory()->getName();
 
 		if (newName == "terminal_bank") {
@@ -101,7 +101,7 @@ void MapLocationEntry::setObject(SceneObject *obj) {
 			if (object->isMissionTerminal()) {
 				ManagedReference<MissionTerminal*> terminal = dynamic_cast<MissionTerminal*>(object.get());
 
-				if (terminal != NULL)
+				if (terminal != nullptr)
 					newName = terminal->getTerminalName();
 			}
 		} else {

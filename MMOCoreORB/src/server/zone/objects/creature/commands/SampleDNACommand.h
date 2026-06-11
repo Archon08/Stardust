@@ -59,7 +59,7 @@ public:
 			return GENERALERROR;
 		}
 
-		if (cr == NULL || !cr->isAttackableBy(player)){
+		if (cr == nullptr || !cr->isAttackableBy(player)){
 			player->sendSystemMessage("@bio_engineer:harvest_dna_invalid_target"); // You cannot sample DNA from that target.
 			return INVALIDTARGET;
 		}

@@ -128,17 +128,17 @@ public:
 
 		Reference<PlanetTravelPoint*> arrivalPoint = arrivalZone->getPlanetManager()->getPlanetTravelPoint(arrivalPointName);
 
-		if (arrivalPoint == NULL || !closestPoint->canTravelTo(arrivalPoint)) {
+		if (arrivalPoint == nullptr || !closestPoint->canTravelTo(arrivalPoint)) {
 			creature->sendSystemMessage("@travel:wrong_shuttle"); //The ticket is not valid for the given shuttle.
 			return GENERALERROR;
 		}
 
 		ManagedReference<CreatureObject*> targetShuttleObject = arrivalPoint->getShuttle();
 
-		if (targetShuttleObject != NULL) {
+		if (targetShuttleObject != nullptr) {
 			ManagedReference<CityRegion*> region = targetShuttleObject->getCityRegion().get();
 
-			if (region != NULL) {
+			if (region != nullptr) {
 #ifdef ENABLE_CITY_TRAVEL_LIMIT
 				if (region->getCurrentPlayerCount() >= MAXIMUM_PLAYER_COUNT) {
 					creature->sendSystemMessage("Your destination is currently under maintenance, please try again later.");
@@ -154,7 +154,7 @@ public:
 
 		ManagedReference<CityRegion*> departCity = shuttle->getCityRegion().get();
 
-		if (departCity != NULL){
+		if (departCity != nullptr){
 			if (departCity->isBanned(creature->getObjectID())) {
 				creature->sendSystemMessage("@city/city:city_cant_board"); // You are banned from using the services of this city.\nYou may not board the transport.
 				return GENERALERROR;
@@ -168,11 +168,11 @@ public:
 
 		p.initializePosition(arrivalPoint->getArrivalPosition());
 
-		ManagedReference<CityRegion*> region = targetShuttleObject != NULL ? targetShuttleObject->getCityRegion().get() : NULL;
+		ManagedReference<CityRegion*> region = targetShuttleObject != nullptr ? targetShuttleObject->getCityRegion().get() : nullptr;
 
 		// Randomize the arrival a bit to try and avoid everyone zoning on top of each other
 		// For NPC cities, use the generic method
-		if (region == NULL || region->isClientRegion()) {
+		if (region == nullptr || region->isClientRegion()) {
 			p.randomizePosition(3);
 
 			x = p.getPositionX();

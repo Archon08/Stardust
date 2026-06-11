@@ -39,7 +39,7 @@ public:
 			Reference<Task*> surveytask = creature->getPendingTask("survey");
 
 			// If the sample task exists, we can't sample again
-			if (sampletask != NULL) {
+			if (sampletask != nullptr) {
 				Time nextExecutionTime;
 				Core::getTaskManager()->getNextExecutionTime(sampletask, nextExecutionTime);
 				int seconds = (int) ((nextExecutionTime.getMiliTime() - Time().getMiliTime()) / 1000.0f);

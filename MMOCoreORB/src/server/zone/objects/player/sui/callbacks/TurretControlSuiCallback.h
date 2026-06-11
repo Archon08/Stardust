@@ -76,13 +76,13 @@ public:
 		}
 
 		SuiListBox* listBox = cast<SuiListBox*>(suiBox);
-		if (listBox == NULL)
+		if (listBox == nullptr)
 			return;
 
 		uint64 targetID = listBox->getMenuObjectID(index);
 		ManagedReference<CreatureObject*> targetCreature = server->getObject(targetID).castTo<CreatureObject*>();
 
-		if (targetCreature == NULL)
+		if (targetCreature == nullptr)
 			return;
 
 		Locker clocker(turret, player);
@@ -93,7 +93,7 @@ public:
 
 		StringIdChatParameter param;
 
-		if (fireTask != NULL && fireTask->isManualFireTask()) {
+		if (fireTask != nullptr && fireTask->isManualFireTask()) {
 			if (targetCreature == turretData->getManualTarget()) {
 				param.setStringId("hq","already_attacking"); //Your selected target is already being attacked by this turret.
 				player->sendSystemMessage(param);

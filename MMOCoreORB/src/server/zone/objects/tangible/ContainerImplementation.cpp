@@ -146,7 +146,7 @@ int ContainerImplementation::canAddObject(SceneObject* object, int containmentTy
 		ManagedReference<SceneObject*> playerParent = getParentRecursively(SceneObjectType::PLAYERCREATURE);
 
 		// If there's a wearable container parent, return if it doesn't have enough room
-		if (wearableParent != NULL) {
+		if (wearableParent != nullptr) {
 			if (wearableParent->getContainerVolumeLimit() < wearableParent->getCountableObjectsRecursive() + objectSize) {
 				errorDescription = "@container_error_message:container03"; // This container is full.
 
@@ -183,7 +183,7 @@ int ContainerImplementation::canAddObject(SceneObject* object, int containmentTy
 
 				if (pack != nullptr && !pack->isEquipped()) {
 				// This is a wearable container, and it's not equipped.
-					if (playerParent != NULL ) {
+					if (playerParent != nullptr ) {
 						SceneObject* inventory = playerParent->getSlottedObject("inventory");
 						SceneObject* bank = playerParent->getSlottedObject("bank");
 						SceneObject* thisParent = getParent().get();
@@ -207,7 +207,7 @@ int ContainerImplementation::canAddObject(SceneObject* object, int containmentTy
 				}
 			} else {
 				// This is a non-wearable container.
-				if (playerParent != NULL ) {
+				if (playerParent != nullptr ) {
 					SceneObject* inventory = playerParent->getSlottedObject("inventory");
 					SceneObject* bank = playerParent->getSlottedObject("bank");
 					SceneObject* thisParent = getParent().get();

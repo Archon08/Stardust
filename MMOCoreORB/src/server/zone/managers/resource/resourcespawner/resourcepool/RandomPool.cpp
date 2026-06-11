@@ -60,9 +60,9 @@ bool RandomPool::update() {
 
 		ManagedReference<ResourceSpawn* > resourceSpawn = pool.get(i);
 
-		if (resourceSpawn == NULL || !resourceSpawn->inShift()) {
+		if (resourceSpawn == nullptr || !resourceSpawn->inShift()) {
 
-			if(resourceSpawn != NULL) {
+			if(resourceSpawn != nullptr) {
 				resourceSpawner->despawn(resourceSpawn);
 				despawnedCount++;
 				//buffer << "Removing: " << spawn->getName() << " : " << spawn->getType();
@@ -70,7 +70,7 @@ bool RandomPool::update() {
 
 			String resourceType = includedResources.elementAt(System::random(includedResources.size() - 1)).getKey();
 			ManagedReference<ResourceSpawn* > newSpawn = resourceSpawner->createResourceSpawn(resourceType, excludedResources);
-			if(newSpawn != NULL) {
+			if(newSpawn != nullptr) {
 				Locker locker(newSpawn);
 				newSpawn->setSpawnPool(ResourcePool::RANDOMPOOL, "");
 				spawnedCount++;
@@ -90,16 +90,16 @@ bool RandomPool::update() {
 }
 
 ResourceSpawn* RandomPool::removeSpawn(const String& type) {
-	ManagedReference<ResourceSpawn* > spawn = NULL;
+	ManagedReference<ResourceSpawn* > spawn = nullptr;
 
 	for(int i = 0; i < pool.size(); ++i) {
 		spawn = pool.get(i);
-		if(spawn != NULL && spawn->isType(type)) {
-			pool.setElementAt(i, NULL);
+		if(spawn != nullptr && spawn->isType(type)) {
+			pool.setElementAt(i, nullptr);
 			return spawn;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 String RandomPool::healthCheck() {
@@ -115,7 +115,7 @@ String RandomPool::healthCheck() {
 
 		bool isRightType = false;
 
-		if(spawn != NULL) {
+		if(spawn != nullptr) {
 			resourceType = spawn->getType();
 
 			for(int j = 0; j < includedResources.size(); ++j) {
@@ -130,7 +130,7 @@ String RandomPool::healthCheck() {
 		if(!isRightType)
 			heathly = false;
 
-		if (spawn != NULL) {
+		if (spawn != nullptr) {
 			buffer << "   " << i << ". " << resourceType << " : "
 					<< (isRightType ? "Pass" : "Fail")
 					<< "  " << spawn->getName() << " Zones: " << String::valueOf(spawn->getSpawnMapSize())
@@ -157,7 +157,7 @@ void RandomPool::print() {
 
 		StringBuffer msg;
 
-		if (spawn != NULL)
+		if (spawn != nullptr)
 			msg << spawn->getName() << " : " << spawn->getType();
 		else
 			msg << "EMPTY";

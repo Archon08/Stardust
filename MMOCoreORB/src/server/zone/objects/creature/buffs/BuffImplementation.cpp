@@ -344,7 +344,7 @@ void BuffImplementation::applySkillModifiers() {
 void BuffImplementation::applyStates() {
 	ManagedReference<CreatureObject*> creo = creature.get();
 
-	if (creo == NULL)
+	if (creo == nullptr)
 		return;
 
 	int size = states.size();
@@ -358,7 +358,7 @@ void BuffImplementation::applyStates() {
 void BuffImplementation::removeAttributeModifiers() {
 	ManagedReference<CreatureObject*> creo = creature.get();
 
-	if (creo == NULL)
+	if (creo == nullptr)
 		return;
 
 	int size = attributeModifiers.size();
@@ -407,7 +407,7 @@ void BuffImplementation::removeAttributeModifiers() {
 void BuffImplementation::removeSkillModifiers() {
 	ManagedReference<CreatureObject*> creo = creature.get();
 
-	if (creo == NULL)
+	if (creo == nullptr)
 		return;
 
 	int size = skillModifiers.size();

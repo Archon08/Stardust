@@ -62,7 +62,7 @@ public:
 					return GENERALERROR;
 				}
 
-				if (playerObject != NULL)
+				if (playerObject != nullptr)
 					playerObject->setForcePower(playerObject->getForcePower() - forceCost);
 
 			} catch (Exception& e) {

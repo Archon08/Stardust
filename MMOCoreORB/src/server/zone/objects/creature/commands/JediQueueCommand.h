@@ -142,7 +142,7 @@ public:
 		}
 
 		// Create buff object.
-		ManagedReference<Buff*> buff = NULL;
+		ManagedReference<Buff*> buff = nullptr;
         
 		if(buffClass == BASE_BUFF || singleUseEventTypes.size() == 0) {
 			buff = new Buff(creature, buffCRC, duration, BuffType::JEDI);
@@ -160,7 +160,7 @@ public:
 
 		} else {
 			error("Unknown buff type");
-			return NULL;
+			return nullptr;
 		}
 
 		Locker locker(buff);

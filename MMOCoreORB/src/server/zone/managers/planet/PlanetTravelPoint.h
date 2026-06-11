@@ -179,7 +179,7 @@ public:
 			<< " Arrival: " << arrivalVector.toString()
 			<< " shuttle = ";
 
-		if(shuttleObject == NULL) {
+		if(shuttleObject == nullptr) {
 			buf << "nullptr";
 		} else {
 			buf << "[oid:" << shuttleObject.get()->getObjectID()

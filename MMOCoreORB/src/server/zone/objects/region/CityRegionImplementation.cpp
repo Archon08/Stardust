@@ -1124,22 +1124,22 @@ void CityRegionImplementation::sendStructureInvalidMails() {
 			params.setTT(structure->getObjectName());
 			UnicodeString subject = "@city/city:structure_invalid_subject"; // City Can't Support Structure!
 
-			chatManager->sendMail("@city/city:new_city_from", subject, params, mayor->getFirstName(), NULL);
+			chatManager->sendMail("@city/city:new_city_from", subject, params, mayor->getFirstName(), nullptr);
 		}
 	}
 
 	for (int i = cityDecorations.size() - 1; i >= 0; --i) {
 		ManagedReference<StructureObject*> structure = cityDecorations.get(i).castTo<StructureObject*>();
 
-		if (structure == NULL)
+		if (structure == nullptr)
 			continue;
 
 		SharedStructureObjectTemplate* ssot = dynamic_cast<SharedStructureObjectTemplate*>(structure->getObjectTemplate());
 
-		if (ssot == NULL || ssot->getCityRankRequired() <= cityRank || !ssot->isCivicStructure())
+		if (ssot == nullptr || ssot->getCityRankRequired() <= cityRank || !ssot->isCivicStructure())
 			continue;
 
-		if (mayor != NULL) {
+		if (mayor != nullptr) {
 			StringIdChatParameter params("city/city", "structure_invalid_body");
 			params.setTO(mayor->getFirstName());
 			params.setTT(structure->getObjectName());

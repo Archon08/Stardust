@@ -298,7 +298,7 @@ Vector<WorldCoordinates>* PathFinderManager::findPathFromWorldToWorld(const Worl
 				if (area->containsPoint(startTemp.getX(), startTemp.getY())) {
 					if (!getRecastPath(startTemp, position, area, path, len, allowPartial)) { // exiting navmesh
 						delete collision;
-						if (path != NULL) delete path;
+						if (path != nullptr) delete path;
 						continue;
 					}
 
@@ -309,7 +309,7 @@ Vector<WorldCoordinates>* PathFinderManager::findPathFromWorldToWorld(const Worl
 
 					if (!getRecastPath(position, targetTemp, area, path, len, allowPartial)) { // entering navmesh
 						delete collision;
-						if (path != NULL) delete path;
+						if (path != nullptr) delete path;
 						continue;
 					}
 				}
@@ -320,7 +320,7 @@ Vector<WorldCoordinates>* PathFinderManager::findPathFromWorldToWorld(const Worl
 
 					finalLengthSq = len;
 					finalpath = path;
-					path = NULL;
+					path = nullptr;
 				}
 			} else if (collisionSize == 0) { // we're already inside a navmesh (or there are no navmeshes around)
 				for (int i = 0; i < areas.size(); i++) {

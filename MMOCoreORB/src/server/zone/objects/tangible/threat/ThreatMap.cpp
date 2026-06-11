@@ -131,7 +131,7 @@ void ThreatMap::removeAll(bool forceRemoveAll) {
 		}
 	}
 
-	currentThreat = NULL;
+	currentThreat = nullptr;
 	threatMatrix.clear();
 }
 
@@ -139,10 +139,10 @@ void ThreatMap::dropDamage(CreatureObject* target) {
 	Locker llocker(&lockMutex);
 
 	ManagedReference<TangibleObject*> selfStrong = self.get();
-	if (target == NULL || selfStrong == NULL || target->isDead() || !target->isOnline() || target->getPlanetCRC() != selfStrong->getPlanetCRC()) {
+	if (target == nullptr || selfStrong == nullptr || target->isDead() || !target->isOnline() || target->getPlanetCRC() != selfStrong->getPlanetCRC()) {
 		drop(target);
 
-		if (threatMapObserver != NULL)
+		if (threatMapObserver != nullptr)
 			target->dropObserver(ObserverEventType::HEALINGRECEIVED, threatMapObserver);
 	} else {
 		ThreatMapEntry *entry = &get(target);

@@ -133,14 +133,14 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 			ManagedReference<StructureObject*> structure = ghost->getZoneServer()->getObject(oid).castTo<StructureObject*>();
 
-			if (structure != NULL && structure->isCampStructure()) {
+			if (structure != nullptr && structure->isCampStructure()) {
 				player->sendSystemMessage("@camp:sys_already_camping");
 				return 0;
 			}
 		}
 
 		/// Check if player is in another camp
-		if(player->getCurrentCamp() != NULL) {
+		if(player->getCurrentCamp() != nullptr) {
 			player->sendSystemMessage("@camp:error_camp_exists");
 			return 0;
 		}
@@ -154,19 +154,19 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 		for(int i = 0; i < nearbyObjects.size(); ++i) {
 			SceneObject* scno = cast<SceneObject*>(nearbyObjects.get(i).get());
-			if (scno != NULL && scno->isCampStructure() && scno->getDistanceTo(
+			if (scno != nullptr && scno->isCampStructure() && scno->getDistanceTo(
 					player) <= scno->getObjectTemplate()->getNoBuildRadius() + campStructureData->getRadius()) {
 				player->sendSystemMessage("@camp:error_camp_too_close");
 				return 0;
 			}
 
-			if (scno != NULL && !scno->isCampStructure() && scno->isStructureObject() &&
+			if (scno != nullptr && !scno->isCampStructure() && scno->isStructureObject() &&
 					scno->getDistanceTo(player) <= 100) {
 				player->sendSystemMessage("@camp:error_building_too_close");
 				return 0;
 			}
 
-			if(scno != NULL && scno->getDistanceTo(player) <= scno->getObjectTemplate()->getNoBuildRadius() + campStructureData->getRadius()) {
+			if(scno != nullptr && scno->getDistanceTo(player) <= scno->getObjectTemplate()->getNoBuildRadius() + campStructureData->getRadius()) {
 
 				if (scno->getObserverCount(ObserverEventType::OBJECTDESTRUCTION) > 0) {
 					SortedVector<ManagedReference<Observer* > > observers = scno->getObservers(ObserverEventType::OBJECTDESTRUCTION);
@@ -204,13 +204,13 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 				player->getPositionX(), player->getPositionY(),
 				(int) player->getDirectionAngle());
 
-		if (structureObject == NULL) {
+		if (structureObject == nullptr) {
 			error("Unable to create camp: " + campKitData->getSpawnObjectTemplate());
 			return 1;
 		}
 
 		/// Identify terminal for Active area
-		Terminal* campTerminal = NULL;
+		Terminal* campTerminal = nullptr;
 		SortedVector < ManagedReference<SceneObject*> > *childObjects
 				= structureObject->getChildObjects();
 
@@ -221,7 +221,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 			}
 		}
 
-		if (campTerminal == NULL) {
+		if (campTerminal == nullptr) {
 			structureObject->destroyObjectFromDatabase(true);
 			error("Camp does not have terminal: " + campStructureData->getTemplateFileName());
 			return 1;
@@ -238,7 +238,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 		ManagedReference<CampSiteActiveArea*> campArea =
 			(zoneServer->createObject( areaPath.hashCode(), 1)).castTo< CampSiteActiveArea*>();
 
-		if (campArea == NULL) {
+		if (campArea == nullptr) {
 			structureObject->destroyObjectFromDatabase(true);
 			return 1;
 		}

@@ -422,7 +422,7 @@ void ChatManagerImplementation::loadPersistentRooms() {
 				parentPath = parentPath.subString(0, parentPath.lastIndexOf('.'));
 
 				ManagedReference<ChatRoom*> parent = getChatRoomByFullPath(parentPath);
-				if (parent != NULL) {
+				if (parent != nullptr) {
 					room->setParentRoomID(parent->getRoomID());
 					parent->addSubRoom(room->getName().toLowerCase(), room->getRoomID());
 				}
@@ -458,7 +458,7 @@ int ChatManagerImplementation::checkRoomPaths() {
 	while (iter.hasNext()) {
 		ChatRoom* room = iter.next();
 
-		if (room == NULL)
+		if (room == nullptr)
 			continue;
 
 		//Check if room's path is broken.
@@ -1940,7 +1940,7 @@ void ChatManagerImplementation::handleChatCreateRoom(CreatureObject* player, uin
 	//Check if player has reached their max allowed rooms yet.
 	Locker clocker(player, _this.getReferenceUnsafeStaticCast());
 	ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
-	if (ghost == NULL || ghost->getOwnedChatRoomCount() >= MAXCUSTOMCHATROOMS) {
+	if (ghost == nullptr || ghost->getOwnedChatRoomCount() >= MAXCUSTOMCHATROOMS) {
 		error = 1;
 		sendChatOnCreateRoomError(player, requestID, error);
 		return;
@@ -1951,7 +1951,7 @@ void ChatManagerImplementation::handleChatCreateRoom(CreatureObject* player, uin
 	//Attempt to create the new room as a subroom of the second last path node (the parent).
 	ManagedReference<ChatRoom*> newRoom = createPersistentRoomByFullPath(player, roomPath, roomTitle, requestID);
 
-	if (newRoom == NULL)
+	if (newRoom == nullptr)
 		return;
 
 	Locker newRoomlocker(newRoom);
@@ -2001,8 +2001,8 @@ Reference<ChatRoom*> ChatManagerImplementation::createPersistentRoomByFullPath(C
 
 	Reference<ChatRoom*> gameRoom = getGameRoom(game);
 
-	if (gameRoom == NULL)
-		return NULL;
+	if (gameRoom == nullptr)
+		return nullptr;
 
 	ManagedReference<ChatRoom*> parent = gameRoom;
 
@@ -2016,7 +2016,7 @@ Reference<ChatRoom*> ChatManagerImplementation::createPersistentRoomByFullPath(C
 		if (persistentNodes >= ChatManager::MAXPERSISTENTNODES) {
 			int error = 6; //"Cannot create the channel named '[RoomPathName]' because the name is invalid."
 			sendChatOnCreateRoomError(player, requestID, error);
-			return NULL;
+			return nullptr;
 		}
 
 		//Get name of next node in path.
@@ -2025,7 +2025,7 @@ Reference<ChatRoom*> ChatManagerImplementation::createPersistentRoomByFullPath(C
 		unsigned int subRoomID = parent->getSubRoom(channelLower);
 		Reference<ChatRoom*> subRoom = getChatRoom(subRoomID);
 
-		if (subRoom == NULL) { //Found first node that doesn't already exist.
+		if (subRoom == nullptr) { //Found first node that doesn't already exist.
 			persistentPath = persistentPath + channelLower;
 
 			if (tokenizer.hasMoreTokens()) { //Do not create a room that is not the last node in the entered path.
@@ -2040,12 +2040,12 @@ Reference<ChatRoom*> ChatManagerImplementation::createPersistentRoomByFullPath(C
 			if (!tokenizer.hasMoreTokens()) {
 				if (subRoom->isDisabled() && subRoom->getOwnerID() == player->getObjectID()) { //Allow owner to re-enable the room.
 					enableRoom(player, subRoom, requestID);
-					return NULL;
+					return nullptr;
 
 				} else { //Only the owner can re-enable the room.
 					int error = 24; //NO MESSAGE (room already exists)
 					sendChatOnCreateRoomError(player, requestID, error);
-					return NULL;
+					return nullptr;
 				}
 
 			} else {
@@ -2061,14 +2061,14 @@ Reference<ChatRoom*> ChatManagerImplementation::createPersistentRoomByFullPath(C
 	if (parent == gameRoom) {
 		int error = 6; //"Cannot create the channel named '[RoomPathName]' because the name is invalid."
 		sendChatOnCreateRoomError(player, requestID, error);
-		return NULL;
+		return nullptr;
 	}
 
 	//Check permission to create channel in the parent.
 	if (!parent->subroomsAllowed() && !parent->hasModerator(player)) {
 		int error = 1; //"Channel '[RoomPathName]' creation failed for an unknown reason.""
 		sendChatOnCreateRoomError(player, requestID, error);
-		return NULL;
+		return nullptr;
 	}
 
 	NameManager* nameManager = NameManager::instance();
@@ -2121,7 +2121,7 @@ void ChatManagerImplementation::handleChatDestroyRoom(CreatureObject* player, ui
 	 */
 
 	ManagedReference<ChatRoom*> room = getChatRoom(roomID);
-	if (room != NULL && room->getOwnerID() == player->getObjectID())
+	if (room != nullptr && room->getOwnerID() == player->getObjectID())
 		destroyRoom(room);
 
 	else {
@@ -2135,7 +2135,7 @@ void ChatManagerImplementation::handleChatDestroyRoom(CreatureObject* player, ui
 void ChatManagerImplementation::handleChatLeaveRoom(CreatureObject* player, const String& roomPath) {
 	Reference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
 
-	if (room == NULL)
+	if (room == nullptr)
 		return;
 
 	Locker clocker(room, player);
@@ -2144,7 +2144,7 @@ void ChatManagerImplementation::handleChatLeaveRoom(CreatureObject* player, cons
 
 void ChatManagerImplementation::handleChatQueryRoom(CreatureObject* player, const String& roomPath, int requestID) {
 	Reference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
-	if (player == NULL || room == NULL)
+	if (player == nullptr || room == nullptr)
 		return;
 
 	Locker lock(room);
@@ -2156,7 +2156,7 @@ void ChatManagerImplementation::handleChatQueryRoom(CreatureObject* player, cons
 void ChatManagerImplementation::broadcastQueryResultsToRoom(ChatRoom* room) {
 	//Room prelocked
 
-	if (room == NULL)
+	if (room == nullptr)
 		return;
 
 	ChatQueryRoomResults* notification = new ChatQueryRoomResults(room);
@@ -2175,12 +2175,12 @@ void ChatManagerImplementation::handleChatInvitePlayer(CreatureObject* inviter, 
 	 * 16: Failed to invite %TT to %TU: you are not a moderator. (NOPERMISSION)
 	 */
 
-	if (inviter == NULL)
+	if (inviter == nullptr)
 		return;
 
 	//Validate the room.
 	ManagedReference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
-	if (room == NULL) {
+	if (room == nullptr) {
 		sendChatOnInviteResult(inviter, inviteeName, roomPath, ChatManager::NOROOM, requestID);
 		return;
 	} else if (room->isPublic()) {
@@ -2196,7 +2196,7 @@ void ChatManagerImplementation::handleChatInvitePlayer(CreatureObject* inviter, 
 
 	//Get the invitee.
 	ManagedReference<CreatureObject*> invitee = playerManager->getPlayer(inviteeName);
-	if (invitee == NULL || inviteeName != invitee->getFirstName()) { //Enforce proper capitalization to prevent duplicate list entries on client.
+	if (invitee == nullptr || inviteeName != invitee->getFirstName()) { //Enforce proper capitalization to prevent duplicate list entries on client.
 		sendChatOnInviteResult(inviter, inviteeName, roomPath, ChatManager::NOAVATAR, requestID);
 		return;
 	}
@@ -2323,17 +2323,17 @@ void ChatManagerImplementation::sendChatOnUninviteResult(CreatureObject* uninvit
 
 void ChatManagerImplementation::handleChatKickPlayer(CreatureObject* kicker, const String& kickeeName, const String& roomPath) {
 	//Nothing locked
-	if (kicker == NULL)
+	if (kicker == nullptr)
 		return;
 
 	//Validate the room.
 	ManagedReference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
-	if (room == NULL)
+	if (room == nullptr)
 		return;
 
 	//Get the player to be kicked.
 	ManagedReference<CreatureObject*> kickee = getPlayer(kickeeName); //locks ChatManager
-	if (kickee == NULL || kickee->getObjectID() == room->getOwnerID()) //Sorry friend, you cannot kick the channel owner!
+	if (kickee == nullptr || kickee->getObjectID() == room->getOwnerID()) //Sorry friend, you cannot kick the channel owner!
 		return;
 
 	//Check for moderator permission.
@@ -2372,12 +2372,12 @@ void ChatManagerImplementation::handleChatAddModerator(CreatureObject* oper, con
 	 * 16: Failed to op [Game.Server.Target] in [RoomPathName]: You are not a moderator. (NOPERMISSION)
 	 */
 
-	if (oper == NULL)
+	if (oper == nullptr)
 		return;
 
 	//Validate the room.
 	ManagedReference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
-	if (room == NULL) {
+	if (room == nullptr) {
 		sendChatOnAddModeratorResult(oper, opeeName, roomPath, ChatManager::NOROOM, requestID);
 		return;
 	}
@@ -2455,12 +2455,12 @@ void ChatManagerImplementation::handleChatRemoveModerator(CreatureObject* deoper
 	 * 16: Failed to deop [Target] in [RoomPathName]: You are not a moderator. (NOPERMISSION)
 	 */
 
-	if (deoper == NULL)
+	if (deoper == nullptr)
 		return;
 
 	//Validate the room.
 	ManagedReference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
-	if (room == NULL) {
+	if (room == nullptr) {
 		sendChatOnRemoveModeratorResult(deoper, deopeeName, roomPath, ChatManager::NOROOM, requestID);
 		return;
 	}
@@ -2473,7 +2473,7 @@ void ChatManagerImplementation::handleChatRemoveModerator(CreatureObject* deoper
 
 	//Get the deopee.
 	ManagedReference<CreatureObject*> deopee = playerManager->getPlayer(deopeeName);
-	if (deopee == NULL) {
+	if (deopee == nullptr) {
 		sendChatOnRemoveModeratorResult(deoper, deopeeName, roomPath, ChatManager::NOAVATAR, requestID);
 		return;
 	} else if (deopee->getObjectID() == room->getOwnerID()) { //Sorry buddy, you cannot deop the channel owner!
@@ -2517,12 +2517,12 @@ void ChatManagerImplementation::handleChatBanPlayer(CreatureObject* banner, cons
 	 * 16: Ban [Target] from [RoomName] failed: Insufficient Privileges (NOPERMISSION)
 	 */
 
-	if (banner == NULL)
+	if (banner == nullptr)
 		return;
 
 	//Validate the room.
 	ManagedReference<ChatRoom*> room = getChatRoomByFullPath(roomPath);
-	if (room == NULL) {
+	if (room == nullptr) {
 		sendChatOnBanResult(banner, baneeName, roomPath, ChatManager::NOROOM, requestID);
 		return;
 	}
@@ -2535,7 +2535,7 @@ void ChatManagerImplementation::handleChatBanPlayer(CreatureObject* banner, cons
 
 	//Get the banee.
 	ManagedReference<CreatureObject*> banee = playerManager->getPlayer(baneeName);
-	if (banee == NULL) {
+	if (banee == nullptr) {
 		sendChatOnBanResult(banner, baneeName, roomPath, ChatManager::NOAVATAR, requestID);
 		return;
 	} else if (banee->getObjectID() == room->getOwnerID()) { //Sorry friend, you cannot ban the channel owner!

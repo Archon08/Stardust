@@ -618,7 +618,7 @@ void LootManagerImplementation::setSockets(TangibleObject* object, CraftingValue
 bool LootManagerImplementation::createLoot(SceneObject* container, AiAgent* creature) {
 	LootGroupCollection* lootCollection = creature->getLootGroups();
 
-	if (lootCollection == NULL)
+	if (lootCollection == nullptr)
 		return false;
 
 	return createLootFromCollection(container, lootCollection, creature->getLevel());
@@ -666,7 +666,7 @@ bool LootManagerImplementation::createLootFromCollection(SceneObject* container,
 bool LootManagerImplementation::createLoot(SceneObject* container, const String& lootGroup, int level, bool maxCondition) {
 	Reference<LootGroupTemplate*> group = lootGroupMap->getLootGroupTemplate(lootGroup);
 
-	if (group == NULL) {
+	if (group == nullptr) {
 		warning("Loot group template requested does not exist: " + lootGroup);
 		return false;
 	}

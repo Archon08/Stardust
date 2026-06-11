@@ -854,11 +854,11 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(int ma
 			protoclone->removeMagicBit(false);
 		}
 
-		protoclone->setParent(NULL);
+		protoclone->setParent(nullptr);
 		if (!crate->transferObject(protoclone, -1, false)) {
 			protoclone->destroyObjectFromDatabase(true);
 			crate->destroyObjectFromDatabase(true);
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -872,7 +872,7 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(int ma
 void TangibleObjectImplementation::addTemplateSkillMods(TangibleObject* targetObject) {
 	SharedTangibleObjectTemplate* tano = dynamic_cast<SharedTangibleObjectTemplate*>(templateObject.get());
 
-	if (tano == NULL)
+	if (tano == nullptr)
 		return;
 
 	VectorMap<String, int>* mods = tano->getSkillMods();
@@ -887,7 +887,7 @@ void TangibleObjectImplementation::addTemplateSkillMods(TangibleObject* targetOb
 void TangibleObjectImplementation::removeTemplateSkillMods(TangibleObject* targetObject) {
 	SharedTangibleObjectTemplate* tano = dynamic_cast<SharedTangibleObjectTemplate*>(templateObject.get());
 
-	if (tano == NULL)
+	if (tano == nullptr)
 		return;
 
 	VectorMap<String, int>* mods = tano->getSkillMods();
@@ -902,19 +902,19 @@ void TangibleObjectImplementation::removeTemplateSkillMods(TangibleObject* targe
 VectorMap<String, int>* TangibleObjectImplementation::getTemplateSkillMods() {
 	SharedTangibleObjectTemplate* tano = dynamic_cast<SharedTangibleObjectTemplate*>(templateObject.get());
 
-	if (tano == NULL)
-		return NULL;
+	if (tano == nullptr)
+		return nullptr;
 
 	return tano->getSkillMods();
 }
 
 bool TangibleObjectImplementation::canRepair(CreatureObject* player) {
-	if (player == NULL || !isASubChildOf(player))
+	if (player == nullptr || !isASubChildOf(player))
 		return false;
 
 	SceneObject* inventory = player->getSlottedObject("inventory");
 
-	if (inventory == NULL)
+	if (inventory == nullptr)
 		return false;
 
 	for (int i = 0; i < inventory->getContainerObjectsSize(); ++i) {
@@ -922,7 +922,7 @@ bool TangibleObjectImplementation::canRepair(CreatureObject* player) {
 		if(item->isRepairTool()) {
 			Reference<RepairToolTemplate*> repairTemplate = cast<RepairToolTemplate*>(item->getObjectTemplate());
 
-			if (repairTemplate == NULL) {
+			if (repairTemplate == nullptr) {
 				error("No RepairToolTemplate for: " + String::valueOf(item->getServerObjectCRC()));
 
 				continue;
@@ -939,7 +939,7 @@ bool TangibleObjectImplementation::canRepair(CreatureObject* player) {
 
 void TangibleObjectImplementation::repair(CreatureObject* player) {
 
-	if(player == NULL || player->getZoneServer() == NULL)
+	if(player == nullptr || player->getZoneServer() == nullptr)
 		return;
 
 	if(!isASubChildOf(player))

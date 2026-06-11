@@ -51,7 +51,7 @@ public:
 
 		//Get the corpse's inventory.
 		SceneObject* lootContainer = ai->getSlottedObject("inventory");
-		if (lootContainer == NULL)
+		if (lootContainer == nullptr)
 			return GENERALERROR;
 
 		//Determine the loot rights.

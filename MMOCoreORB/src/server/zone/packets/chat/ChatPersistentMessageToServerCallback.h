@@ -84,7 +84,7 @@ public:
 		if (recipient == "guild") {
 			ManagedReference<GuildObject*> guild = player->getGuildObject().get();
 
-			if (guild == NULL)
+			if (guild == nullptr)
 				return 0;
 
 			if (!guild->hasMailPermission(player->getObjectID())) {
@@ -116,7 +116,7 @@ public:
 		}
 		else if (recipient == "citizens") {
 			PlayerObject* ghost = player->getPlayerObject();
-			if (ghost == NULL)
+			if (ghost == nullptr)
 				return 0;
 
 			// Pull the player's residence

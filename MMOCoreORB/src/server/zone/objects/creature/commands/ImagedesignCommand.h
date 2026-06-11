@@ -36,10 +36,10 @@ public:
 		//return SUCCESS;
 
 		ManagedReference<SceneObject*> object = server->getZoneServer()->getObject(target);
-		CreatureObject* playerTarget = NULL;
+		CreatureObject* playerTarget = nullptr;
 		CreatureObject* designer = cast<CreatureObject*>( creature);
 
-		if (object == NULL || !object->isPlayerCreature())
+		if (object == nullptr || !object->isPlayerCreature())
 			playerTarget = designer;
 		else
 			playerTarget = cast<CreatureObject*>( object.get());
@@ -101,7 +101,7 @@ public:
 		ManagedReference<Facade*> facade = designer->getActiveSession(SessionFacadeType::IMAGEDESIGN);
 		ManagedReference<ImageDesignSession*> session = dynamic_cast<ImageDesignSession*>(facade.get());
 
-		if (session != NULL) {
+		if (session != nullptr) {
 			designer->sendSystemMessage("@image_designer:already_image_designing");
 			return GENERALERROR;
 		}

@@ -291,8 +291,8 @@ Reference<SlotDescriptor*> TemplateManager::getSlotDescriptor(const String& file
 	if (!slotDescriptors.contains(filename)) {
 		IffStream* iffStream = openIffFile(filename);
 
-		if (iffStream == NULL)
-			return NULL; //Descriptor does not exist.
+		if (iffStream == nullptr)
+			return nullptr; //Descriptor does not exist.
 
 		Reference<SlotDescriptor*> slotDesc = new SlotDescriptor();
 		slotDesc->readObject(iffStream);
@@ -306,12 +306,12 @@ Reference<SlotDescriptor*> TemplateManager::getSlotDescriptor(const String& file
 }
 
 PaletteTemplate* TemplateManager::getPaletteTemplate(const String& fileName) {
-	PaletteTemplate* palette = NULL;
+	PaletteTemplate* palette = nullptr;
 
 	ObjectInputStream* stream = openTreFile(fileName);
 
-	if (stream == NULL)
-		return NULL;
+	if (stream == nullptr)
+		return nullptr;
 
 	palette = new PaletteTemplate();
 
@@ -322,7 +322,7 @@ PaletteTemplate* TemplateManager::getPaletteTemplate(const String& fileName) {
 		error(e.getMessage());
 
 		delete palette;
-		palette = NULL;
+		palette = nullptr;
 	}
 
 	delete stream;

@@ -23,7 +23,7 @@ void WeatherManagerImplementation::initialize() {
 	setLogging(true);
 
 	weatherEnabled = true;
-	weatherChangeEvent = NULL;
+	weatherChangeEvent = nullptr;
 
 	//Load weather configuration from the luas.
 	//info("Loading configuration from Lua.");
@@ -83,7 +83,7 @@ bool WeatherManagerImplementation::loadLuaConfig() {
 
 	luaObject.pop();
 	delete lua;
-	lua = NULL;
+	lua = nullptr;
 	return true;
 }
 
@@ -119,7 +119,7 @@ void WeatherManagerImplementation::createNewWeatherPattern() {
 	int duration = (System::random(averageWeatherDuration) + (averageWeatherDuration / 2)) / (baseWeather + 1);
 	currentMap = new WeatherMap(weatherStability, zone->getMinX(), zone->getMaxX(), zone->getMinY(), zone->getMaxY(), duration);
 
-	if(weatherChangeEvent != NULL) {
+	if(weatherChangeEvent != nullptr) {
 		if(weatherChangeEvent->isScheduled())
 			weatherChangeEvent->cancel();
 	} else {
@@ -133,7 +133,7 @@ void WeatherManagerImplementation::sendWeatherTo(CreatureObject* player) {
 
 	byte currentWeather = 0;
 
-	if(currentMap != NULL)
+	if(currentMap != nullptr)
 		currentWeather = currentMap->getWeatherAt(player->getPositionX(), player->getPositionY()) + baseWeather;
 	else
 		currentWeather = baseWeather;
@@ -169,7 +169,7 @@ void WeatherManagerImplementation::sendWeatherTo(CreatureObject* player) {
 }
 
 void WeatherManagerImplementation::applySandstormDamage(CreatureObject* player) {
-	if (player == NULL)
+	if (player == nullptr)
 		return;
 
 	PlayerObject* ghost = player->getPlayerObject();

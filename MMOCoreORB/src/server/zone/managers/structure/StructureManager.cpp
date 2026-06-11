@@ -378,8 +378,8 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 		const String& structureTemplatePath, float x, float y, int angle, int persistenceLevel) {
 	ManagedReference<Zone*> zone = creature->getZone();
 
-	if (zone == NULL)
-		return NULL;
+	if (zone == nullptr)
+		return nullptr;
 
 	TerrainManager* terrainManager =
 			zone->getPlanetManager()->getTerrainManager();
@@ -387,9 +387,9 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 			dynamic_cast<SharedStructureObjectTemplate*>(templateManager->getTemplate(
 					structureTemplatePath.hashCode()));
 
-	if (serverTemplate == NULL) {
+	if (serverTemplate == nullptr) {
 		info("server template is null");
-		return NULL;
+		return nullptr;
 
 	}
 	float z = zone->getHeight(x, y);
@@ -407,7 +407,7 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 	float w1 = 5;
 	float zIncreaseWhenNoAvailableFootprint = 0.f; //TODO: remove this when it has been verified that all buildings have astructure footprint.
 
-	if (structureFootprint != NULL) {
+	if (structureFootprint != nullptr) {
 		//If the angle is odd, then swap them.
 		getStructureFootprint(serverTemplate, angle, l0, w0, l1, w1);
 	} else {
@@ -435,8 +435,8 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 			ObjectManager::instance()->createObject(
 					structureTemplatePath.hashCode(), persistenceLevel, strDatabase);
 
-	if (obj == NULL || !obj->isStructureObject()) {
-		if (obj != NULL) {
+	if (obj == nullptr || !obj->isStructureObject()) {
+		if (obj != nullptr) {
 			Locker locker(obj);
 			obj->destroyObjectFromDatabase(true);
 		}
@@ -444,7 +444,7 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 		error(
 				"Failed to create structure with template: "
 						+ structureTemplatePath);
-		return NULL;
+		return nullptr;
 	}
 
 	StructureObject* structureObject = cast<StructureObject*>(obj.get());
@@ -455,7 +455,7 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 	structureObject->setOwner(creature->getObjectID());
 
 	ManagedReference<PlayerObject*> ghost = creature->getPlayerObject();
-	if (ghost != NULL) {
+	if (ghost != nullptr) {
 		ghost->addOwnedStructure(structureObject);
 	}
 
@@ -463,10 +463,10 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 		structureObject->setFaction(creature->getFaction());
 	}
 
-	BuildingObject* buildingObject = NULL;
+	BuildingObject* buildingObject = nullptr;
 	if (structureObject->isBuildingObject()) {
 		buildingObject = cast<BuildingObject*>(structureObject);
-		if (buildingObject != NULL)
+		if (buildingObject != nullptr)
 			buildingObject->createCellObjects();
 	}
 
@@ -554,7 +554,7 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 
 	CityManager* cityManager = server->getCityManager();
 
-	if (declaredResidence != NULL) {
+	if (declaredResidence != nullptr) {
 		if (declaredResidence == buildingObject) {
 			player->sendSystemMessage("@player_structure:already_residence"); //This building is already your residence.
 			return 1;
@@ -562,7 +562,7 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 
 		ManagedReference<CityRegion*> residentCity = declaredResidence->getCityRegion().get();
 
-		if (residentCity != NULL) {
+		if (residentCity != nullptr) {
 			Locker lock(residentCity, player);
 
 			if (residentCity->isMayor(objectid)) {
@@ -578,7 +578,7 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 		player->sendSystemMessage("@player_structure:declared_residency"); //You have declared your residency here.
 	}
 
-	if (cityRegion != NULL) {
+	if (cityRegion != nullptr) {
 		Locker lock(cityRegion, player);
 
 		if (cityRegion->isMayor(objectid) && structureObject != cityRegion->getCityHall()) {
@@ -592,7 +592,7 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 	//Set the characters home location to this structure.
 	ghost->setDeclaredResidence(buildingObject);
 
-	if(declaredResidence != NULL) {
+	if(declaredResidence != nullptr) {
 		Locker oldLock(declaredResidence, player);
 		declaredResidence->setResidence(false);
 	}
@@ -608,13 +608,13 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 Reference<SceneObject*> StructureManager::getInRangeParkingGarage(SceneObject* obj, int range) {
 	ManagedReference<Zone*> zone = obj->getZone();
 
-	if (zone == NULL)
-		return NULL;
+	if (zone == nullptr)
+		return nullptr;
 
 	SortedVector<QuadTreeEntry*> closeSceneObjects;
 	CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) obj->getCloseObjects();
 
-	if (closeObjectsVector == NULL) {
+	if (closeObjectsVector == nullptr) {
 		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), 128, &closeSceneObjects, true, false);
 	} else {
 		closeObjectsVector->safeCopyTo(closeSceneObjects);
@@ -623,26 +623,26 @@ Reference<SceneObject*> StructureManager::getInRangeParkingGarage(SceneObject* o
 	for (int i = 0; i < closeSceneObjects.size(); ++i) {
 		SceneObject* scno = cast<SceneObject*>(closeSceneObjects.get(i));
 
-		if (scno == NULL || scno == obj)
+		if (scno == nullptr || scno == obj)
 			continue;
 
 		if (scno->isGarage() && scno->isInRange(obj, range))
 			return scno;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int StructureManager::redeedStructure(CreatureObject* creature) {
 	ManagedReference<DestroyStructureSession*> session = creature->getActiveSession(SessionFacadeType::DESTROYSTRUCTURE).castTo<DestroyStructureSession*>();
 
-	if (session == NULL)
+	if (session == nullptr)
 		return 0;
 
 	ManagedReference<StructureObject*> structureObject =
 			session->getStructureObject();
 
-	if (structureObject == NULL)
+	if (structureObject == nullptr)
 		return 0;
 
 	Locker _locker(structureObject);
@@ -654,7 +654,7 @@ int StructureManager::redeedStructure(CreatureObject* creature) {
 	int maint = structureObject->getSurplusMaintenance();
 	int redeedCost = structureObject->getRedeedCost();
 
-	if (deed != NULL && structureObject->isRedeedable()) {
+	if (deed != nullptr && structureObject->isRedeedable()) {
 		Locker _lock(deed, structureObject);
 
 		ManagedReference<SceneObject*> inventory = creature->getSlottedObject(
@@ -663,10 +663,10 @@ int StructureManager::redeedStructure(CreatureObject* creature) {
 		bool isSelfPoweredHarvester = false;
 		HarvesterObject* harvester = structureObject.castTo<HarvesterObject*>();
 
-		if(harvester != NULL)
+		if(harvester != nullptr)
 			isSelfPoweredHarvester = harvester->isSelfPowered();
 
-		if (inventory == NULL || inventory->getCountableObjectsRecursive() > (inventory->getContainerVolumeLimit() - (isSelfPoweredHarvester ? 2 : 1))) {
+		if (inventory == nullptr || inventory->getCountableObjectsRecursive() > (inventory->getContainerVolumeLimit() - (isSelfPoweredHarvester ? 2 : 1))) {
 
 			if(isSelfPoweredHarvester) {
 				//This installation can not be destroyed because there is no room for the Self Powered Harvester Kit in your inventory.
@@ -683,7 +683,7 @@ int StructureManager::redeedStructure(CreatureObject* creature) {
 			if(isSelfPoweredHarvester) {
 
 				Reference<SceneObject*> rewardSceno = server->createObject(STRING_HASHCODE("object/tangible/veteran_reward/harvester.iff"), 1);
-				if( rewardSceno == NULL ){
+				if( rewardSceno == nullptr ){
 					creature->sendSystemMessage("@player_structure:deed_reclaimed_failed"); //Structure destroy and deed reclaimed FAILED!
 					return session->cancelSession();
 				}

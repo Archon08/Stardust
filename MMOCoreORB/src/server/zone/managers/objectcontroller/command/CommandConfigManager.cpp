@@ -144,7 +144,7 @@ void CommandConfigManager::loadCommandData(const String& filename) {
 			row->getValue(CommandConfigManager::COMMANDNAME, name);
 			slashCommand = createCommand(name.trim().toLowerCase());
 
-			if (slashCommand == NULL) {
+			if (slashCommand == nullptr) {
 				error("Could not create command " + name);
 				continue;
 			}
@@ -300,11 +300,11 @@ void CommandConfigManager::loadCommandData(const String& filename) {
 }
 
 QueueCommand* CommandConfigManager::createCommand(const String& name) {
-	QueueCommand* command = NULL;
+	QueueCommand* command = nullptr;
 
 	command = commandFactory.createCommand(name, name, server);
 
-	if (command == NULL)
+	if (command == nullptr)
 		return command;
 
 	slashCommands->put(command);

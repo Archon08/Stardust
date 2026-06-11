@@ -443,19 +443,19 @@ void PetControlDeviceImplementation::spawnObject(CreatureObject* player) {
 void PetControlDeviceImplementation::cancelSpawnObject(CreatureObject* player) {
 	Reference<Task*> petTask = player->getPendingTask("call_pet");
 
-	if(petTask != NULL) {
+	if(petTask != nullptr) {
 		petTask->cancel();
 		player->removePendingTask("call_pet");
 	}
 
-	if (petControlObserver != NULL)
+	if (petControlObserver != nullptr)
 		player->dropObserver(ObserverEventType::STARTCOMBAT, petControlObserver);
 }
 
 void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool force) {
 	ManagedReference<TangibleObject*> controlledObject = this->controlledObject.get();
 
-	if (controlledObject == NULL || !controlledObject->isAiAgent())
+	if (controlledObject == nullptr || !controlledObject->isAiAgent())
 		return;
 
 	ManagedReference<AiAgent*> pet = cast<AiAgent*>(controlledObject.get());
@@ -476,7 +476,7 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 			return;
 	}
 
-	if (player->getCooldownTimerMap() == NULL)
+	if (player->getCooldownTimerMap() == nullptr)
 		return;
 
 	// Check cooldown
@@ -498,7 +498,7 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 		task->execute();
 	}
 	else {
-		if (pet->getPendingTask("store_pet") == NULL) {
+		if (pet->getPendingTask("store_pet") == nullptr) {
 			player->sendSystemMessage( "Storing pet in 60 seconds");
 			pet->addPendingTask("store_pet", task, 60 * 1000);
 		}
@@ -525,17 +525,17 @@ bool PetControlDeviceImplementation::growPet(CreatureObject* player, bool force,
 
 	ManagedReference<TangibleObject*> controlledObject = this->controlledObject.get();
 
-	if (controlledObject == NULL || !controlledObject->isCreature())
+	if (controlledObject == nullptr || !controlledObject->isCreature())
 		return true;
 	ManagedReference<Creature*> pet = cast<Creature*>(controlledObject.get());
 
 	ManagedReference<CreatureTemplate*> creatureTemplate = pet->getCreatureTemplate();
 
-	if (creatureTemplate == NULL)
+	if (creatureTemplate == nullptr)
 		return true;
 
 	PetManager* petManager = pet->getZoneServer()->getPetManager();
-	if (petManager == NULL)
+	if (petManager == nullptr)
 		return true;
 
 	Time currentTime;
@@ -571,7 +571,7 @@ bool PetControlDeviceImplementation::growPet(CreatureObject* player, bool force,
 
 		PlayerObject* ghost = player->getPlayerObject();
 
-		if (ghost == NULL){
+		if (ghost == nullptr){
 			return true;
 		}
 

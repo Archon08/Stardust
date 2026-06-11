@@ -49,12 +49,12 @@ int PlaceStructureSessionImplementation::constructStructure(float x, float y, in
 	if (!barricadeServerTemplatePath.isEmpty()) {
 		ManagedReference<SceneObject*> barricade = ObjectManager::instance()->createObject(barricadeServerTemplatePath.hashCode(), 0, "");
 
-		if (barricade != NULL) {
+		if (barricade != nullptr) {
 			barricade->initializePosition(x, 0, y); //The construction barricades are always at the terrain height.
 
 			StructureFootprint* structureFootprint = serverTemplate->getStructureFootprint();
 
-			if (structureFootprint != NULL && (structureFootprint->getRowSize() > structureFootprint->getColSize())) {
+			if (structureFootprint != nullptr && (structureFootprint->getRowSize() > structureFootprint->getColSize())) {
 				angle = angle + 180;
 			}
 
@@ -79,7 +79,7 @@ int PlaceStructureSessionImplementation::constructStructure(float x, float y, in
 void PlaceStructureSessionImplementation::placeTemporaryNoBuildZone(SharedStructureObjectTemplate* serverTemplate) {
 	ManagedReference<Zone*> thisZone = zone.get();
 
-	if (thisZone == NULL)
+	if (thisZone == nullptr)
 		return;
 
 	Reference<StructureFootprint*> structureFootprint =	serverTemplate->getStructureFootprint();

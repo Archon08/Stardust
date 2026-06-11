@@ -406,7 +406,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		}
 
 		Reference<CreatureManager*> creatureManager = player->getZone()->getCreatureManager();
-		if( creatureManager == NULL ){
+		if( creatureManager == nullptr ){
 			player->sendSystemMessage("Internal Pet Deed Error #307");
 			return 1;
 		}
@@ -414,7 +414,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		CreatureTemplateManager* creatureTemplateManager = CreatureTemplateManager::instance();
 		ManagedReference<CreatureTemplate*> petTemplate = creatureTemplateManager->getTemplate( mobileTemplate.hashCode() );
 
-		if (petTemplate == NULL) {
+		if (petTemplate == nullptr) {
 			player->sendSystemMessage("wrong pet template;mobileTemplate=[" + mobileTemplate + "]" );
 			return 1;
 		}
@@ -436,7 +436,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		// All checks complete, lets setup the control device and do it.
 		ManagedReference<PetControlDevice*> controlDevice = (server->getZoneServer()->createObject(controlDeviceObjectTemplate.hashCode(), 1)).castTo<PetControlDevice*>();
 
-		if (controlDevice == NULL) {
+		if (controlDevice == nullptr) {
 			player->sendSystemMessage("wrong pet control device;controlDevice=[" + controlDeviceObjectTemplate + "]" );
 			return 1;
 		}
@@ -445,7 +445,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 
 		String templateToSpawn = creatureManager->getTemplateToSpawn(mobileTemplate.hashCode());
 		ManagedReference<CreatureObject*> creatureObject = creatureManager->createCreature(templateToSpawn.hashCode(), true, 0 );
-		if( creatureObject == NULL ) {
+		if( creatureObject == nullptr ) {
 			controlDevice->destroyObjectFromDatabase(true);
 			player->sendSystemMessage("wrong pet template;mobileTemplate=[" + mobileTemplate + "]" );
 			return 1;
@@ -454,7 +454,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		Locker clocker(creatureObject, player);
 
 		ManagedReference<Creature*> pet = creatureObject.castTo<Creature*>();
-		if( pet == NULL ) {
+		if( pet == nullptr ) {
 			controlDevice->destroyObjectFromDatabase(true);
 			creatureObject->destroyObjectFromDatabase(true);
 			player->sendSystemMessage("Internal Pet Deed Error #348" );
@@ -471,7 +471,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 
 		// Copy color customization from deed to pet
 		CustomizationVariables* customVars = getCustomizationVariables();
-		if( customVars != NULL ){
+		if( customVars != nullptr ){
 			for (int i = 0; i < customVars->size(); ++i) {
 				uint8 id = customVars->elementAt(i).getKey();
 				int16 val = customVars->elementAt(i).getValue();

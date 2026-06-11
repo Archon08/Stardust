@@ -64,7 +64,7 @@ public:
 
 		ManagedReference<ResourceSpawn*> spawn = resource->getSpawnObject();
 
-		if (spawn == NULL)
+		if (spawn == nullptr)
 			return;
 
 		if (!spawn->isType("organic") && !spawn->isType("water"))

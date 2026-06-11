@@ -72,7 +72,7 @@ public:
 		SortedVector<QuadTreeEntry*> objects(512, 512);
 		CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) creature->getCloseObjects();
 
-		if (closeObjectsVector == NULL) {
+		if (closeObjectsVector == nullptr) {
 			creature->getZone()->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), 32, &objects, true);
 		} else {
 			closeObjectsVector->safeCopyReceiversTo(objects, CloseObjectsVector::CREOTYPE);

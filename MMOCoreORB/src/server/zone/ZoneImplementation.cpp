@@ -686,7 +686,7 @@ void ZoneImplementation::registerObjectWithPlanetaryMap(SceneObject* object) {
 	// to the planet's mission map.
 	if (objectIsValidPlanetaryMapPerformanceLocation(object)) {
 		PlanetManager* planetManager = getPlanetManager();
-		if (planetManager != NULL) {
+		if (planetManager != nullptr) {
 			planetManager->addPerformanceLocation(object);
 		}
 	}

@@ -174,7 +174,7 @@ void MissionManagerImplementation::handleMissionListRequest(MissionTerminal* mis
 
 	ManagedReference<CityRegion*> terminalCity = missionTerminal->getCityRegion().get();
 
-	if (terminalCity != NULL) {
+	if (terminalCity != nullptr) {
 		if (terminalCity.get()->isBanned(player->getObjectID())) {
 			player->sendSystemMessage("@city/city:banned_services"); // You are banned from using this city's services.
 			return;
@@ -1206,12 +1206,12 @@ bool MissionManagerImplementation::randomGenericDeliverMission(CreatureObject* p
 
 	Reference<NpcSpawnPoint*> endNpc;
 	int retries = 10;
-	while ((endNpc == NULL || endNpc == startNpc) && (retries > 0)) {
+	while ((endNpc == nullptr || endNpc == startNpc) && (retries > 0)) {
 		endNpc = missionNpcSpawnMap.getRandomNpcSpawnPoint(planetName.hashCode(), endPosition, getDeliverMissionSpawnType(faction), minDistance, maxDistance);
 		retries--;
 	}
 
-	if (endNpc == NULL || endNpc == startNpc) {
+	if (endNpc == nullptr || endNpc == startNpc) {
 		//Couldn't find a suitable spawn point.
 		return false;
 	}

@@ -144,7 +144,7 @@ int ConsumableImplementation::handleObjectMenuSelect(CreatureObject* player, byt
 
 	int availfill = 0;
 
-	if (ghost == NULL)
+	if (ghost == nullptr)
 		return 1;
 
 	if (isFood())
@@ -164,7 +164,7 @@ int ConsumableImplementation::handleObjectMenuSelect(CreatureObject* player, byt
 	}
 
 
-	ManagedReference<Buff*> buff = NULL;
+	ManagedReference<Buff*> buff = nullptr;
 
 	switch (effectType) {
 	case EFFECT_ATTRIBUTE: {

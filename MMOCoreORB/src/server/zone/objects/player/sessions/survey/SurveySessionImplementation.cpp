@@ -116,7 +116,7 @@ void SurveySessionImplementation::startSurvey(const String& resname) {
 	}
 
 	ManagedReference<ResourceSpawn*> spawn = resourceManager->getResourceSpawn(resname);
-	if (spawn == NULL) {
+	if (spawn == nullptr) {
 		return;
 	}
 
@@ -142,30 +142,30 @@ void SurveySessionImplementation::startSample(const String& resname) {
 	ManagedReference<ResourceManager*> resourceManager = this->resourceManager.get();
 	ManagedReference<CreatureObject*> surveyer = this->surveyer.get();
 
-	if (activeSurveyTool == NULL) {
+	if (activeSurveyTool == nullptr) {
 		error("surveyTool is NULL");
 		return;
 	}
 
-	if (resourceManager == NULL) {
+	if (resourceManager == nullptr) {
 		info("ResourceManager is NULL");
 		return;
 	}
 
-	if (surveyer == NULL) {
+	if (surveyer == nullptr) {
 		info("surveyer is NULL");
 		return;
 	}
 
 	Reference<PlayerObject*> ghost = surveyer->getPlayerObject();
-	if (ghost == NULL)
+	if (ghost == nullptr)
 		return;
 
 	if (!resname.isEmpty())
 		 lastResourceSampleName = resname;
 
 	ManagedReference<ResourceSpawn* > resourceSpawn = resourceManager->getResourceSpawn(lastResourceSampleName);
-	if (resourceSpawn == NULL) {
+	if (resourceSpawn == nullptr) {
 		return;
 	}
 

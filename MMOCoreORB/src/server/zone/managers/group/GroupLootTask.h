@@ -37,7 +37,7 @@ public:
 
 		//Get the corpse's inventory.
 		SceneObject* lootContainer = corpse->getSlottedObject("inventory");
-		if (lootContainer == NULL)
+		if (lootContainer == nullptr)
 			return;
 
 		switch (group->getLootRule()) {

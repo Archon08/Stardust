@@ -261,17 +261,17 @@ void ManufactureSchematicImplementation::initializeIngredientSlots() {
 
 	Locker locker(_this.getReferenceUnsafeStaticCast());
 
-	if(draftSchematic == NULL || initialized)
+	if(draftSchematic == nullptr || initialized)
 		return;
 
 	ingredientSlots.removeAll();
-	ingredientNames.removeAll(NULL);
-	ingredientTypes.removeAll(NULL);
-	slotOIDs.removeAll(NULL);
-	slotQuantities.removeAll(NULL);
-	slotQualities.removeAll(NULL);
-	slotClean.removeAll(NULL);
-	slotIndexes.removeAll(NULL);
+	ingredientNames.removeAll(nullptr);
+	ingredientTypes.removeAll(nullptr);
+	slotOIDs.removeAll(nullptr);
+	slotQuantities.removeAll(nullptr);
+	slotQualities.removeAll(nullptr);
+	slotClean.removeAll(nullptr);
+	slotIndexes.removeAll(nullptr);
 	craftingValues->clearAll();
 
 	assembled = false;
@@ -283,7 +283,7 @@ void ManufactureSchematicImplementation::initializeIngredientSlots() {
 
 	for (int i = 0; i < draftSchematic->getDraftSlotCount(); ++i) {
 
-		Reference<IngredientSlot* > ingredientSlot = NULL;
+		Reference<IngredientSlot* > ingredientSlot = nullptr;
 		Reference<DraftSlot* > draftSlot = draftSchematic->getDraftSlot(i);
 		
 		ingredientNames.add(StringId(draftSlot->getStringIdFile(), draftSlot->getStringIdName()));
@@ -339,7 +339,7 @@ int ManufactureSchematicImplementation::addIngredientToSlot(CreatureObject* play
 
 	Reference<IngredientSlot*> ingredientSlot = ingredientSlots.get(slot);
 
-	if (ingredientSlot == NULL)
+	if (ingredientSlot == nullptr)
 		return IngredientSlot::INVALID;
 
 	bool wasEmpty = false;
@@ -403,7 +403,7 @@ int ManufactureSchematicImplementation::removeIngredientFromSlot(CreatureObject*
 
 	Reference<IngredientSlot*> ingredientSlot = ingredientSlots.get(slot);
 
-	if (ingredientSlot == NULL)
+	if (ingredientSlot == nullptr)
 		return IngredientSlot::INVALID;
 
 	if (!ingredientSlot->removeAll(player))

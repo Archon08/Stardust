@@ -114,7 +114,7 @@ short PetManagerImplementation::checkMountEligibility(PetControlDevice* petContr
 		return PetManager::INVALIDCREATURE;
 
 	SharedObjectTemplate* objectTemplate = petControlDevice->getObjectTemplate();
-	if (objectTemplate == NULL)
+	if (objectTemplate == nullptr)
 		return PetManager::INVALIDCREATURE;
 
 	short result;
@@ -135,7 +135,7 @@ MountSpeedData* PetManagerImplementation::getMountSpeedData(const String& appear
 			return data;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 float PetManagerImplementation::getMountedRunSpeed(CreatureObject* mount) {
@@ -144,13 +144,13 @@ float PetManagerImplementation::getMountedRunSpeed(CreatureObject* mount) {
 
 	ManagedReference<PetControlDevice*> pcd = mount->getControlDevice().get().castTo<PetControlDevice*>();
 
-	if (pcd != NULL) {
+	if (pcd != nullptr) {
 		SharedObjectTemplate* objectTemplate = pcd->getObjectTemplate();
 
-		if (objectTemplate != NULL) {
+		if (objectTemplate != nullptr) {
 			MountSpeedData* mountSpeedData = getMountSpeedData(objectTemplate->getAppearanceFilename());
 
-			if (mountSpeedData != NULL)
+			if (mountSpeedData != nullptr)
 				return mountSpeedData->getRunSpeed();
 		}
 	}
@@ -159,7 +159,7 @@ float PetManagerImplementation::getMountedRunSpeed(CreatureObject* mount) {
 }
 
 void PetManagerImplementation::handleChat(CreatureObject* speaker, AiAgent* pet, const String& message){
-	if( speaker == NULL || pet == NULL )
+	if( speaker == nullptr || pet == nullptr )
 		return;
 
 	if( message.isEmpty() )
@@ -170,7 +170,7 @@ void PetManagerImplementation::handleChat(CreatureObject* speaker, AiAgent* pet,
 
 	ManagedReference<PetControlDevice*> pcd = pet->getControlDevice().get().castTo<PetControlDevice*>();
 
-	if( pcd == NULL )
+	if( pcd == nullptr )
 		return;
 
 	// Handle command training
@@ -185,7 +185,7 @@ void PetManagerImplementation::handleChat(CreatureObject* speaker, AiAgent* pet,
 	}
 
 	ManagedReference< CreatureObject*> linkedCreature = pet->getLinkedCreature().get();
-	if( linkedCreature == NULL )
+	if( linkedCreature == nullptr )
 		return;
 
 	// Check if speaker has permission to command pet
@@ -196,7 +196,7 @@ void PetManagerImplementation::handleChat(CreatureObject* speaker, AiAgent* pet,
 	ManagedReference<SceneObject*> petParent = pet->getRootParent();
 
 	// If speaker is mounted, pet must be outdoors
-	if( speaker->isRidingMount() && petParent != NULL )
+	if( speaker->isRidingMount() && petParent != nullptr )
 		return;
 
 	// If speaker is unmounted, pet and speaker must both be outdoors or inside same building
@@ -269,7 +269,7 @@ void PetManagerImplementation::handleChat(CreatureObject* speaker, AiAgent* pet,
 	if( pcd->getPetType() == PetManager::DROIDPET ){
 
 		DroidObject* droidObject = cast<DroidObject*>(pet);
-		if( droidObject != NULL ){
+		if( droidObject != nullptr ){
 			droidObject->handleChat(speaker, message);
 		}
 	}
@@ -377,7 +377,7 @@ bool PetManagerImplementation::handleCommandTraining(CreatureObject* speaker, Ai
 		if (!alreadyTrained) {
 			CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
 
-			if (creatureTemplate == NULL)
+			if (creatureTemplate == nullptr)
 				return true;
 
 			PlayerManager* playerManager = zoneServer->getPlayerManager();
@@ -477,7 +477,7 @@ void PetManagerImplementation::enqueuePetCommand(CreatureObject* player, AiAgent
 
 void PetManagerImplementation::enqueueOwnerOnlyPetCommand(CreatureObject* player, AiAgent* pet, uint32 command, const String& args){
 	ManagedReference< CreatureObject*> linkedCreature = pet->getLinkedCreature().get();
-	if( linkedCreature == NULL )
+	if( linkedCreature == nullptr )
 		return;
 
 	// Player must be pet's owner

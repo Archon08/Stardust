@@ -119,7 +119,7 @@ void NavAreaImplementation::notifyEnter(SceneObject* object) {
 
     SharedObjectTemplate *shot = object->getObjectTemplate();
 
-    if (shot == NULL)
+    if (shot == nullptr)
         return;
 
     if (shot->getCollisionMaterialFlags() == 0 || shot->getCollisionMaterialBlockFlags() == 0) // soft object

@@ -49,7 +49,7 @@ void LootLotterySessionImplementation::doLotteryDraw() {
 
 	//Cancel the timeout task if it's running.
 	Reference<LootLotteryTimeoutTask*> task = corpse->getPendingTask("lottery").castTo<LootLotteryTimeoutTask*>();
-	if (task != NULL) {
+	if (task != nullptr) {
 		if (task->isScheduled())
 		task->cancel();
 	}

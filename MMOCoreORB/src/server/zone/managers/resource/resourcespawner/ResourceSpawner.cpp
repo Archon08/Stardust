@@ -813,13 +813,13 @@ void ResourceSpawner::sendSurvey(CreatureObject* player, const String& resname) 
 	player->inflictDamage(player, CreatureAttribute::MIND, mindCost, false, true);
 
 	ManagedReference<SurveySession*> session = player->getActiveSession(SessionFacadeType::SURVEY).castTo<SurveySession*>();
-	if(session == NULL) {
+	if(session == nullptr) {
 		return;
 	}
 
 	ManagedReference<SurveyTool*> surveyTool = session->getActiveSurveyTool().get();
 
-	if (surveyTool == NULL || !resourceMap->contains(resname.toLowerCase()) || player->getZone() == NULL)
+	if (surveyTool == nullptr || !resourceMap->contains(resname.toLowerCase()) || player->getZone() == nullptr)
 		return;
 
 	String zoneName = player->getZone()->getZoneName();
@@ -864,7 +864,7 @@ void ResourceSpawner::sendSurvey(CreatureObject* player, const String& resname) 
 		posX -= (points * spacer);
 	}
 
-	ManagedReference<WaypointObject*> waypoint = NULL;
+	ManagedReference<WaypointObject*> waypoint = nullptr;
 
 	if (maxDensity >= 0.1f) {
 
@@ -872,7 +872,7 @@ void ResourceSpawner::sendSurvey(CreatureObject* player, const String& resname) 
 		waypoint = ghost->getSurveyWaypoint();
 
 		// Create new waypoint
-		if (waypoint == NULL)
+		if (waypoint == nullptr)
 			waypoint = ( server->createObject(0xc456e788, 1)).castTo<WaypointObject*>();
 
 		Locker locker(waypoint);
@@ -902,13 +902,13 @@ void ResourceSpawner::sendSample(CreatureObject* player, const String& resname,
 
 	// Determine if survey tool is valid, and that resource actually exists
 	ManagedReference<SurveySession*> session = player->getActiveSession(SessionFacadeType::SURVEY).castTo<SurveySession*>();
-	if(session == NULL) {
+	if(session == nullptr) {
 		return;
 	}
 
 	ManagedReference<SurveyTool*> surveyTool = session->getActiveSurveyTool().get();
 
-	if (surveyTool == NULL || !resourceMap->contains(resname.toLowerCase()) || player->getZone() == NULL)
+	if (surveyTool == nullptr || !resourceMap->contains(resname.toLowerCase()) || player->getZone() == nullptr)
 		return;
 
 	ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
@@ -1123,9 +1123,9 @@ Reference<ResourceContainer*> ResourceSpawner::harvestResource(CreatureObject* p
 	String zoneName = player->getZone()->getZoneName();
 
 	ZoneResourceMap* zoneMap = resourceMap->getZoneResourceList(zoneName);
-	if (zoneMap == NULL) {
+	if (zoneMap == nullptr) {
 		player->sendSystemMessage("Failed to locate any resources");
-		return NULL;
+		return nullptr;
 	}
 
 	ManagedReference<ResourceSpawn*> resourceSpawn;
@@ -1133,7 +1133,7 @@ Reference<ResourceContainer*> ResourceSpawner::harvestResource(CreatureObject* p
 	for (int i = 0; i < zoneMap->size(); ++i) {
 		resourceSpawn = zoneMap->get(i);
 
-		if (resourceSpawn != NULL && resourceSpawn->getType() == type) {
+		if (resourceSpawn != nullptr && resourceSpawn->getType() == type) {
 			Locker locker(resourceSpawn);
 
 			resourceSpawn->extractResource(player->getZone()->getZoneName(), quantity);
@@ -1142,7 +1142,7 @@ Reference<ResourceContainer*> ResourceSpawner::harvestResource(CreatureObject* p
 
 	}
 	player->sendSystemMessage("Failed to locate any suitable resources");
-	return NULL;
+	return nullptr;
 }
 
 bool ResourceSpawner::harvestResource(CreatureObject* player, ResourceSpawn* resourceSpawn, int quantity) {
@@ -1157,8 +1157,8 @@ ResourceSpawn* ResourceSpawner::getCurrentSpawn(const String& restype, const Str
 
 	ZoneResourceMap* zoneMap = resourceMap->getZoneResourceList(zoneName);
 
-	if (zoneMap == NULL) {
-		return NULL;
+	if (zoneMap == nullptr) {
+		return nullptr;
 	}
 
 	ManagedReference<ResourceSpawn*> resourceSpawn;
@@ -1166,11 +1166,11 @@ ResourceSpawn* ResourceSpawner::getCurrentSpawn(const String& restype, const Str
 	for (int i = 0; i < zoneMap->size(); ++i) {
 		resourceSpawn = zoneMap->get(i);
 
-		if (resourceSpawn != NULL && resourceSpawn->getType().indexOf(restype) != -1)
+		if (resourceSpawn != nullptr && resourceSpawn->getType().indexOf(restype) != -1)
 			return resourceSpawn;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 ResourceSpawn* ResourceSpawner::getFromRandomPool(const String& type) {

@@ -961,7 +961,7 @@ void CreatureManagerImplementation::tame(Creature* creature, CreatureObject* pla
 
 	CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
 
-	if (creatureTemplate == NULL)
+	if (creatureTemplate == nullptr)
 		return;
 
 	int templateLevel = creatureTemplate->getLevel();
@@ -979,7 +979,7 @@ void CreatureManagerImplementation::tame(Creature* creature, CreatureObject* pla
 
 	ManagedReference<SceneObject*> datapad = player->getSlottedObject("datapad");
 
-	if (datapad == NULL)
+	if (datapad == nullptr)
 		return;
 
 	if (datapad->getContainerObjectsSize() >= datapad->getContainerVolumeLimit()) {
@@ -995,7 +995,7 @@ void CreatureManagerImplementation::tame(Creature* creature, CreatureObject* pla
 	for (int i = 0; i < datapad->getContainerObjectsSize(); ++i) {
 		ManagedReference<SceneObject*> object = datapad->getContainerObject(i);
 
-		if (object != NULL && object->isPetControlDevice()) {
+		if (object != nullptr && object->isPetControlDevice()) {
 			PetControlDevice* device = cast<PetControlDevice*>( object.get());
 
 			if (device->getPetType() == PetManager::CREATUREPET) {
@@ -1018,10 +1018,10 @@ void CreatureManagerImplementation::tame(Creature* creature, CreatureObject* pla
 	for (int i = 0; i < ghost->getActivePetsSize(); ++i) {
 		ManagedReference<AiAgent*> object = ghost->getActivePet(i);
 
-		if (object != NULL) {
+		if (object != nullptr) {
 			ManagedReference<PetControlDevice*> pcd = object->getControlDevice().get().castTo<PetControlDevice*>();
 
-			if (pcd == NULL || pcd->getPetType() != PetManager::CREATUREPET) {
+			if (pcd == nullptr || pcd->getPetType() != PetManager::CREATUREPET) {
 				continue;
 			}
 

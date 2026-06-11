@@ -626,7 +626,7 @@ public:
 	virtual void applyEffect(CreatureObject* attacker, CreatureObject* defender, uint8 effectType, uint32 mod) const {
 		CombatManager* combatManager = CombatManager::instance();
 		StateEffect effect = getStateEffect(effectType);
-		Reference<Buff*> buff = NULL;
+		Reference<Buff*> buff = nullptr;
 
 		Vector<String> defenseMods = effect.getDefenderStateDefenseModifiers();
 		float targetDefense = 0.f;

@@ -69,7 +69,7 @@ void DataTableIff::readObject(IffStream* iffStream) {
 		for (int j = 0; j < totalColumns; ++j) {
 			byte type = columnTypes.get(j);
 
-			DataTableCell* cell = NULL;
+			DataTableCell* cell = nullptr;
 
 			switch (type) {
 			case 'f':
