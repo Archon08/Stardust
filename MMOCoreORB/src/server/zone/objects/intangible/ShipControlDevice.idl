@@ -37,7 +37,7 @@ class ShipControlDevice extends ControlDevice {
 			} else {
 				SceneObject playerParent = player.getParent();
 
-				if (playerParent == null) {
+				if (!playerParent) {
 					this.generateObject(player);
 				}
 			}
