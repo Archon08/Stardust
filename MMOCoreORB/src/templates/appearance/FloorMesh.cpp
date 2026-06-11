@@ -146,12 +146,12 @@ const Vector<TriangleNode*>* FloorMesh::getNeighbors(uint32 triangleID) const {
 	return triangle->getNeighbors();
 }
 
-TriangleNode* FloorMesh::findNearestTriangle(const Vector3& point) {
+const TriangleNode* FloorMesh::findNearestTriangle(const Vector3& point) const {
 	float dist = MAX_FLOAT;
-	TriangleNode* found = nullptr;
+	const TriangleNode* found = nullptr;
 
 	for (int i = 0; i < tris.size(); ++i) {
-		TriangleNode* node = tris.getUnsafe(i);
+		const TriangleNode* node = tris.getUnsafe(i);
 
 		Vector3 bary = node->getBarycenter();
 
@@ -385,11 +385,11 @@ void FloorMesh::parsePGRF(IffStream* iffStream) {
 	pathGraph->readObject(iffStream);
 }
 
-PathNode* FloorMesh::getGlobalNode(int globalID) {
+const PathNode* FloorMesh::getGlobalNode(int globalID) const {
 	return pathGraph->findGlobalNode(globalID);
 }
 
-bool FloorMesh::testCollide(float x, float z, float y, float radius) {
+bool FloorMesh::testCollide(float x, float z, float y, float radius) const {
 	Vector3 point(x, z, y);
 
 	Sphere sphere(point, radius);
