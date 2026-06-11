@@ -73,21 +73,16 @@ jobs:
           mysql swgemu < MMOCoreORB/sql/swgemu.sql
           [ -f MMOCoreORB/sql/datatables.sql ] && mysql swgemu < MMOCoreORB/sql/datatables.sql || true
           [ -f MMOCoreORB/sql/mantis.sql ] && mysql swgemu < MMOCoreORB/sql/mantis.sql || true
-          mysql -e "SHOW DATABASES; USE swgemu; SHOW TABLES;" | head -20
 
-      - name: Boot check (init machinery up to TRE load)
+      - name: Boot check (init machinery up to TRE/asset load)
         working-directory: MMOCoreORB/bin
         shell: bash
         run: |
-          ls -la core3 || { echo "no core3 binary in bin/"; ls -la ../build/src/ | head; cp ../build/src/core3 . 2>/dev/null || exit 1; }
+          ls -la core3 || cp ../build/src/core3 . || exit 1
           mkdir -p log databases navmeshes
           timeout 180 ./core3 > ../../boot-stdout.log 2>&1 || true
-          echo "=== exit; stdout head ==="
-          head -60 ../../boot-stdout.log
           echo "=== stdout tail ==="
-          tail -60 ../../boot-stdout.log
-          echo "=== core3.log (if present) ==="
-          tail -60 log/core3.log 2>/dev/null || echo "(none)"
+          tail -40 ../../boot-stdout.log
 
       - name: Grade boot
         shell: bash
@@ -98,10 +93,21 @@ jobs:
           echo "$ALL" | grep -q "connected to 127.0.0.1:3306" || { echo "FAIL: no DB connection"; PASS=0; }
           echo "$ALL" | grep -qi "TreeFile" || { echo "FAIL: never reached TRE/asset stage"; PASS=0; }
           if echo "$ALL" | grep -qiE "segmentation|SIGSEGV|dumped core"; then
-            echo "$ALL" | grep -qi "TreeFile.*does not exist" && echo "NOTE: crash after missing-TRE stage - expected in CI without client assets" || { echo "FAIL: crash before asset stage"; PASS=0; }
+            if echo "$ALL" | grep -qi "TreeFile.*does not exist"; then
+              echo "NOTE: crash after missing-TRE stage - expected in CI without client assets"
+            else
+              echo "FAIL: crash before asset stage"
+              PASS=0
+            fi
           fi
-          [ $PASS -eq 1 ] && echo "G1-CI INIT-MACHINERY: PASS (BDB+MySQL+ORB+Lua up; full TRE-backed zone smoke = operator-run)" || { echo "G1-CI: FAIL"; exit 1; }
-$1
+          if [ $PASS -eq 1 ]; then
+            echo "G1-CI INIT-MACHINERY: PASS (BDB+MySQL+ORB+Lua up; full TRE-backed zone smoke = operator-run)"
+          else
+            echo "G1-CI: FAIL"
+            exit 1
+          fi
+
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
