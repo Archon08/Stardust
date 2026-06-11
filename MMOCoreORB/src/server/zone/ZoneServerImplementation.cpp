@@ -438,7 +438,7 @@ ZoneClientSession* ZoneServerImplementation::createConnection(Socket* sock, Sock
 	//client->deploy("ZoneClientSession " + addr.getFullIPAddress());
 	//client->deploy();
 
-	String address = session->getAddress();
+	String address = session->getFullIPAddress();
 
 	//info("client connected from \'" + address + "\'");
 
