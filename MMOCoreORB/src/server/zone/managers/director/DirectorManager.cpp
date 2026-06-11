@@ -8,12 +8,15 @@
 #include "DirectorManager.h"
 #include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/objects/creature/LuaCreatureObject.h"
+#include "templates/params/creature/ObjectFlag.h"
 #include "server/zone/objects/scene/LuaSceneObject.h"
 #include "server/zone/objects/building/LuaBuildingObject.h"
 #include "server/zone/objects/intangible/LuaIntangibleObject.h"
+#include "server/zone/objects/mission/LuaMissionObject.h"
 #include "server/zone/objects/intangible/ControlDevice.h"
 #include "server/zone/objects/intangible/PetControlDevice.h"
 #include "server/zone/objects/player/LuaPlayerObject.h"
+#include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/tangible/LuaTangibleObject.h"
 #include "server/zone/objects/region/LuaCityRegion.h"
 #include "server/zone/packets/cell/UpdateCellPermissionsMessage.h"
@@ -71,6 +74,8 @@
 #include "server/zone/packets/scene/PlayClientEffectLocMessage.h"
 #include "server/zone/managers/player/BadgeList.h"
 #include "server/zone/managers/player/LuaQuestInfo.h"
+#include "server/zone/managers/player/LuaQuestTask.h"
+#include "server/zone/managers/player/LuaQuestTasks.h"
 #include "server/zone/objects/tangible/misc/FsPuzzlePack.h"
 #include "server/zone/objects/tangible/misc/FsCsObject.h"
 #include "server/zone/objects/tangible/misc/CustomIngredient.h"
@@ -87,7 +92,25 @@
 #include "server/zone/objects/creature/variables/LuaSkill.h"
 #include "server/zone/objects/intangible/TheaterObject.h"
 #include "server/zone/objects/tangible/misc/ContractCrate.h"
+#include "server/zone/objects/tangible/spawning/SpawnEggObject.h"
 #include "server/zone/managers/crafting/schematicmap/SchematicMap.h"
+#include "server/zone/managers/director/ScreenPlayObserver.h"
+#include "server/zone/managers/resource/ResourceManager.h"
+#include "server/zone/managers/gcw/observers/SquadObserver.h"
+#include "server/zone/managers/ship/ShipManager.h"
+#include "templates/params/ship/ShipFlag.h"
+#include "templates/params/creature/PlayerArrangement.h"
+#include "server/zone/objects/ship/components/ShipChassisComponent.h"
+
+#include "server/zone/objects/ship/LuaShipObject.h"
+#include "server/zone/objects/ship/LuaPobShipObject.h"
+#include "server/zone/objects/ship/ai/LuaShipAiAgent.h"
+#include "server/zone/objects/ship/components/LuaShipComponent.h"
+#include "server/zone/objects/ship/components/ShipComponent.h"
+#include "server/zone/objects/area/space/SpaceActiveArea.h"
+#include "server/zone/objects/area/areashapes/SphereAreaShape.h"
+#include "server/zone/packets/ui/CreateClientPathMessage.h"
+#include "server/zone/objects/ship/squadron/ShipSquadronFormation.h"
 
 int DirectorManager::DEBUG_MODE = 0;
 int DirectorManager::ERROR_CODE = NO_ERROR;
@@ -113,6 +136,9 @@ DirectorManager::DirectorManager() : Logger("DirectorManager") {
 	masterScreenPlayVersion.set(0);
 }
 
+DirectorManager::~DirectorManager() {
+}
+
 void DirectorManager::loadPersistentEvents() {
 	info("Loading persistent events from events.db");
 
@@ -133,6 +159,8 @@ void DirectorManager::loadPersistentEvents() {
 
 		while (iterator.getNextKey(objectID)) {
 			Reference<PersistentEvent*> event = Core::getObjectBroker()->lookUp(objectID).castTo<PersistentEvent*>();
+			Locker locker(event);
+
 			++i;
 
 			Reference<PersistentEvent*> oldEvent = persistentEvents.put(event->getEventName().hashCode(), event);
@@ -152,7 +180,7 @@ void DirectorManager::loadPersistentEvents() {
 		error("Database exception in DirectorManager::loadPersistentEvents(): "	+ e.getMessage());
 	}
 
-	info(String::valueOf(i) + " persistent events loaded.", true);
+	info(true) << i << " persistent events loaded.";
 }
 
 void DirectorManager::loadPersistentStatus() {
@@ -188,7 +216,7 @@ void DirectorManager::loadPersistentStatus() {
 		error("Database exception in DirectorManager::loadPersistentStatus(): "	+ e.getMessage());
 	}
 
-	info(String::valueOf(questStatuses.size() + questVectorMaps.size()) + " persistent statuses loaded.", true);
+	info(true) << questStatuses.size() + questVectorMaps.size() << " persistent statuses loaded.";
 }
 
 void DirectorManager::setQuestStatus(const String& keyString, const String& valString) {
@@ -205,7 +233,7 @@ void DirectorManager::setQuestStatus(const String& keyString, const String& valS
 	status->setStatus(valString);
 }
 
-String DirectorManager::getQuestStatus(const String& keyString) {
+String DirectorManager::getQuestStatus(const String& keyString) const {
 	String str = "";
 
 	Reference<QuestStatus*> status = questStatuses.get(keyString);
@@ -240,6 +268,20 @@ String DirectorManager::readStringSharedMemory(const String& key) {
 	return data;
 }
 
+Vector3 DirectorManager::readVector3SharedMemory(const String& key) {
+#ifndef WITH_STM
+	DirectorManager::instance()->rlock();
+#endif
+
+	Vector3 data = DirectorManager::instance()->sharedMemory->getVector3(key);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->runlock();
+#endif
+
+	return data;
+}
+
 uint64 DirectorManager::readSharedMemory(const String& key) {
 #ifndef WITH_STM
 	DirectorManager::instance()->rlock();
@@ -254,19 +296,48 @@ uint64 DirectorManager::readSharedMemory(const String& key) {
 	return data;
 }
 
-Vector<Reference<ScreenPlayTask*> > DirectorManager::getObjectEvents(SceneObject* obj) {
+Vector<String> DirectorManager::readStringVectorSharedMemory(const String& key) {
+#ifndef WITH_STM
+	DirectorManager::instance()->rlock();
+#endif
+
+	Vector<String> table = DirectorManager::instance()->sharedMemory->getStringVector(key);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->runlock();
+#endif
+
+	return table;
+}
+
+Vector<Reference<ScreenPlayTask*> > DirectorManager::getObjectEvents(SceneObject* obj) const {
 	Vector<Reference<ScreenPlayTask*> > eventList;
 
 	for (int i = 0; i < screenplayTasks.size(); i++) {
 		Reference<ScreenPlayTask*> task = screenplayTasks.get(i);
 
 		if (task->getSceneObject() == obj) {
-			eventList.add(task);
+			eventList.emplace(std::move(task));
 		}
 	}
 
 	return eventList;
 }
+
+Logger& DirectorManager::getEventLogger() {
+	auto static eventLogger = [] () {
+		Logger eventLogger("LuaEventLogger");
+
+		eventLogger.setFileLogger("log/luaEvent.log", true, ConfigManager::instance()->getRotateLogAtStart());
+		eventLogger.setLogToConsole(false);
+		eventLogger.setRotateLogSizeMB(ConfigManager::instance()->getRotateLogSizeMB());
+		eventLogger.setLogLevel(ConfigManager::instance()->getLogLevel("Core3.LuaEngine.LuaEventLogLevel", Logger::INFO));
+
+		return eventLogger;
+	} ();
+
+	return eventLogger;
+};
 
 void DirectorManager::printTraceError(lua_State* L, const String& error) {
 	Lua* lua = instance()->getLuaInstance();
@@ -275,20 +346,47 @@ void DirectorManager::printTraceError(lua_State* L, const String& error) {
 	lua->error(trace);
 }
 
-String DirectorManager::getStringSharedMemory(const String& key) {
+String DirectorManager::getStringSharedMemory(const String& key) const {
 	return sharedMemory->getString(key);
 }
 
 void DirectorManager::startGlobalScreenPlays() {
-	info("Starting global screenplays.", true);
+	info(true) << "Starting " << screenPlays.size() << " global screenplays.";
+
+	auto slowLoadMs = ConfigManager::instance()->getInt("Core3.DirectorManager.SlowLoadMs", 1000);
+
+	Time nextReport;
+	nextReport.addMiliTime(5000);
+	int countStarted = 0;
+
+	Timer profileAll;
+	profileAll.start();
 
 	for (int i = 0; i < screenPlays.size(); ++i) {
 		String screenPlay = screenPlays.elementAt(i).getKey();
 		bool start = screenPlays.elementAt(i).getValue();
 
-		if (start)
+		if (!nextReport.isFuture()) {
+			nextReport.updateToCurrentTime();
+			nextReport.addMiliTime(5000);
+			info(true) << "Started " << countStarted << " of " << screenPlays.size() << " screenplays.";
+		}
+
+		if (start) {
+			Timer profileStart;
+			profileStart.start();
 			startScreenPlay(nullptr, screenPlay);
+			auto elapsedMs = profileStart.stopMs();
+
+			if (elapsedMs > slowLoadMs) {
+				info(true) << "Slow screenplay: " << screenPlay << " took " << msToString(elapsedMs) << " to start.";
+			}
+
+			countStarted++;
+		}
 	}
+
+	info(true) << "Started " << countStarted << " global screenplays in " << msToString(profileAll.stopMs());
 }
 
 void DirectorManager::setupLuaPackagePath(Lua* luaEngine) {
@@ -305,137 +403,177 @@ void DirectorManager::setupLuaPackagePath(Lua* luaEngine) {
 
 void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	if (DEBUG_MODE)
-		setLogging(true);
+		setLogLevel(Logger::DEBUG);
 
-	if (!DEBUG_MODE)
-		info("initializeLuaEngine");
+	debug("initializeLuaEngine started");
 
 	luaEngine->init();
 	luaEngine->setLoggingName("DirectorManagerLuaInstance");
 	luaEngine->setGlobalLogging(true);
-	luaEngine->setLogging(true);
 
-	StringBuffer fileName;
-	fileName << "log/lua.log";
-	luaEngine->setFileLogger(fileName.toString(), true);
+	if (DEBUG_MODE) {
+		luaEngine->setLogLevel(Logger::DEBUG);
+	} else {
+		luaEngine->setLogLevel(ConfigManager::instance()->getLogLevel("Core3.LuaEngine.LogLevel", Logger::ERROR));
+		luaEngine->setLogToConsole(false);
+	}
+
+	luaEngine->setFileLogger("log/lua.log", true, ConfigManager::instance()->getRotateLogAtStart());
 	luaEngine->setLogJSON(ConfigManager::instance()->getLuaLogJSON());
+	luaEngine->setRotateLogSizeMB(ConfigManager::instance()->getRotateLogSizeMB());
+
+	if (luaEngine->getLogJSON()) {
+		luaEngine->setLogSynchronized(true);
+	}
 
 	setupLuaPackagePath(luaEngine);
 
-	lua_register(luaEngine->getLuaState(), "includeFile", includeFile);
-	lua_register(luaEngine->getLuaState(), "createEvent", createEvent);
-	lua_register(luaEngine->getLuaState(), "createEventActualTime", createEventActualTime);
-	lua_register(luaEngine->getLuaState(), "createServerEvent", createServerEvent);
-	lua_register(luaEngine->getLuaState(), "hasServerEvent", hasServerEvent);
-	lua_register(luaEngine->getLuaState(), "rescheduleServerEvent", rescheduleServerEvent);
-	lua_register(luaEngine->getLuaState(), "getServerEventID", getServerEventID);
-	lua_register(luaEngine->getLuaState(), "getServerEventTimeLeft", getServerEventTimeLeft);
-	lua_register(luaEngine->getLuaState(), "createObserver", createObserver);
-	lua_register(luaEngine->getLuaState(), "dropObserver", dropObserver);
-	lua_register(luaEngine->getLuaState(), "hasObserver", hasObserver);
-	lua_register(luaEngine->getLuaState(), "spawnMobile", spawnMobile);
-	lua_register(luaEngine->getLuaState(), "spawnEventMobile", spawnEventMobile);
-	lua_register(luaEngine->getLuaState(), "spatialChat", spatialChat);
-	lua_register(luaEngine->getLuaState(), "spatialMoodChat", spatialMoodChat);
-
-	lua_register(luaEngine->getLuaState(), "getRandomNumber", getRandomNumber);
-
-	lua_register(luaEngine->getLuaState(), "forcePeace", forcePeace);
-
-	lua_register(luaEngine->getLuaState(), "readSharedMemory", readSharedMemory);
-	lua_register(luaEngine->getLuaState(), "writeSharedMemory", writeSharedMemory);
-	lua_register(luaEngine->getLuaState(), "deleteSharedMemory", deleteSharedMemory);
-	lua_register(luaEngine->getLuaState(), "readStringSharedMemory", readStringSharedMemory);
-	lua_register(luaEngine->getLuaState(), "writeStringSharedMemory", writeStringSharedMemory);
-	lua_register(luaEngine->getLuaState(), "deleteStringSharedMemory", deleteStringSharedMemory);
-	lua_register(luaEngine->getLuaState(), "spawnSceneObject", spawnSceneObject);
-	lua_register(luaEngine->getLuaState(), "spawnActiveArea", spawnActiveArea);
-	lua_register(luaEngine->getLuaState(), "spawnBuilding", spawnBuilding);
-	lua_register(luaEngine->getLuaState(), "destroyBuilding", destroyBuilding);
-	lua_register(luaEngine->getLuaState(), "getSceneObject", getSceneObject);
-	lua_register(luaEngine->getLuaState(), "getCreatureObject", getCreatureObject);
-	lua_register(luaEngine->getLuaState(), "addStartingItemsInto", addStartingItemsInto);
-	lua_register(luaEngine->getLuaState(), "addStartingWeaponsInto", addStartingWeaponsInto);
-	lua_register(luaEngine->getLuaState(), "setAuthorizationState", setAuthorizationState);
-	lua_register(luaEngine->getLuaState(), "giveItem", giveItem);
-	lua_register(luaEngine->getLuaState(), "giveControlDevice", giveControlDevice);
-	lua_register(luaEngine->getLuaState(), "checkTooManyHirelings", checkTooManyHirelings);
-	lua_register(luaEngine->getLuaState(), "checkInt64Lua", checkInt64Lua);
-	lua_register(luaEngine->getLuaState(), "getChatMessage", getChatMessage);
-	lua_register(luaEngine->getLuaState(), "getStringId", getStringId);
-	lua_register(luaEngine->getLuaState(), "getRankName", getRankName);
-	lua_register(luaEngine->getLuaState(), "getRankCost", getRankCost);
-	lua_register(luaEngine->getLuaState(), "getRankDelegateRatioFrom", getRankDelegateRatioFrom);
-	lua_register(luaEngine->getLuaState(), "getRankDelegateRatioTo", getRankDelegateRatioTo);
-	lua_register(luaEngine->getLuaState(), "isHighestRank", isHighestRank);
-	lua_register(luaEngine->getLuaState(), "getFactionPointsCap", getFactionPointsCap);
-	lua_register(luaEngine->getLuaState(), "registerScreenPlay", registerScreenPlay);
-	lua_register(luaEngine->getLuaState(), "getZoneByName", getZoneByName);
-	lua_register(luaEngine->getLuaState(), "isZoneEnabled", isZoneEnabled);
-	lua_register(luaEngine->getLuaState(), "getContainerObjectByTemplate", getContainerObjectByTemplate);
-	lua_register(luaEngine->getLuaState(), "updateCellPermission", updateCellPermission);
-	lua_register(luaEngine->getLuaState(), "updateCellPermissionGroup", updateCellPermissionGroup);
-	lua_register(luaEngine->getLuaState(), "getQuestInfo", getQuestInfo);
-	lua_register(luaEngine->getLuaState(), "getPlayerQuestID", getPlayerQuestID);
+	//luaEngine->registerFunction("includeFile", includeFile);
+	luaEngine->registerFunction("includeFile", includeFile);
+	luaEngine->registerFunction("createEvent", createEvent);
+	luaEngine->registerFunction("cancelEvent", cancelEvent);
+	luaEngine->registerFunction("createEventActualTime", createEventActualTime);
+	luaEngine->registerFunction("createServerEvent", createServerEvent);
+	luaEngine->registerFunction("hasServerEvent", hasServerEvent);
+	luaEngine->registerFunction("rescheduleServerEvent", rescheduleServerEvent);
+	luaEngine->registerFunction("getServerEventID", getServerEventID);
+	luaEngine->registerFunction("getServerEventTimeLeft", getServerEventTimeLeft);
+	luaEngine->registerFunction("createObserver", createObserver);
+	luaEngine->registerFunction("dropObserver", dropObserver);
+	luaEngine->registerFunction("hasObserver", hasObserver);
+	luaEngine->registerFunction("hasObserverType", hasObserverType);
+	luaEngine->registerFunction("spawnMobile", spawnMobile);
+	luaEngine->registerFunction("spawnEventMobile", spawnEventMobile);
+	luaEngine->registerFunction("spawnShipAgent", spawnShipAgent);
+	luaEngine->registerFunction("spatialChat", spatialChat);
+	luaEngine->registerFunction("spatialMoodChat", spatialMoodChat);
+	luaEngine->registerFunction("getRandomNumber", getRandomNumber);
+	luaEngine->registerFunction("getHashCode", getHashCode);
+	luaEngine->registerFunction("forcePeace", forcePeace);
+	luaEngine->registerFunction("readSharedMemory", readSharedMemory);
+	luaEngine->registerFunction("writeSharedMemory", writeSharedMemory);
+	luaEngine->registerFunction("deleteSharedMemory", deleteSharedMemory);
+	luaEngine->registerFunction("readStringSharedMemory", readStringSharedMemory);
+	luaEngine->registerFunction("writeStringSharedMemory", writeStringSharedMemory);
+	luaEngine->registerFunction("deleteStringSharedMemory", deleteStringSharedMemory);
+	luaEngine->registerFunction("readVector3SharedMemory", readVector3SharedMemory);
+	luaEngine->registerFunction("writeVector3SharedMemory", writeVector3SharedMemory);
+	luaEngine->registerFunction("deleteVector3SharedMemory", deleteVector3SharedMemory);
+	luaEngine->registerFunction("readStringVectorSharedMemory", readStringVectorSharedMemory);
+	luaEngine->registerFunction("writeStringVectorSharedMemory", writeStringVectorSharedMemory);
+	luaEngine->registerFunction("deleteStringVectorSharedMemory", deleteStringVectorSharedMemory);
+	luaEngine->registerFunction("spawnSceneObject", spawnSceneObject);
+	luaEngine->registerFunction("spawnActiveArea", spawnActiveArea);
+	luaEngine->registerFunction("spawnSpaceActiveArea", spawnSpaceActiveArea);
+	luaEngine->registerFunction("spawnBuilding", spawnBuilding);
+	luaEngine->registerFunction("spawnSecurityPatrol", spawnSecurityPatrol);
+	luaEngine->registerFunction("despawnSecurityPatrol", despawnSecurityPatrol);
+	luaEngine->registerFunction("destroyBuilding", destroyBuilding);
+	luaEngine->registerFunction("getSceneObject", getSceneObject);
+	luaEngine->registerFunction("getCreatureObject", getCreatureObject);
+	luaEngine->registerFunction("addStartingItemsInto", addStartingItemsInto);
+	luaEngine->registerFunction("addStartingWeaponsInto", addStartingWeaponsInto);
+	luaEngine->registerFunction("setAuthorizationState", setAuthorizationState);
+	luaEngine->registerFunction("giveItem", giveItem);
+	luaEngine->registerFunction("giveControlDevice", giveControlDevice);
+	luaEngine->registerFunction("checkTooManyHirelings", checkTooManyHirelings);
+	luaEngine->registerFunction("checkInt64Lua", checkInt64Lua);
+	luaEngine->registerFunction("getChatMessage", getChatMessage);
+	luaEngine->registerFunction("getStringId", getStringId);
+	luaEngine->registerFunction("getRankName", getRankName);
+	luaEngine->registerFunction("getRankCost", getRankCost);
+	luaEngine->registerFunction("getRankDelegateRatioFrom", getRankDelegateRatioFrom);
+	luaEngine->registerFunction("getRankDelegateRatioTo", getRankDelegateRatioTo);
+	luaEngine->registerFunction("isHighestRank", isHighestRank);
+	luaEngine->registerFunction("getFactionPointsCap", getFactionPointsCap);
+	luaEngine->registerFunction("registerScreenPlay", registerScreenPlay);
+	luaEngine->registerFunction("getZoneByName", getZoneByName);
+	luaEngine->registerFunction("isZoneEnabled", isZoneEnabled);
+	luaEngine->registerFunction("getContainerObjectByTemplate", getContainerObjectByTemplate);
+	luaEngine->registerFunction("updateCellPermission", updateCellPermission);
+	luaEngine->registerFunction("updateCellPermissionGroup", updateCellPermissionGroup);
+	luaEngine->registerFunction("getQuestInfo", getQuestInfo);
+	luaEngine->registerFunction("getPlayerQuestID", getPlayerQuestID);
 
 	// call for createLoot(SceneObject* container, const String& lootGroup, int level)
-	lua_register(luaEngine->getLuaState(), "createLoot", createLoot);
-	lua_register(luaEngine->getLuaState(), "createLootSet", createLootSet);
-	lua_register(luaEngine->getLuaState(), "createLootFromCollection", createLootFromCollection);
+	luaEngine->registerFunction("createLoot", createLoot);
+	luaEngine->registerFunction("createLootSet", createLootSet);
+	luaEngine->registerFunction("createLootFromCollection", createLootFromCollection);
+	luaEngine->registerFunction("givePlayerResource", givePlayerResource);
 
-	lua_register(luaEngine->getLuaState(), "getRegion", getRegion);
-	lua_register(luaEngine->getLuaState(), "writeScreenPlayData", writeScreenPlayData);
-	lua_register(luaEngine->getLuaState(), "readScreenPlayData", readScreenPlayData);
-	lua_register(luaEngine->getLuaState(), "deleteScreenPlayData", deleteScreenPlayData);
-	lua_register(luaEngine->getLuaState(), "clearScreenPlayData", clearScreenPlayData);
-	lua_register(luaEngine->getLuaState(), "getObjectTemplatePathByCRC", getObjectTemplatePathByCRC);
-	lua_register(luaEngine->getLuaState(), "getTimestamp", getTimestamp);
-	lua_register(luaEngine->getLuaState(), "getTimestampMilli", getTimestampMilli);
-	lua_register(luaEngine->getLuaState(), "getFormattedTime", getFormattedTime);
-	lua_register(luaEngine->getLuaState(), "getSpawnPoint", getSpawnPoint);
-	lua_register(luaEngine->getLuaState(), "getSpawnPointInArea", getSpawnPointInArea);
-	lua_register(luaEngine->getLuaState(), "getSpawnArea", getSpawnArea);
-	lua_register(luaEngine->getLuaState(), "makeCreatureName", makeCreatureName);
-	lua_register(luaEngine->getLuaState(), "getGCWDiscount", getGCWDiscount);
-	lua_register(luaEngine->getLuaState(), "getTerrainHeight", getTerrainHeight);
-	lua_register(luaEngine->getLuaState(), "awardSkill", awardSkill);
-	lua_register(luaEngine->getLuaState(), "getCityRegionAt", getCityRegionAt);
-	lua_register(luaEngine->getLuaState(), "setDungeonTicketAttributes", setDungeonTicketAttributes);
-	lua_register(luaEngine->getLuaState(), "setQuestStatus", setQuestStatus);
-	lua_register(luaEngine->getLuaState(), "getQuestStatus", getQuestStatus);
-	lua_register(luaEngine->getLuaState(), "removeQuestStatus", removeQuestStatus);
-	lua_register(luaEngine->getLuaState(), "getControllingFaction", getControllingFaction);
-	lua_register(luaEngine->getLuaState(), "getImperialScore", getImperialScore);
-	lua_register(luaEngine->getLuaState(), "getRebelScore", getRebelScore);
-	lua_register(luaEngine->getLuaState(), "getWinningFactionDifficultyScaling", getWinningFactionDifficultyScaling);
-	lua_register(luaEngine->getLuaState(), "playClientEffectLoc", playClientEffectLoc);
-	lua_register(luaEngine->getLuaState(), "getQuestVectorMap", getQuestVectorMap);
-	lua_register(luaEngine->getLuaState(), "createQuestVectorMap", createQuestVectorMap);
-	lua_register(luaEngine->getLuaState(), "removeQuestVectorMap", removeQuestVectorMap);
-	lua_register(luaEngine->getLuaState(), "creatureTemplateExists", creatureTemplateExists);
-	lua_register(luaEngine->getLuaState(), "printLuaError", printLuaError);
-	lua_register(luaEngine->getLuaState(), "getPlayerByName", getPlayerByName);
-	lua_register(luaEngine->getLuaState(), "sendMail", sendMail);
-	lua_register(luaEngine->getLuaState(), "spawnTheaterObject", spawnTheaterObject);
-	lua_register(luaEngine->getLuaState(), "getSchematicItemName", getSchematicItemName);
-	lua_register(luaEngine->getLuaState(), "getBadgeListByType", getBadgeListByType);
+	luaEngine->registerFunction("getRegion", getRegion);
+	luaEngine->registerFunction("writeScreenPlayData", writeScreenPlayData);
+	luaEngine->registerFunction("readScreenPlayData", readScreenPlayData);
+	luaEngine->registerFunction("deleteScreenPlayData", deleteScreenPlayData);
+	luaEngine->registerFunction("clearScreenPlayData", clearScreenPlayData);
+	luaEngine->registerFunction("getObjectTemplatePathByCRC", getObjectTemplatePathByCRC);
+	luaEngine->registerFunction("getTimestamp", getTimestamp);
+	luaEngine->registerFunction("getTimestampMilli", getTimestampMilli);
+	luaEngine->registerFunction("getFormattedTime", getFormattedTime);
+	luaEngine->registerFunction("getSpawnPoint", getSpawnPoint);
+	luaEngine->registerFunction("getSpawnPointInArea", getSpawnPointInArea);
+	luaEngine->registerFunction("getSpawnArea", getSpawnArea);
+	luaEngine->registerFunction("makeCreatureName", makeCreatureName);
+	luaEngine->registerFunction("getGCWDiscount", getGCWDiscount);
+	luaEngine->registerFunction("getTerrainHeight", getTerrainHeight);
+	luaEngine->registerFunction("awardSkill", awardSkill);
+	luaEngine->registerFunction("getCityRegionAt", getCityRegionAt);
+	luaEngine->registerFunction("setDungeonTicketAttributes", setDungeonTicketAttributes);
+	luaEngine->registerFunction("setQuestStatus", setQuestStatus);
+	luaEngine->registerFunction("getQuestStatus", getQuestStatus);
+	luaEngine->registerFunction("removeQuestStatus", removeQuestStatus);
+	luaEngine->registerFunction("setCoaWinningFaction", setCoaWinningFaction);
+	luaEngine->registerFunction("getControllingFaction", getControllingFaction);
+	luaEngine->registerFunction("getImperialScore", getImperialScore);
+	luaEngine->registerFunction("getRebelScore", getRebelScore);
+	luaEngine->registerFunction("getWinningFactionDifficultyScaling", getWinningFactionDifficultyScaling);
+	luaEngine->registerFunction("playClientEffectLoc", playClientEffectLoc);
+	luaEngine->registerFunction("getQuestVectorMap", getQuestVectorMap);
+	luaEngine->registerFunction("createQuestVectorMap", createQuestVectorMap);
+	luaEngine->registerFunction("removeQuestVectorMap", removeQuestVectorMap);
+	luaEngine->registerFunction("creatureTemplateExists", creatureTemplateExists);
+	luaEngine->registerFunction("printLuaError", printLuaError);
+	luaEngine->registerFunction("logLua", logLua);
+	luaEngine->registerFunction("logLuaEvent", logLuaEvent);
+	luaEngine->registerFunction("getPlayerByName", getPlayerByName);
+	luaEngine->registerFunction("sendMail", sendMail);
+	luaEngine->registerFunction("sendMailToOnlinePlayers", sendMailToOnlinePlayers);
+	luaEngine->registerFunction("spawnTheaterObject", spawnTheaterObject);
+	luaEngine->registerFunction("getSchematicItemName", getSchematicItemName);
+	luaEngine->registerFunction("getBadgeListByType", getBadgeListByType);
+	luaEngine->registerFunction("getGalaxyName", getGalaxyName);
+	luaEngine->registerFunction("getQuestTasks", getQuestTasks);
+	luaEngine->registerFunction("broadcastToGalaxy", broadcastToGalaxy);
+	luaEngine->registerFunction("getWorldFloor", getWorldFloor);
+	luaEngine->registerFunction("useCovertOvert", useCovertOvert);
+	luaEngine->registerFunction("drawClientPath", drawClientPath);
+
+	// JTL
+	luaEngine->registerFunction("generateShipDeed", generateShipDeed);
+	luaEngine->registerFunction("sellSpaceLoot", sellSpaceLoot);
+	luaEngine->registerFunction("isJtlEnabled", isJtlEnabled);
+	luaEngine->registerFunction("grantStarterShip", grantStarterShip);
 
 	//Navigation Mesh Management
-	lua_register(luaEngine->getLuaState(), "createNavMesh", createNavMesh);
+	luaEngine->registerFunction("createNavMesh", createNavMesh);
+	luaEngine->registerFunction("destroyNavMesh", destroyNavMesh);
 
 	luaEngine->setGlobalInt("POSITIONCHANGED", ObserverEventType::POSITIONCHANGED);
 	luaEngine->setGlobalInt("CLOSECONTAINER", ObserverEventType::CLOSECONTAINER);
 	luaEngine->setGlobalInt("OBJECTDESTRUCTION", ObserverEventType::OBJECTDESTRUCTION);
 	luaEngine->setGlobalInt("OBJECTDISABLED", ObserverEventType::OBJECTDISABLED);
 	luaEngine->setGlobalInt("SAMPLE", ObserverEventType::SAMPLE);
+	luaEngine->setGlobalInt("SAMPLETAKEN", ObserverEventType::SAMPLETAKEN);
+	luaEngine->setGlobalInt("HARVESTEDCREATURE", ObserverEventType::HARVESTEDCREATURE);
+	luaEngine->setGlobalInt("DEPLOYEDCAMP", ObserverEventType::DEPLOYEDCAMP);
 	luaEngine->setGlobalInt("CONVERSE", ObserverEventType::CONVERSE);
 	luaEngine->setGlobalInt("KILLEDCREATURE", ObserverEventType::KILLEDCREATURE);
+	luaEngine->setGlobalInt("QUESTKILL", ObserverEventType::QUESTKILL);
 	luaEngine->setGlobalInt("OBJECTREMOVEDFROMZONE", ObserverEventType::OBJECTREMOVEDFROMZONE);
 	luaEngine->setGlobalInt("ENTEREDAREA", ObserverEventType::ENTEREDAREA);
 	luaEngine->setGlobalInt("EXITEDAREA", ObserverEventType::EXITEDAREA);
 	luaEngine->setGlobalInt("DESTINATIONREACHED", ObserverEventType::DESTINATIONREACHED);
 	luaEngine->setGlobalInt("SPECIALATTACK", ObserverEventType::SPECIALATTACK);
-	luaEngine->setGlobalInt("CALLFORHELP", ObserverEventType::CALLFORHELP);
 	luaEngine->setGlobalInt("NEWBIETUTORIALZOOMCAMERA", ObserverEventType::NEWBIETUTORIALZOOMCAMERA);
 	luaEngine->setGlobalInt("CHAT", ObserverEventType::CHAT);
 	luaEngine->setGlobalInt("NEWBIETUTORIALHOLOCRON", ObserverEventType::NEWBIETUTORIALHOLOCRON);
@@ -449,6 +587,7 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	luaEngine->setGlobalInt("NEWBIECLOSEINVENTORY", ObserverEventType::NEWBIECLOSEINVENTORY);
 	luaEngine->setGlobalInt("OBJECTRADIALUSED", ObserverEventType::OBJECTRADIALUSED);
 	luaEngine->setGlobalInt("DAMAGERECEIVED", ObserverEventType::DAMAGERECEIVED);
+	luaEngine->setGlobalInt("DAMAGECHECKPOINT", ObserverEventType::DAMAGECHECKPOINT);
 	luaEngine->setGlobalInt("OBJECTNAMECHANGED", ObserverEventType::OBJECTNAMECHANGED);
 	luaEngine->setGlobalInt("SURVEY", ObserverEventType::SURVEY);
 	luaEngine->setGlobalInt("GETATTRIBUTESBATCHCOMMAND", ObserverEventType::GETATTRIBUTESBATCHCOMMAND);
@@ -459,6 +598,7 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	luaEngine->setGlobalInt("OBJECTRADIALOPENED", ObserverEventType::OBJECTRADIALOPENED);
 	luaEngine->setGlobalInt("ENTEREDBUILDING", ObserverEventType::ENTEREDBUILDING);
 	luaEngine->setGlobalInt("EXITEDBUILDING", ObserverEventType::EXITEDBUILDING);
+	luaEngine->setGlobalInt("PLAYERKILLED", ObserverEventType::PLAYERKILLED);
 	luaEngine->setGlobalInt("SPATIALCHATSENT", ObserverEventType::SPATIALCHATSENT);
 	luaEngine->setGlobalInt("ITEMLOOTED", ObserverEventType::ITEMLOOTED);
 	luaEngine->setGlobalInt("MEDPACKUSED", ObserverEventType::MEDPACKUSED);
@@ -475,27 +615,79 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	luaEngine->setGlobalInt("CONTAINERCONTENTSCHANGED", ObserverEventType::CONTAINERCONTENTSCHANGED);
 	luaEngine->setGlobalInt("WASLISTENEDTO", ObserverEventType::WASLISTENEDTO);
 	luaEngine->setGlobalInt("WASWATCHED", ObserverEventType::WASWATCHED);
+	luaEngine->setGlobalInt("IMAGEDESIGNHAIR", ObserverEventType::IMAGEDESIGNHAIR);
 	luaEngine->setGlobalInt("PARENTCHANGED", ObserverEventType::PARENTCHANGED);
 	luaEngine->setGlobalInt("LOGGEDIN", ObserverEventType::LOGGEDIN);
 	luaEngine->setGlobalInt("LOGGEDOUT", ObserverEventType::LOGGEDOUT);
 	luaEngine->setGlobalInt("ZONESWITCHED", ObserverEventType::ZONESWITCHED);
 	luaEngine->setGlobalInt("TUNEDCRYSTAL", ObserverEventType::TUNEDCRYSTAL);
 	luaEngine->setGlobalInt("PROTOTYPECREATED", ObserverEventType::PROTOTYPECREATED);
+	luaEngine->setGlobalInt("SLICED", ObserverEventType::SLICED);
+	luaEngine->setGlobalInt("ABILITYUSED", ObserverEventType::ABILITYUSED);
+	luaEngine->setGlobalInt("COMBATCOMMANDENQUEUED", ObserverEventType::COMBATCOMMANDENQUEUED);
+	luaEngine->setGlobalInt("FACTIONCHAT", ObserverEventType::FACTIONCHAT);
+	luaEngine->setGlobalInt("NOPLAYERSINRANGE", ObserverEventType::NOPLAYERSINRANGE);
+	luaEngine->setGlobalInt("SPATIALCHAT", ObserverEventType::SPATIALCHAT);
+	luaEngine->setGlobalInt("SHIPAGENTDESPAWNED", ObserverEventType::SHIPAGENTDESPAWNED);
+	luaEngine->setGlobalInt("SQUADRON", ObserverEventType::SQUADRON);
+	luaEngine->setGlobalInt("ENTEREDPOBSHIP", ObserverEventType::ENTEREDPOBSHIP);
+	luaEngine->setGlobalInt("DESTROYEDSHIP", ObserverEventType::DESTROYEDSHIP);
+	luaEngine->setGlobalInt("SHIPDOCKED", ObserverEventType::SHIPDOCKED);
+	luaEngine->setGlobalInt("SHIPDISABLED", ObserverEventType::SHIPDISABLED);
+	luaEngine->setGlobalInt("SHIPDESTROYED", ObserverEventType::SHIPDESTROYED);
+	luaEngine->setGlobalInt("INSPECTEDSHIP", ObserverEventType::INSPECTEDSHIP);
 
 	luaEngine->setGlobalInt("UPRIGHT", CreaturePosture::UPRIGHT);
 	luaEngine->setGlobalInt("PRONE", CreaturePosture::PRONE);
 	luaEngine->setGlobalInt("POSTURESITTING", CreaturePosture::SITTING);
 	luaEngine->setGlobalInt("KNOCKEDDOWN", CreaturePosture::KNOCKEDDOWN);
 	luaEngine->setGlobalInt("CROUCHED", CreaturePosture::CROUCHED);
-	luaEngine->setGlobalInt("STATESITTINGONCHAIR", CreatureState::SITTINGONCHAIR);
+	luaEngine->setGlobalInt("LYINGDOWN", CreaturePosture::LYINGDOWN);
+
+	// Player Species
+	luaEngine->setGlobalInt("SPECIES_HUMAN", CreatureObject::HUMAN);
+	luaEngine->setGlobalInt("SPECIES_RODIAN", CreatureObject::RODIAN);
+	luaEngine->setGlobalInt("SPECIES_TRANDOSHAN", CreatureObject::TRANDOSHAN);
+	luaEngine->setGlobalInt("SPECIES_MONCAL", CreatureObject::MONCAL);
+	luaEngine->setGlobalInt("SPECIES_WOOKIEE", CreatureObject::WOOKIEE);
+	luaEngine->setGlobalInt("SPECIES_BOTHAN", CreatureObject::BOTHAN);
+	luaEngine->setGlobalInt("SPECIES_TWILEK", CreatureObject::TWILEK);
+	luaEngine->setGlobalInt("SPECIES_ZABRAK", CreatureObject::ZABRAK);
+	luaEngine->setGlobalInt("SPECIES_ITHORIAN", CreatureObject::ITHORIAN);
+	luaEngine->setGlobalInt("SPECIES_SULLUSTAN", CreatureObject::SULLUSTAN);
+
+	//Player Arrangements
+	luaEngine->setGlobalLong("RIDER", PlayerArrangement::RIDER);
+	luaEngine->setGlobalLong("SHIP_PILOT", PlayerArrangement::SHIP_PILOT);
+	luaEngine->setGlobalLong("SHIP_OPERATIONS", PlayerArrangement::SHIP_OPERATIONS);
+	luaEngine->setGlobalLong("SHIP_GUNNER0", PlayerArrangement::SHIP_GUNNER0);
+	luaEngine->setGlobalLong("SHIP_GUNNER1", PlayerArrangement::SHIP_GUNNER1);
+	luaEngine->setGlobalLong("SHIP_GUNNER2", PlayerArrangement::SHIP_GUNNER2);
+	luaEngine->setGlobalLong("SHIP_GUNNER3", PlayerArrangement::SHIP_GUNNER3);
+	luaEngine->setGlobalLong("SHIP_GUNNER4", PlayerArrangement::SHIP_GUNNER4);
+	luaEngine->setGlobalLong("SHIP_GUNNER5", PlayerArrangement::SHIP_GUNNER5);
+	luaEngine->setGlobalLong("SHIP_GUNNER6", PlayerArrangement::SHIP_GUNNER6);
+	luaEngine->setGlobalLong("SHIP_GUNNER7", PlayerArrangement::SHIP_GUNNER7);
+	luaEngine->setGlobalLong("SHIP_PILOT_POB", PlayerArrangement::SHIP_PILOT_POB);
+	luaEngine->setGlobalLong("SHIP_OPERATIONS_POB", PlayerArrangement::SHIP_OPERATIONS_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER0_POB", PlayerArrangement::SHIP_GUNNER0_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER1_POB", PlayerArrangement::SHIP_GUNNER1_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER2_POB", PlayerArrangement::SHIP_GUNNER2_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER3_POB", PlayerArrangement::SHIP_GUNNER3_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER4_POB", PlayerArrangement::SHIP_GUNNER4_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER5_POB", PlayerArrangement::SHIP_GUNNER5_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER6_POB", PlayerArrangement::SHIP_GUNNER6_POB);
+	luaEngine->setGlobalLong("SHIP_GUNNER7_POB", PlayerArrangement::SHIP_GUNNER7_POB);
 
 	//Waypoint Colors
-	luaEngine->setGlobalInt("WAYPOINTBLUE", WaypointObject::COLOR_BLUE);
-	luaEngine->setGlobalInt("WAYPOINTGREEN", WaypointObject::COLOR_GREEN);
-	luaEngine->setGlobalInt("WAYPOINTYELLOW", WaypointObject::COLOR_YELLOW);
-	luaEngine->setGlobalInt("WAYPOINTPURPLE", WaypointObject::COLOR_PURPLE);
-	luaEngine->setGlobalInt("WAYPOINTWHITE", WaypointObject::COLOR_WHITE);
-	luaEngine->setGlobalInt("WAYPOINTORANGE", WaypointObject::COLOR_ORANGE);
+	luaEngine->setGlobalInt("WAYPOINT_WHITE", WaypointObject::COLOR_WHITE);
+	luaEngine->setGlobalInt("WAYPOINT_BLUE", WaypointObject::COLOR_BLUE);
+	luaEngine->setGlobalInt("WAYPOINT_GREEN", WaypointObject::COLOR_GREEN);
+	luaEngine->setGlobalInt("WAYPOINT_ORANGE", WaypointObject::COLOR_ORANGE);
+	luaEngine->setGlobalInt("WAYPOINT_YELLOW", WaypointObject::COLOR_YELLOW);
+	luaEngine->setGlobalInt("WAYPOINT_PURPLE", WaypointObject::COLOR_PURPLE);
+	luaEngine->setGlobalInt("WAYPOINT_WHITE2", WaypointObject::COLOR_WHITE2);
+	luaEngine->setGlobalInt("WAYPOINT_SPACE", WaypointObject::COLOR_SPACE);
 
 	//Waypoint Special Types
 	luaEngine->setGlobalInt("WAYPOINTTHEMEPARK", WaypointObject::SPECIALTYPE_THEMEPARK);
@@ -519,18 +711,25 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	luaEngine->setGlobalInt("BLEEDING", CreatureState::BLEEDING);
 	luaEngine->setGlobalInt("PEACE", CreatureState::PEACE);
 
-	luaEngine->setGlobalInt("NONE", CreatureFlag::NONE);
-	luaEngine->setGlobalInt("ATTACKABLE", CreatureFlag::ATTACKABLE);
-	luaEngine->setGlobalInt("AGGRESSIVE", CreatureFlag::AGGRESSIVE);
-	luaEngine->setGlobalInt("OVERT", CreatureFlag::OVERT);
-	luaEngine->setGlobalInt("TEF", CreatureFlag::TEF);
-	luaEngine->setGlobalInt("PLAYER", CreatureFlag::PLAYER);
-	luaEngine->setGlobalInt("ENEMY", CreatureFlag::ENEMY);
-	luaEngine->setGlobalInt("WILLBEDECLARED", CreatureFlag::WILLBEDECLARED);
-	luaEngine->setGlobalInt("WASDECLARED", CreatureFlag::WASDECLARED);
-	luaEngine->setGlobalInt("SCANNING_FOR_CONTRABAND", CreatureFlag::SCANNING_FOR_CONTRABAND);
-	luaEngine->setGlobalInt("IGNORE_FACTION_STANDING", CreatureFlag::IGNORE_FACTION_STANDING);
+	luaEngine->setGlobalLong("PILOTINGSHIP", CreatureState::PILOTINGSHIP);
+	luaEngine->setGlobalLong("SHIPOPERATIONS", CreatureState::SHIPOPERATIONS);
+	luaEngine->setGlobalLong("SHIPGUNNER", CreatureState::SHIPGUNNER);
+	luaEngine->setGlobalLong("SHIPINTERIOR", CreatureState::SHIPINTERIOR);
+	luaEngine->setGlobalLong("PILOTINGPOBSHIP", CreatureState::PILOTINGPOBSHIP);
 
+	luaEngine->setGlobalInt("NONE", ObjectFlag::NONE);
+	luaEngine->setGlobalInt("ATTACKABLE", ObjectFlag::ATTACKABLE);
+	luaEngine->setGlobalInt("AGGRESSIVE", ObjectFlag::AGGRESSIVE);
+	luaEngine->setGlobalInt("OVERT", ObjectFlag::OVERT);
+	luaEngine->setGlobalInt("TEF", ObjectFlag::TEF);
+	luaEngine->setGlobalInt("PLAYER", ObjectFlag::PLAYER);
+	luaEngine->setGlobalInt("ENEMY", ObjectFlag::ENEMY);
+	luaEngine->setGlobalInt("WILLBEDECLARED", ObjectFlag::WILLBEDECLARED);
+	luaEngine->setGlobalInt("WASDECLARED", ObjectFlag::WASDECLARED);
+	luaEngine->setGlobalInt("SCANNING_FOR_CONTRABAND", ObjectFlag::SCANNING_FOR_CONTRABAND);
+	luaEngine->setGlobalInt("IGNORE_FACTION_STANDING", ObjectFlag::IGNORE_FACTION_STANDING);
+
+	luaEngine->setGlobalInt("INSURED", OptionBitmask::INSURED);
 	luaEngine->setGlobalInt("CONVERSABLE", OptionBitmask::CONVERSE);
 	luaEngine->setGlobalInt("AIENABLED", OptionBitmask::AIENABLED);
 	luaEngine->setGlobalInt("INVULNERABLE", OptionBitmask::INVULNERABLE);
@@ -562,12 +761,109 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	luaEngine->setGlobalLong("FACTIONIMPERIAL", Factions::FACTIONIMPERIAL);
 	luaEngine->setGlobalLong("FACTIONREBEL", Factions::FACTIONREBEL);
 
+	luaEngine->setGlobalInt("ONLEAVE", FactionStatus::ONLEAVE);
+	luaEngine->setGlobalInt("COVERT", FactionStatus::COVERT);
+	luaEngine->setGlobalInt("OVERT", FactionStatus::OVERT);
+
+	// AI/creature bitmasks
+	luaEngine->setGlobalInt("AI_NPC", ObjectFlag::NPC);
+	luaEngine->setGlobalInt("AI_PACK", ObjectFlag::PACK);
+	luaEngine->setGlobalInt("AI_HERD", ObjectFlag::HERD);
+	luaEngine->setGlobalInt("AI_KILLER", ObjectFlag::KILLER);
+	luaEngine->setGlobalInt("AI_STALKER", ObjectFlag::STALKER);
+	luaEngine->setGlobalInt("AI_BABY", ObjectFlag::BABY);
+	luaEngine->setGlobalInt("AI_LAIR", ObjectFlag::LAIR);
+	luaEngine->setGlobalInt("AI_HEALER", ObjectFlag::HEALER);
+	luaEngine->setGlobalInt("AI_SCOUT", ObjectFlag::SCOUT);
+	luaEngine->setGlobalInt("AI_PET", ObjectFlag::PET);
+	luaEngine->setGlobalInt("AI_DROID_PET", ObjectFlag::DROID_PET);
+	luaEngine->setGlobalInt("AI_FACTION_PET", ObjectFlag::FACTION_PET);
+	luaEngine->setGlobalInt("AI_ESCORT", ObjectFlag::ESCORT);
+	luaEngine->setGlobalInt("AI_FOLLOW", ObjectFlag::FOLLOW);
+	luaEngine->setGlobalInt("AI_STATIC", ObjectFlag::STATIC);
+	luaEngine->setGlobalInt("AI_STATIONARY", ObjectFlag::STATIONARY);
+	luaEngine->setGlobalInt("AI_NOAIAGGRO", ObjectFlag::NOAIAGGRO);
+	luaEngine->setGlobalInt("AI_EVENTCONTROL", ObjectFlag::EVENTCONTROL);
+
+	// AI Movement States
+	luaEngine->setGlobalInt("AI_OBLIVIOUS", AiAgent::OBLIVIOUS);
+	luaEngine->setGlobalInt("AI_WATCHING", AiAgent::WATCHING);
+	luaEngine->setGlobalInt("AI_STALKING", AiAgent::STALKING);
+	luaEngine->setGlobalInt("AI_FOLLOWING", AiAgent::FOLLOWING);
+	luaEngine->setGlobalInt("AI_PATROLLING", AiAgent::PATROLLING);
+	luaEngine->setGlobalInt("AI_FLEEING", AiAgent::FLEEING);
+	luaEngine->setGlobalInt("AI_LEASHING", AiAgent::LEASHING);
+	luaEngine->setGlobalInt("AI_EVADING", AiAgent::EVADING);
+	luaEngine->setGlobalInt("AI_PATHING_HOME", AiAgent::PATHING_HOME);
+	luaEngine->setGlobalInt("AI_FOLLOW_FORMATION", AiAgent::FOLLOW_FORMATION);
+	luaEngine->setGlobalInt("AI_MOVING_TO_HEAL", AiAgent::MOVING_TO_HEAL);
+	luaEngine->setGlobalInt("AI_NOTIFY_ALLY", AiAgent::NOTIFY_ALLY);
+	luaEngine->setGlobalInt("AI_CRACKDOWN_SCANNING", AiAgent::CRACKDOWN_SCANNING);
+	luaEngine->setGlobalInt("AI_HARVESTING", AiAgent::HARVESTING);
+	luaEngine->setGlobalInt("AI_RESTING", AiAgent::RESTING);
+	luaEngine->setGlobalInt("AI_CONVERSING", AiAgent::CONVERSING);
+	luaEngine->setGlobalInt("AI_LAIR_HEALING", AiAgent::LAIR_HEALING);
+
+	// Ship Types
+	luaEngine->setGlobalInt("SHIP", ShipManager::SHIP);
+	luaEngine->setGlobalInt("FIGHTERSHIP", ShipManager::FIGHTERSHIP);
+	luaEngine->setGlobalInt("POBSHIP", ShipManager::POBSHIP);
+	luaEngine->setGlobalInt("SPACESTATION", ShipManager::SPACESTATION);
+
+	// Ship Flags
+	luaEngine->setGlobalInt("SHIP_AI_ESCORT", ShipFlag::ESCORT);
+	luaEngine->setGlobalInt("SHIP_AI_FOLLOW", ShipFlag::FOLLOW);
+	luaEngine->setGlobalInt("SHIP_AI_TURRETSHIP", ShipFlag::TURRETSHIP);
+	luaEngine->setGlobalInt("SHIP_AI_GUARD_PATROL", ShipFlag::GUARD_PATROL);
+	luaEngine->setGlobalInt("SHIP_AI_RANDOM_PATROL", ShipFlag::RANDOM_PATROL);
+	luaEngine->setGlobalInt("SHIP_AI_FIXED_PATROL", ShipFlag::FIXED_PATROL);
+	luaEngine->setGlobalInt("SHIP_AI_WAVE_ATTACK", ShipFlag::WAVE_ATTACK);
+	luaEngine->setGlobalInt("SHIP_AI_DISABLED_INVULNERABLE", ShipFlag::DISABLED_INVULNERABLE);
+	luaEngine->setGlobalInt("SHIP_AI_ATTACKABLE_SPACE_STATION", ShipFlag::ATTACKABLE_SPACE_STATION);
+	luaEngine->setGlobalInt("SHIP_AI_SINGLE_PATROL_ROTATION", ShipFlag::SINGLE_PATROL_ROTATION);
+
+	// Squad Formations
+	luaEngine->setGlobalInt("SHIP_SQUADRON_FORM_NONE", ShipSquadronFormation::Type::NONE);
+	luaEngine->setGlobalInt("SHIP_SQUADRON_FORM_LINE", ShipSquadronFormation::Type::LINE);
+	luaEngine->setGlobalInt("SHIP_SQUADRON_FORM_WALL", ShipSquadronFormation::Type::WALL);
+	luaEngine->setGlobalInt("SHIP_SQUADRON_FORM_WEDGE", ShipSquadronFormation::Type::WEDGE);
+
+	luaEngine->setGlobalInt("SHIP_SPAWN_SINGLE", 1);
+	luaEngine->setGlobalInt("SHIP_SPAWN_SQUADRON", 2);
+
+	// ShipComponents
+	luaEngine->setGlobalInt("SHIP_REACTOR", Components::REACTOR);
+	luaEngine->setGlobalInt("SHIP_ENGINE", Components::ENGINE);
+	luaEngine->setGlobalInt("SHIP_SHIELD0", Components::SHIELD0);
+	luaEngine->setGlobalInt("SHIP_SHIELD1", Components::SHIELD1);
+	luaEngine->setGlobalInt("SHIP_ARMOR0", Components::ARMOR0);
+	luaEngine->setGlobalInt("SHIP_ARMOR1", Components::ARMOR1);
+	luaEngine->setGlobalInt("SHIP_CAPACITOR", Components::CAPACITOR);
+	luaEngine->setGlobalInt("SHIP_BOOSTER", Components::BOOSTER);
+	luaEngine->setGlobalInt("SHIP_DROID_INTERFACE", Components::DROID_INTERFACE);
+	luaEngine->setGlobalInt("SHIP_BRIDGE", Components::BRIDGE);
+	luaEngine->setGlobalInt("SHIP_HANGAR", Components::HANGAR);
+	luaEngine->setGlobalInt("SHIP_TARGETING_STATION", Components::TARGETING_STATION);
+	luaEngine->setGlobalInt("SHIP_WEAPON_START", Components::WEAPON_START);
+
+	// Pilot Squadrons
+	luaEngine->setGlobalInt("CORSEC_SQUADRON", PlayerManager::CORSEC_SQUADRON);
+	luaEngine->setGlobalInt("RSF_SQUADRON", PlayerManager::RSF_SQUADRON);
+	luaEngine->setGlobalInt("SMUGGLER_SQUADRON", PlayerManager::SMUGGLER_SQUADRON);
+	luaEngine->setGlobalInt("BLACK_EPSILON_SQUADRON", PlayerManager::BLACK_EPSILON_SQUADRON);
+	luaEngine->setGlobalInt("STORM_SQUADRON", PlayerManager::STORM_SQUADRON);
+	luaEngine->setGlobalInt("INQUISITION_SQUADRON", PlayerManager::INQUISITION_SQUADRON);
+	luaEngine->setGlobalInt("CRIMSON_PHOENIX_SQUADRON", PlayerManager::CRIMSON_PHOENIX_SQUADRON);
+	luaEngine->setGlobalInt("VORTEX_SQUADRON", PlayerManager::VORTEX_SQUADRON);
+	luaEngine->setGlobalInt("HAVOC_SQUADRON", PlayerManager::HAVOC_SQUADRON);
+
 	// Badges
-	VectorMap<unsigned int, const Badge*>* badges = BadgeList::instance()->getMap();
-	const int vectorSize = badges->size();
-	for (int i = 0; i < vectorSize;i++) {
-		const Badge* badge = badges->get(i);
-		String val = badge->getKey().toUpperCase();
+	const auto badges = BadgeList::instance()->getMap();
+	for (const auto& entry : *badges) {
+		const auto badge = entry.getValue();
+
+		const String val = badge->getKey().toUpperCase();
+
 		luaEngine->setGlobalInt(val, badge->getIndex());
 	}
 
@@ -577,11 +873,16 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	Luna<LuaCellObject>::Register(luaEngine->getLuaState());
 	Luna<LuaBuildingObject>::Register(luaEngine->getLuaState());
 	Luna<LuaCreatureObject>::Register(luaEngine->getLuaState());
+	Luna<LuaShipObject>::Register(luaEngine->getLuaState());
+	Luna<LuaPobShipObject>::Register(luaEngine->getLuaState());
+	Luna<LuaShipAiAgent>::Register(luaEngine->getLuaState());
+	Luna<LuaShipComponent>::Register(luaEngine->getLuaState());
 	Luna<LuaSceneObject>::Register(luaEngine->getLuaState());
 	Luna<LuaConversationScreen>::Register(luaEngine->getLuaState());
 	Luna<LuaConversationSession>::Register(luaEngine->getLuaState());
 	Luna<LuaConversationTemplate>::Register(luaEngine->getLuaState());
 	Luna<LuaIntangibleObject>::Register(luaEngine->getLuaState());
+	Luna<LuaMissionObject>::Register(luaEngine->getLuaState());
 	Luna<LuaControlDevice>::Register(luaEngine->getLuaState());
 	Luna<LuaPlayerObject>::Register(luaEngine->getLuaState());
 	Luna<LuaAiAgent>::Register(luaEngine->getLuaState());
@@ -595,6 +896,8 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	Luna<LuaStringIdChatParameter>::Register(luaEngine->getLuaState());
 	Luna<LuaTicketObject>::Register(luaEngine->getLuaState());
 	Luna<LuaQuestInfo>::Register(luaEngine->getLuaState());
+	Luna<LuaQuestTasks>::Register(luaEngine->getLuaState());
+	Luna<LuaQuestTask>::Register(luaEngine->getLuaState());
 	Luna<LuaFsPuzzlePack>::Register(luaEngine->getLuaState());
 	Luna<LuaFsCsObject>::Register(luaEngine->getLuaState());
 	Luna<LuaFsBuffItem>::Register(luaEngine->getLuaState());
@@ -612,13 +915,26 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	Luna<LuaSkill>::Register(luaEngine->getLuaState());
 	Luna<LuaSkillManager>::Register(luaEngine->getLuaState());
 	Luna<LuaContractCrate>::Register(luaEngine->getLuaState());
+	Luna<LuaScreenPlayObserver>::Register(luaEngine->getLuaState());
+	Luna<LuaSpawnEggObject>::Register(luaEngine->getLuaState());
 }
 
 int DirectorManager::loadScreenPlays(Lua* luaEngine) {
+	Timer loadTimer;
+	loadTimer.start();
+
 	bool res = luaEngine->runFile("scripts/screenplays/screenplays.lua");
 
-	if (!DEBUG_MODE)
-		info("Loaded " + String::valueOf(instance()->screenPlays.size()) + " screenplays.", true);
+	if (!DEBUG_MODE) {
+		auto elapsed = loadTimer.stopMs();
+
+		info() << Thread::getCurrentThread()->getName()
+			<< " loaded "
+			<< instance()->screenPlays.size()
+			<< " screenplays in "
+			<< elapsed
+			<< " ms.";
+	}
 
 	if (!res)
 		return 1;
@@ -632,8 +948,8 @@ void DirectorManager::reloadScreenPlays() {
 
 int DirectorManager::writeScreenPlayData(lua_State* L) {
 	if (checkArgumentCount(L, 4) == 1) {
-		String err = "incorrect number of arguments passed to DirectorManager::writeScreenPlayData";
-		printTraceError(L, err);
+		printTraceError(L, "incorrect number of arguments passed to DirectorManager::writeScreenPlayData");
+
 		ERROR_CODE = INCORRECT_ARGUMENTS;
 		return 0;
 	}
@@ -676,13 +992,43 @@ int DirectorManager::createLoot(lua_State* L) {
 	int level = lua_tonumber(L, -2);
 	bool maxCondition = lua_toboolean(L, -1);
 
-	if (container == nullptr || lootGroup == "")
+	if (container == nullptr) {
+		printTraceError(L, "Failed to generate loot in DirectorManager::createLoot, null inventory.");
 		return 0;
+	}
+
+	if (lootGroup == "") {
+		printTraceError(L, "Failed to generate loot in DirectorManager::createLoot, empty loot group.");
+		return 0;
+	}
 
 	LootManager* lootManager = ServerCore::getZoneServer()->getLootManager();
-	lootManager->createLoot(container, lootGroup, level, maxCondition);
 
-	return 0;
+	auto dst = container;
+
+	if (!container->isCreatureObject()) {
+		auto parent = container->getParentRecursively(SceneObjectType::PLAYERCREATURE);
+
+		if (parent != nullptr) {
+			dst = parent;
+		}
+	}
+
+	TransactionLog trx(TrxCode::LUALOOT, dst);
+	trx.addContextFromLua(L);
+	trx.addState("dstContainer", container->getObjectID());
+
+	uint64 lootObjectID = lootManager->createLoot(trx,container, lootGroup, level, maxCondition);
+
+	if (lootObjectID > 0) {
+		trx.commit(true);
+	} else {
+		trx.abort() << __FUNCTION__ << " failed: lootGroup=" << lootGroup << "; level=" << level << "; maxCondition=" << maxCondition;
+	}
+
+	lua_pushinteger(L, lootObjectID);
+
+	return 1;
 }
 
 int DirectorManager::createLootSet(lua_State* L) {
@@ -703,7 +1049,25 @@ int DirectorManager::createLootSet(lua_State* L) {
 		return 0;
 
 	LootManager* lootManager = ServerCore::getZoneServer()->getLootManager();
-	lootManager->createLootSet(container, lootGroup, level, maxCondition, setSize);
+
+	auto dst = container;
+
+	if (!container->isCreatureObject()) {
+		auto parent = container->getParentRecursively(SceneObjectType::PLAYERCREATURE);
+
+		if (parent != nullptr) {
+			dst = parent;
+		}
+	}
+
+	TransactionLog trx(TrxCode::LUALOOT, dst);
+	trx.addContextFromLua(L);
+	trx.addState("dstContainer", container->getObjectID());
+	if (lootManager->createLootSet(trx, container, lootGroup, level, maxCondition, setSize)) {
+		trx.commit(true);
+	} else {
+		trx.abort() << __FUNCTION__ << " failed: lootGroup=" << lootGroup << "; level=" << level << "; maxCondition=" << maxCondition << "; setSize=" << setSize;
+	}
 
 	return 0;
 }
@@ -732,7 +1096,99 @@ int DirectorManager::createLootFromCollection(lua_State* L) {
 	luaObject.pop();
 
 	LootManager* lootManager = ServerCore::getZoneServer()->getLootManager();
-	lootManager->createLootFromCollection(container, &lootCollection, level);
+
+	auto dst = container;
+
+	if (!container->isCreatureObject()) {
+		auto parent = container->getParentRecursively(SceneObjectType::PLAYERCREATURE);
+
+		if (parent != nullptr) {
+			dst = parent;
+		}
+	}
+
+	TransactionLog trx(TrxCode::LUALOOT, dst);
+	trx.addContextFromLua(L);
+	trx.addState("dstContainer", container->getObjectID());
+	if (lootManager->createLootFromCollection(trx, container, &lootCollection, level)) {
+		trx.commit(true);
+	} else {
+		trx.abort() << __FUNCTION__ << " failed: level=" << level;
+	}
+
+	return 0;
+}
+
+int DirectorManager::givePlayerResource(lua_State* L) {
+	if (checkArgumentCount(L, 3) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::givePlayerResource";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	const int quantity = lua_tointeger(L, -1);
+	const String typeString = lua_tostring(L, -2);
+	CreatureObject* player = (CreatureObject*)lua_touserdata(L, -3);
+
+	if (player == nullptr)
+		return 0;
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+	Zone* zone = player->getZone();
+
+	if (zoneServer == nullptr || zone == nullptr)
+		return 0;
+
+	ResourceManager* resourceManager = zoneServer->getResourceManager();
+
+	if (resourceManager == nullptr)
+		return 0;
+
+	int type = 0;
+
+	// TODO: Global resource types
+	// SOLAR = 1; CHEMICAL = 2; FLORA = 3; GAS = 4; GEOTHERMAL = 5; MINERAL = 6; WATER = 7; WIND = 8; FUSION = 9;
+	if (typeString == "organic")
+		type = -1;
+	else if (typeString == "solar")
+		type = 1;
+	else if (typeString == "chemical")
+		type = 2;
+	else if (typeString == "flora")
+		type = 3;
+	else if (typeString == "gas")
+		type = 4;
+	else if (typeString == "geothermal")
+		type = 5;
+	else if (typeString == "mineral")
+		type = 6;
+	else if (typeString == "water")
+		type = 7;
+	else if (typeString == "wind")
+		type = 8;
+	else if (typeString == "fusion")
+		type = 9;
+	else if (typeString == "inorganic")
+		type = 10;
+
+	Vector<ManagedReference<ResourceSpawn*> > resources;
+	resourceManager->getResourceListByType(resources, type, zone->getZoneName());
+
+	if (resources.size() < 1)
+		return 0;
+
+	ManagedReference<ResourceSpawn*> spawn = resources.get(System::random(resources.size() - 1));
+
+	if (spawn == nullptr) {
+		return 0;
+	}
+
+	TransactionLog trx(TrxCode::LUASCRIPT, player);
+	trx.addContextFromLua(L);
+
+	resourceManager->harvestResourceToPlayer(trx, player, spawn, quantity);
+	trx.commit();
 
 	return 0;
 }
@@ -886,18 +1342,14 @@ int DirectorManager::checkInt64Lua(lua_State* L) {
 		return 0;
 	}
 
-	instance()->info("Lua version: " + String::valueOf(*lua_version(L)), true);
+	instance()->info(true) << "Lua version: " << *lua_version(L);
 
 	uint64 data = lua_tointeger(L, -1);
 
 	uint64 bigNumber = 0x01000000;
 	bigNumber += bigNumber << 32;
 
-	if (data < bigNumber) {
-		instance()->error("Lua not using lnum patch with 64 bit integers, please patch lua!!");
-	} else {
-		instance()->info("Lua reads int64", true);
-	}
+	instance()->fatal(data >= bigNumber, "Lua not using lnum patch with 64 bit integers, please patch lua!!");
 
 	lua_pop(L, 1);
 
@@ -993,8 +1445,6 @@ int DirectorManager::writeSharedMemory(lua_State* L) {
 	return 0;
 }
 
-
-
 int DirectorManager::readStringSharedMemory(lua_State* L) {
 	if (checkArgumentCount(L, 1) == 1) {
 		String err = "incorrect number of arguments passed to DirectorManager::readStringSharedMemory";
@@ -1059,6 +1509,171 @@ int DirectorManager::writeStringSharedMemory(lua_State* L) {
 	return 0;
 }
 
+int DirectorManager::readVector3SharedMemory(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::readVector3SharedMemory";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String key = Lua::getStringParameter(L);
+
+	Vector3 data = instance()->readVector3SharedMemory(key);
+
+	lua_newtable(L);
+	lua_pushnumber(L, data.getX());
+	lua_pushnumber(L, data.getZ());
+	lua_pushnumber(L, data.getY());
+	lua_rawseti(L, -4, 3);
+	lua_rawseti(L, -3, 2);
+	lua_rawseti(L, -2, 1);
+
+	return 1;
+}
+
+int DirectorManager::deleteVector3SharedMemory(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::deleteVector3SharedMemory";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String key = Lua::getStringParameter(L);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->wlock();
+#endif
+
+	DirectorManager::instance()->sharedMemory->removeVector3(key);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->unlock();
+#endif
+
+	return 0;
+}
+
+int DirectorManager::writeVector3SharedMemory(lua_State* L) {
+	if (checkArgumentCount(L, 4) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::writeVector3SharedMemory";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String key = lua_tostring(L, -4);
+	float x = lua_tonumber(L, -3);
+	float z = lua_tonumber(L, -2);
+	float y = lua_tonumber(L, -1);
+
+	Vector3 newVector = Vector3(x, y, z);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->wlock();
+#endif
+
+	DirectorManager::instance()->sharedMemory->putVector3(key, newVector);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->unlock();
+#endif
+
+	return 0;
+}
+
+int DirectorManager::readStringVectorSharedMemory(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::readStringVectorSharedMemory";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String key = Lua::getStringParameter(L);
+
+	Vector<String> table = instance()->readStringVectorSharedMemory(key);
+	int tableSize = table.size();
+
+	lua_newtable(L);
+
+	for (int i = tableSize; i > 0; --i) {
+		const String str = table.get(i - 1);
+
+		lua_pushstring(L, str.toCharArray());
+	}
+
+	for (int j = tableSize; j > 0; --j) {
+		int rawSet = (j + 1) * -1;
+
+		lua_rawseti(L, rawSet, j);
+	}
+
+	return 1;
+}
+
+int DirectorManager::deleteStringVectorSharedMemory(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::deleteStringVectorSharedMemory";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String key = Lua::getStringParameter(L);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->wlock();
+#endif
+
+	DirectorManager::instance()->sharedMemory->removeStringVector(key);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->unlock();
+#endif
+
+	return 0;
+}
+
+int DirectorManager::writeStringVectorSharedMemory(lua_State* L) {
+	if (checkArgumentCount(L, 2) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::writeStringVectorSharedMemory";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String key = lua_tostring(L, -2);
+
+	lua_settop(L, -1);
+
+	LuaObject table(L);
+	int tableSize = table.getTableSize();
+
+	Vector<String> strings;
+
+	for (int i = 1; i <= tableSize; ++i) {
+		String entry = table.getStringAt(i);
+
+		strings.add(entry);
+	}
+
+	table.pop();
+
+#ifndef WITH_STM
+	DirectorManager::instance()->wlock();
+#endif
+
+	DirectorManager::instance()->sharedMemory->putStringVector(key, strings);
+
+#ifndef WITH_STM
+	DirectorManager::instance()->unlock();
+#endif
+
+	return 0;
+}
+
 int DirectorManager::createEvent(lua_State* L) {
 	int numberOfArguments = lua_gettop(L);
 	if (numberOfArguments != 5 && numberOfArguments != 6) {
@@ -1077,6 +1692,7 @@ int DirectorManager::createEvent(lua_State* L) {
 	//System::out << "scheduling task with mili:" << mili << endl;
 
 	Reference<ScreenPlayTask*> task = new ScreenPlayTask(obj, key, play, args);
+	DirectorManager::instance()->screenplayTasks.put(task);
 
 	if (numberOfArguments == 6) {
 		bool save = lua_toboolean(L, -6);
@@ -1090,7 +1706,7 @@ int DirectorManager::createEvent(lua_State* L) {
 			pevent->setKey(key);
 			pevent->setScreenplay(play);
 			pevent->setArgs(args);
-			pevent->setTimeStamp(mili);
+			pevent->setMiliDiff(mili);
 			pevent->setCurTime(currentTime);
 			pevent->setScreenplayTask(task);
 
@@ -1116,7 +1732,52 @@ int DirectorManager::createEvent(lua_State* L) {
 		task->schedule(mili);
 	}
 
-	DirectorManager::instance()->screenplayTasks.put(task);
+	return 0;
+}
+
+int DirectorManager::cancelEvent(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments != 3) {
+		String err = "incorrect number of arguments passed to DirectorManager::cancelEvent";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	SceneObject* sceneO = (SceneObject*) lua_touserdata(L, -1);
+	String screenplayFunction = lua_tostring(L, -2);
+	String screenplayName = lua_tostring(L, -3);
+
+	if (sceneO == nullptr) {
+		return 0;
+	}
+
+	auto eventsList = DirectorManager::instance()->getObjectEvents(sceneO);
+
+	for (int i = 0; i < eventsList.size(); i++) {
+		Reference<ScreenPlayTask*> task = eventsList.get(i);
+
+		if (task == nullptr || task->getSceneObject() != sceneO) {
+			continue;
+		}
+
+		auto taskScreenplay = task->getScreenPlay();
+		auto taskKey = task->getTaskKey();
+
+		// instance()->info(true) << "DirectorManager::cancelEvent -- Checking Screenplay Name: " << screenplayName << " Function: " << screenplayFunction << " Object: " << sceneO->getDisplayedName();
+
+		if (taskScreenplay != screenplayName || taskKey != screenplayFunction) {
+			continue;
+		}
+
+		// Cancel the task
+		task->cancel();
+
+		// Remove it from the list
+		instance()->screenplayTasks.drop(task);
+	}
+
 	return 0;
 }
 
@@ -1141,9 +1802,9 @@ int DirectorManager::createEventActualTime(lua_State* L) {
 	if (actualTime.getMiliTime()<= dModifier){
 		interval =(24*60*60000) - (dModifier - actualTime.getMiliTime());
 	}
-	task->schedule(interval);
-
 	DirectorManager::instance()->screenplayTasks.put(task);
+
+	task->schedule(interval);
 
 	return 0;
 }
@@ -1176,7 +1837,7 @@ int DirectorManager::createServerEvent(lua_State* L) {
 	Reference<ScreenPlayTask*> task = new ScreenPlayTask(nullptr, key, play, "");
 
 	Reference<PersistentEvent*> pevent = new PersistentEvent();
-	pevent->setTimeStamp(mili);
+	pevent->setMiliDiff(mili);
 	pevent->setCurTime(currentTime);
 	pevent->setEventName(eventName);
 	pevent->setKey(key);
@@ -1249,7 +1910,7 @@ int DirectorManager::rescheduleServerEvent(lua_State* L) {
 	Time curTime;
 	uint64 currentTime = curTime.getMiliTime();
 
-	pEvent->setTimeStamp(mili);
+	pEvent->setMiliDiff(mili);
 	pEvent->setCurTime(currentTime);
 	task->reschedule(mili);
 
@@ -1273,9 +1934,9 @@ int DirectorManager::getServerEventTimeLeft(lua_State* L) {
 	else {
 		Time curTime;
 		uint64 currentTime = curTime.getMiliTime();
-		int origTime = pEvent->getCurTime();
-		int timeStamp = pEvent->getTimeStamp();
-		int timeLeft = origTime + timeStamp - currentTime;
+		uint64 origTime = pEvent->getCurTime();
+		uint64 timeStamp = pEvent->getMiliDiff();
+		uint64 timeLeft = origTime + timeStamp - currentTime;
 
 		lua_pushinteger(L, timeLeft);
 	}
@@ -1340,10 +2001,20 @@ int DirectorManager::spatialChat(lua_State* L) {
 		return 0;
 	}
 
+	ManagedReference<CreatureObject*> creature = (CreatureObject*)lua_touserdata(L, -2);
+
+	if (creature == nullptr)
+		return 0;
+
 	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr)
+		return 0;
+
 	ChatManager* chatManager = zoneServer->getChatManager();
 
-	ManagedReference<CreatureObject*> creature = (CreatureObject*)lua_touserdata(L, -2);
+	if (chatManager == nullptr)
+		return 0;
 
 	if (lua_islightuserdata(L, -1)) {
 		StringIdChatParameter* message = (StringIdChatParameter*)lua_touserdata(L, -1);
@@ -1455,6 +2126,24 @@ int DirectorManager::getRandomNumber(lua_State* L) {
 	return 1;
 }
 
+int DirectorManager::getHashCode(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments != 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::getHashCode";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String argument = lua_tostring(L, -1);
+	uint32 hash = argument.hashCode();
+
+	lua_pushinteger(L, hash);
+
+	return 1;
+}
+
 
 int DirectorManager::getRegion(lua_State* L) {
 	if (checkArgumentCount(L, 2) == 1) {
@@ -1466,7 +2155,14 @@ int DirectorManager::getRegion(lua_State* L) {
 
 	String regionName = lua_tostring(L, -1);
 	String zoneName = lua_tostring(L, -2);
+
 	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
 	Zone* zone = zoneServer->getZone(zoneName);
 
 	if (zone == nullptr) {
@@ -1474,15 +2170,20 @@ int DirectorManager::getRegion(lua_State* L) {
 		return 1;
 	}
 
-	CreatureManager* creatureManager = zone->getCreatureManager();
+	PlanetManager* planetMan = zone->getPlanetManager();
 
-	SceneObject* spawnArea = creatureManager->getSpawnArea(regionName);
-
-	if (spawnArea == nullptr)
+	if (planetMan == nullptr) {
 		lua_pushnil(L);
-	else {
-		spawnArea->_setUpdated(true); //mark updated so the GC doesnt delete it while in LUA
-		lua_pushlightuserdata(L, spawnArea);
+		return 1;
+	}
+
+	SceneObject* region = planetMan->getRegion(regionName);
+
+	if (region == nullptr) {
+		lua_pushnil(L);
+	} else {
+		region->_setUpdated(true); //mark updated so the GC doesnt delete it while in LUA
+		lua_pushlightuserdata(L, region);
 	}
 
 	return 1;
@@ -1525,7 +2226,7 @@ int DirectorManager::getContainerObjectByTemplate(lua_State* L) {
 	uint32 objectCRC = objectTemplate.hashCode();
 
 	if (container == nullptr) {
-		instance()->info("getContainerObjectByTemplate: SceneObject NULL", true);
+		instance()->info("getContainerObjectByTemplate: SceneObject nullptr", true);
 		lua_pushnil(L);
 
 		return 1;
@@ -1582,18 +2283,17 @@ int DirectorManager::updateCellPermission(lua_State* L) {
 
 	//sco->info("allowentry:" + String::valueOf(allowEntry), true);
 	if (obj == nullptr) {
-		instance()->info("Object NULL", true);
+		instance()->info("Object nullptr", true);
 		return 0;
 	}
 
 
-	//sco->info("values not NULL", true);
+	//sco->info("values not nullptr", true);
 
 	if (sco == nullptr) {
-		obj->info("Cell NULL", true);
+		obj->info("Cell nullptr", true);
 		return 0;
 	}
-
 
 	if (!sco->isCellObject()) {
 		sco->info("Unknown entity error: Cell", true);
@@ -1630,7 +2330,7 @@ int DirectorManager::updateCellPermissionGroup(lua_State* L) {
 	if (obj == nullptr)
 		return 0;
 
-	//realObject->info("values not NULL", true);
+	//realObject->info("values not nullptr", true);
 
 	if (!sco->isCellObject()) {
 		sco->info("Unknown entity error: Cell", true);
@@ -1936,7 +2636,7 @@ int DirectorManager::setAuthorizationState(lua_State* L) {
 	//SceneObject* sceneObject = creatureObject->getSlottedObject("inventory");
 
 	if (terminal == nullptr) {
-		instance()->info("setAuthorizationState: Terminal is NULL");
+		instance()->info("setAuthorizationState: Terminal is nullptr");
 		return 0;
 	}
 
@@ -2002,7 +2702,7 @@ int DirectorManager::spawnMobile(lua_State* L) {
 	msg << "trying to spawn with mobile: " << mobile << " x:" << x;
 	DirectorManager::instance()->info(msg.toString(), true);*/
 
-	CreatureObject* creature = creatureManager->spawnCreature(mobile.hashCode(), 0, x, z, y, parentID);
+	CreatureObject* creature = creatureManager->spawnCreature(mobile.hashCode(), 0, x, z, y, parentID, false, heading);
 
 	if (creature == nullptr) {
 		String err = "could not spawn mobile " + mobile;
@@ -2018,11 +2718,14 @@ int DirectorManager::spawnMobile(lua_State* L) {
 			AiAgent* ai = cast<AiAgent*>(creature);
 			ai->setRespawnTimer(respawnTimer);
 
+			if (respawnTimer > 0 && parentID > 0) {
+				zone->incrementSpawnedAgents();
+			}
+
 			if (randomRespawn)
 				ai->setRandomRespawn(true);
 
-			// TODO (dannuic): this is a temporary measure until we add an AI setting method to DirectorManager -- make stationary the default
-			ai->activateLoad("stationary");
+			ai->setAITemplate();
 		}
 
 		creature->_setUpdated(true); //mark updated so the GC doesnt delete it while in LUA
@@ -2086,6 +2789,183 @@ int DirectorManager::spawnEventMobile(lua_State* L) {
 	}
 
 	return 1;
+}
+
+int DirectorManager::spawnShipAgent(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments < 5 || numberOfArguments > 6) {
+		String err = "incorrect number of arguments passed to DirectorManager::spawnShipAgent";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	auto shipManager = ShipManager::instance();
+
+	if (shipManager == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	float x, z, y;
+	Vector3 spawnPosition = Vector3::ZERO;
+	String shipName, zoneName;
+	ShipObject* targetShip = nullptr;
+
+	if (numberOfArguments == 6) {
+		targetShip = (ShipObject*) lua_touserdata(L, -1);
+		spawnPosition.setY(lua_tonumber(L, -2));
+		spawnPosition.setZ(lua_tonumber(L, -3));
+		spawnPosition.setX(lua_tonumber(L, -4));
+		zoneName = lua_tostring(L, -5);
+		shipName = lua_tostring(L, -6);
+	} else {
+		spawnPosition.setY(lua_tonumber(L, -1));
+		spawnPosition.setZ(lua_tonumber(L, -2));
+		spawnPosition.setX(lua_tonumber(L, -3));
+		zoneName = lua_tostring(L, -4);
+		shipName = lua_tostring(L, -5);
+	}
+
+	auto zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	auto spaceZone = zoneServer->getZone(zoneName);
+
+	if (spaceZone == nullptr || !spaceZone->isSpaceZone()) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	ShipAiAgent* shipAgent = shipManager->createAiShip(shipName);
+
+	if (shipAgent == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	Locker lock(shipAgent);
+
+	Quaternion targetDirection = Quaternion::IDENTITY;
+
+	if (targetShip != nullptr) {
+		const auto& targetPosition = targetShip->getPosition();
+
+		Vector3 velocity = targetPosition - spawnPosition; // direction to target
+		float distance = SpaceMath::qNormalize(velocity);
+		auto rotation = SpaceMath::velocityToRotation(velocity); // get our phi vector
+
+		targetDirection = SpaceMath::rotationToQuaternion(rotation, false);
+	}
+
+	// Set the home location
+	shipAgent->setHomeLocation(spawnPosition.getX(), spawnPosition.getZ(), spawnPosition.getY(), targetDirection);
+
+	// Set position in zone
+	shipAgent->initializePosition(spawnPosition);
+
+	// Set Ship direction
+	shipAgent->setDirection(targetDirection);
+
+	shipAgent->setHyperspacing(true);
+
+	shipAgent->initializeTransform(spawnPosition, targetDirection);
+
+	if (!spaceZone->transferObject(shipAgent, -1, true)) {
+		shipAgent->destroyObjectFromWorld(true);
+
+		lua_pushnil(L);
+		return 1;
+	}
+
+ 	// mark updated so the GC doesnt delete it while in LUA
+	shipAgent->_setUpdated(true);
+	lua_pushlightuserdata(L, shipAgent);
+
+	shipAgent->setHyperspacing(false);
+
+	return 1;
+}
+
+int DirectorManager::spawnSecurityPatrol(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments != 9) {
+		String err = "incorrect number of arguments passed to DirectorManager::spawnSecurityPatrol";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	bool attackable = true;
+	bool stationary = false;
+
+	attackable = lua_toboolean(L, -1);
+	stationary = lua_toboolean(L, -2);
+
+	int direction = lua_tointeger(L, -3);
+	uint64 parentID = lua_tointeger(L, -4);
+	float y = lua_tonumber(L, -5);
+	float z = lua_tonumber(L, -6);
+	float x = lua_tonumber(L, -7);
+	String planet = lua_tostring(L, -8);
+	String patrol = lua_tostring(L, -9);
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr)
+		return 0;
+
+	Zone* zone = zoneServer->getZone(planet);
+
+	if (zone == nullptr)
+		return 0;
+
+	GCWManager* gcwMan = zone->getGCWManager();
+
+	if (gcwMan == nullptr)
+		return 0;
+
+	Vector3 location(x, y, z);
+
+	uint64 squadLeaderID = gcwMan->spawnSecurityPatrol(nullptr, patrol, location, parentID, direction, stationary, attackable);
+
+	lua_pushinteger(L, squadLeaderID);
+
+	return 1;
+}
+
+int DirectorManager::despawnSecurityPatrol(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments != 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::despawnSecurityPatrol";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	CreatureObject* creature = (CreatureObject*)lua_touserdata(L, -1);
+
+	if (creature == nullptr)
+		return 0;
+
+	SortedVector<ManagedReference<Observer* > > observers = creature->getObservers(ObserverEventType::SQUAD);
+
+	if (observers.size() > 0) {
+		ManagedReference<SquadObserver*> squadObserver = cast<SquadObserver*>(observers.get(0).get());
+
+		if (squadObserver != nullptr) {
+			squadObserver->despawnSquad();
+		}
+	}
+
+	return 0;
 }
 
 int DirectorManager::spawnBuilding(lua_State* L) {
@@ -2230,6 +3110,7 @@ int DirectorManager::spawnSceneObject(lua_State* L) {
 		}
 
 		if (cellParent != nullptr) {
+			cellParent->broadcastObject(object, true);
 			cellParent->transferObject(object, -1, true);
 		} else {
 			zone->transferObject(object, -1, true);
@@ -2315,6 +3196,80 @@ int DirectorManager::spawnActiveArea(lua_State* L) {
 	return 1;
 }
 
+int DirectorManager::spawnSpaceActiveArea(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments != 6) {
+		String err = "incorrect number of arguments passed to DirectorManager::spawnSpaceActiveArea";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+
+		lua_pushnil(L);
+		return 1;
+	}
+
+	float radius = lua_tonumber(L, -1);
+	float y = lua_tonumber(L, -2);
+	float z = lua_tonumber(L, -3);
+	float x = lua_tonumber(L, -4);
+	String areaTemplateName = lua_tostring(L, -5);
+	String zoneName = lua_tostring(L, -6);
+
+	auto zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	auto zone = zoneServer->getZone(zoneName);
+
+	if (zone == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	ManagedReference<SceneObject*> object = zoneServer->createObject(areaTemplateName.hashCode(), 0);
+
+	if (object == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	auto spaceArea = (object).castTo<SpaceActiveArea*>();
+	ManagedReference<SphereAreaShape*> sphereAreaShape = new SphereAreaShape();
+
+	if (spaceArea == nullptr || sphereAreaShape == nullptr) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	Locker locker(spaceArea);
+
+	spaceArea->setRadius(radius);
+	spaceArea->initializePosition(x, z, y);
+
+	// Lock the shape for mutation
+	Locker shapeLocker(sphereAreaShape, spaceArea);
+
+	sphereAreaShape->setAreaCenter(x, z, y);
+	sphereAreaShape->setRadius(radius);
+
+	spaceArea->setAreaShape(sphereAreaShape);
+
+	shapeLocker.release();
+
+	Locker zoneLocker(zone, spaceArea);
+
+	zone->transferObject(spaceArea, -1, true);
+
+	spaceArea->_setUpdated(true); //mark updated so the GC doesnt delete it while in LUA
+
+	lua_pushlightuserdata(L, spaceArea);
+
+	return 1;
+}
+
 int DirectorManager::createObserver(lua_State* L) {
 	int numberOfArguments = lua_gettop(L);
 	if (numberOfArguments != 4 && numberOfArguments != 5) {
@@ -2352,11 +3307,54 @@ int DirectorManager::createObserver(lua_State* L) {
 
 	sceneObject->registerObserver(eventType, observer);
 
-	return 0;
+	lua_pushlightuserdata(L, observer);
+
+	return 1;
 }
 
 int DirectorManager::hasObserver(lua_State* L) {
 	int numberOfArguments = lua_gettop(L);
+
+	if (numberOfArguments != 4) {
+		String err = "incorrect number of arguments passed to DirectorManager::hasObserver";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	SceneObject* sceneObject = (SceneObject*) lua_touserdata(L, -1);
+	String key = lua_tostring(L, -2);
+	String play = lua_tostring(L, -3);
+	uint32 eventType = lua_tointeger(L, -4);
+
+	SortedVector<ManagedReference<Observer* > > observers = sceneObject->getObservers(eventType);
+	bool ret = false;
+
+	for (int i = 0; i < observers.size(); i++) {
+		Observer* observer = observers.get(i).get();
+
+		if (observer == nullptr || !observer->isObserverType(ObserverType::SCREENPLAY)) {
+			continue;
+		}
+
+		auto screenplayObserver = cast<ScreenPlayObserver*>(observer);
+
+		if (screenplayObserver == nullptr || !(screenplayObserver->getScreenPlay() == play && screenplayObserver->getScreenKey() == key)) {
+			continue;
+		}
+
+		ret = true;
+		break;
+	}
+
+	lua_pushboolean(L, ret);
+
+	return 1;
+}
+
+int DirectorManager::hasObserverType(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+
 	if (numberOfArguments != 2) {
 		String err = "incorrect number of arguments passed to DirectorManager::hasObserver";
 		printTraceError(L, err);
@@ -2443,19 +3441,30 @@ Lua* DirectorManager::getLuaInstance() {
 
 	if (lua == nullptr) {
 		lua = new Lua();
+		localLua.set(lua);
+
 		initializeLuaEngine(lua);
 		loadScreenPlays(lua);
 		JediManager::instance()->loadConfiguration(lua);
-		AiMap::instance()->initialize(lua);
-		if (!AiMap::instance()->isLoaded())
-			AiMap::instance()->loadTemplates(lua);
 
-		localLua.set(lua);
+		if (!lua->checkStack(0)) {
+			error()
+				<< __FILE__ << ":" << __LINE__ << ":" <<  __FUNCTION__ << "()"
+				<< " LUA Stack Leak: Found " << lua_gettop(lua->getLuaState()) << " item(s) on stack.";
+		}
 	}
 
 	if (*version != masterScreenPlayVersion.get()) {
+		int stackSize = lua_gettop(lua->getLuaState());
+
 		loadScreenPlays(lua);
 		*version = masterScreenPlayVersion.get();
+
+		if (!lua->checkStack(stackSize)) {
+			error()
+				<< __FILE__ << ":" << __LINE__ << ":" <<  __FUNCTION__ << "()"
+				<< " LUA Stack Leak: Found " << lua_gettop(lua->getLuaState()) << " item(s) on stack.";
+		}
 	}
 
 	return lua;
@@ -2477,16 +3486,27 @@ int DirectorManager::runScreenPlays() {
 		initializeLuaEngine(lua);
 		ret = loadScreenPlays(lua);
 		JediManager::instance()->loadConfiguration(lua);
-		AiMap::instance()->initialize(lua);
-		if (!AiMap::instance()->isLoaded())
-			AiMap::instance()->loadTemplates(lua);
 
 		localLua.set(lua);
+
+		if (!lua->checkStack(0)) {
+			error()
+				<< __FILE__ << ":" << __LINE__ << ":" <<  __FUNCTION__ << "()"
+				<< " LUA Stack Leak: Found " << lua_gettop(lua->getLuaState()) << " item(s) on stack.";
+		}
 	}
 
 	if (*version != masterScreenPlayVersion.get()) {
+		int stackSize = lua_gettop(lua->getLuaState());
+
 		ret = loadScreenPlays(lua);
 		*version = masterScreenPlayVersion.get();
+
+		if (!lua->checkStack(stackSize)) {
+			error()
+				<< __FILE__ << ":" << __LINE__ << ":" <<  __FUNCTION__ << "()"
+				<< " LUA Stack Leak: Found " << lua_gettop(lua->getLuaState()) << " item(s) on stack.";
+		}
 	}
 
 	return ret || ERROR_CODE;
@@ -2501,7 +3521,7 @@ void DirectorManager::startScreenPlay(CreatureObject* creatureObject, const Stri
 	startScreenPlay.callFunction();
 }
 
-ConversationScreen* DirectorManager::getNextConversationScreen(const String& luaClass, ConversationTemplate* conversationTemplate, CreatureObject* conversingPlayer, int selectedOption, CreatureObject* conversingNPC) {
+ConversationScreen* DirectorManager::getNextConversationScreen(const String& luaClass, ConversationTemplate* conversationTemplate, CreatureObject* conversingPlayer, int selectedOption, SceneObject* conversingNPC) {
 	Lua* lua = getLuaInstance();
 
 	LuaFunction runMethod(lua->getLuaState(), luaClass, "getNextConversationScreen", 1);
@@ -2519,7 +3539,7 @@ ConversationScreen* DirectorManager::getNextConversationScreen(const String& lua
 	return result;
 }
 
-ConversationScreen* DirectorManager::runScreenHandlers(const String& luaClass, ConversationTemplate* conversationTemplate, CreatureObject* conversingPlayer, CreatureObject* conversingNPC, int selectedOption, ConversationScreen* conversationScreen) {
+ConversationScreen* DirectorManager::runScreenHandlers(const String& luaClass, ConversationTemplate* conversationTemplate, CreatureObject* conversingPlayer, SceneObject* conversingNPC, int selectedOption, ConversationScreen* conversationScreen) {
 	Lua* lua = getLuaInstance();
 
 	LuaFunction runMethod(lua->getLuaState(), luaClass, "runScreenHandlers", 1);
@@ -2718,9 +3738,14 @@ int DirectorManager::getZoneByName(lua_State* L) {
 		return 0;
 	}
 
-	String zoneid = lua_tostring(L, -1);
+	auto zoneServer = ServerCore::getZoneServer();
 
-	Zone* zone = ServerCore::getZoneServer()->getZone(zoneid);
+	if (zoneServer == nullptr)
+		return 0;
+
+	String zoneName = lua_tostring(L, -1);
+
+	Zone* zone = zoneServer->getZone(zoneName);
 
 	if (zone == nullptr) {
 		lua_pushnil(L);
@@ -2752,10 +3777,22 @@ Vector3 DirectorManager::generateSpawnPoint(String zoneName, float x, float y, f
 	bool found = false;
 	Vector3 position(0, 0, 0);
 	int retries = 40;
-	ZoneServer* zoneServer = ServerCore::getZoneServer();
-	Zone* zone = zoneServer->getZone(zoneName);
+
+	auto zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		return position;
+	}
+
+	auto zone = zoneServer->getZone(zoneName);
 
 	if (zone == nullptr) {
+		return position;
+	}
+
+	auto planetManager = zone->getPlanetManager();
+
+	if (planetManager == nullptr) {
 		return position;
 	}
 
@@ -2775,16 +3812,16 @@ Vector3 DirectorManager::generateSpawnPoint(String zoneName, float x, float y, f
 
 		float newZ = zone->getHeight(newX, newY);
 
-		position = Vector3(newX, newY, newZ);
+		position.set(newX, newZ, newY);
 
-		found = forceSpawn == true || (zone->getPlanetManager()->isSpawningPermittedAt(position.getX(), position.getY(), extraNoBuildRadius) &&
+		found = forceSpawn == true || (planetManager->isSpawningPermittedAt(position.getX(), position.getY(), extraNoBuildRadius) &&
 				!CollisionManager::checkSphereCollision(position, sphereCollision, zone));
 
 		retries--;
 	}
 
 	if (!found) {
-		position = Vector3(0, 0, 0);
+		position.set(0, 0, 0);
 	}
 
 	return position;
@@ -2821,28 +3858,32 @@ int DirectorManager::getSpawnPoint(lua_State* L) {
 	Zone* zone = ServerCore::getZoneServer()->getZone(zoneName);
 
 	if (zone == nullptr) {
-		String err = "Zone is NULL in DirectorManager::getSpawnPoint. zoneName = " + zoneName;
+		String err = "Zone is nullptr in DirectorManager::getSpawnPoint. zoneName = " + zoneName;
 		printTraceError(L, err);
 		return 0;
 	}
 
 	bool found = false;
-	Vector3 position;
 	int retries = 50;
+
+	Vector3 position;
+	Vector3 testPosition(0.f, 0.f, 0.f);
 
 	while (!found && retries > 0) {
 		position = generateSpawnPoint(zoneName, x, y, minimumDistance, maximumDistance, 5.0, 20, false);
 
-		if (position != Vector3(0, 0, 0))
+		if (fabs(position.getX() - testPosition.getX()) > 0.1 && fabs(position.getY() - testPosition.getY()) > 0.1) {
 			found = true;
+		}
 
 		retries--;
 	}
 
-	if (!found && forceSpawn)
+	if (!found && forceSpawn) {
 		position = generateSpawnPoint(zoneName, x, y, minimumDistance, maximumDistance, 5.0, 20, true);
+	}
 
-	if (position != Vector3(0, 0, 0)) {
+	if (fabs(position.getX() - testPosition.getX()) > 0.1 && fabs(position.getY() - testPosition.getY()) > 0.1) {
 		lua_newtable(L);
 		lua_pushnumber(L, position.getX());
 		lua_pushnumber(L, position.getZ());
@@ -2853,9 +3894,10 @@ int DirectorManager::getSpawnPoint(lua_State* L) {
 
 		return 1;
 	} else {
-		String err = "Unable to generate spawn point in DirectorManager::getSpawnPoint, x: " + String::valueOf(x) + ", y: " + String::valueOf(y) +
-				", zone: " + zoneName + ", minDist: " + String::valueOf(minimumDistance) + ", maxDist: " + String::valueOf(maximumDistance);
-		printTraceError(L, err);
+		StringBuffer errorMsg;
+		errorMsg << "DirectorManager::getSpawnPoint failed to find spawn point - Zone: " << zoneName << " X: " << x << ", Y: " << y << " Min Distance: " << minimumDistance << " Max Distance: " << maximumDistance;
+
+		printTraceError(L, errorMsg.toString());
 		return 0;
 	}
 }
@@ -2896,8 +3938,20 @@ int DirectorManager::getSpawnArea(lua_State* L) {
 	zone = ServerCore::getZoneServer()->getZone(zoneName);
 
 	if (zone == nullptr) {
-		String err = "Zone is NULL in DirectorManager::getSpawnArea using zone name: " + zoneName;
+		String err = "Zone is nullptr in DirectorManager::getSpawnArea using zone name: " + zoneName;
 		printTraceError(L, err);
+		return 0;
+	}
+
+	auto planetManager = zone->getPlanetManager();
+
+	if (planetManager == nullptr) {
+		return 0;
+	}
+
+	auto terrainManager = planetManager->getTerrainManager();
+
+	if (terrainManager == nullptr) {
 		return 0;
 	}
 
@@ -2913,7 +3967,7 @@ int DirectorManager::getSpawnArea(lua_State* L) {
 		int y0 = position.getY() - areaSize;
 		int y1 = position.getY() + areaSize;
 
-		found = zone->getPlanetManager()->getTerrainManager()->getHighestHeightDifference(x0, y0, x1, y1) <= maximumHeightDifference;
+		found = terrainManager->getHighestHeightDifference(x0, y0, x1, y1) <= maximumHeightDifference;
 		retries--;
 	}
 
@@ -2925,7 +3979,7 @@ int DirectorManager::getSpawnArea(lua_State* L) {
 		int y0 = position.getY() - areaSize;
 		int y1 = position.getY() + areaSize;
 
-		found = zone->getPlanetManager()->getTerrainManager()->getHighestHeightDifference(x0, y0, x1, y1) <= maximumHeightDifference;
+		found = terrainManager->getHighestHeightDifference(x0, y0, x1, y1) <= maximumHeightDifference;
 	}
 
 	if (found) {
@@ -2948,8 +4002,13 @@ int DirectorManager::getSpawnArea(lua_State* L) {
 }
 
 int DirectorManager::makeCreatureName(lua_State* L) {
-	NameManager* nameManager = NameManager::instance();
-	String name = nameManager->makeCreatureName();
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	String name = "";
+	if (zoneServer != nullptr) {
+		NameManager* nameManager = zoneServer->getNameManager();
+		name = nameManager->makeCreatureName();
+	}
 
 	lua_pushstring(L, name.toCharArray());
 	return 1;
@@ -2982,7 +4041,7 @@ int DirectorManager::getGCWDiscount(lua_State* L){
 
 int DirectorManager::getTerrainHeight(lua_State* L){
 	if (checkArgumentCount(L, 3) == 1) {
-		String err = "incorrect number of arguments passed to DirectorManager::getGCWDiscount";
+		String err = "incorrect number of arguments passed to DirectorManager::getTerrainHeight";
 		printTraceError(L, err);
 		ERROR_CODE = INCORRECT_ARGUMENTS;
 		return 0;
@@ -3045,8 +4104,11 @@ int DirectorManager::getCityRegionAt(lua_State* L) {
 
 	if (zone != nullptr) {
 		PlanetManager* planetManager = zone->getPlanetManager();
+		CityRegion* cityRegion = nullptr;
 
-		CityRegion* cityRegion = planetManager->getRegionAt(x, y);
+		if (planetManager != nullptr) {
+			cityRegion = planetManager->getCityRegionAt(x, y);
+		}
 
 		if (cityRegion != nullptr) {
 			lua_pushlightuserdata(L, cityRegion);
@@ -3135,6 +4197,26 @@ int DirectorManager::removeQuestStatus(lua_State* L) {
 	String keyString = lua_tostring(L, -1);
 
 	instance()->removeQuestStatus(keyString);
+
+	return 0;
+}
+
+int DirectorManager::setCoaWinningFaction(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::setCoaWinningFaction";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	uint32 faction = lua_tointeger(L, -1);
+
+	ManagedReference<PlayerManager*> playerManager = ServerCore::getZoneServer()->getPlayerManager();
+
+	if (playerManager == nullptr)
+		return 0;
+
+	playerManager->setCoaWinningFaction(faction);
 
 	return 0;
 }
@@ -3244,7 +4326,16 @@ int DirectorManager::getWinningFactionDifficultyScaling(lua_State* L) {
 }
 
 int DirectorManager::playClientEffectLoc(lua_State* L) {
-	uint64 playerId = lua_tointeger(L, -7);
+	SceneObject* obj = nullptr;
+
+	if (lua_isnumber(L, -7)) {
+		uint64 objectID = lua_tointeger(L, -7);
+		ZoneServer* zoneServer = ServerCore::getZoneServer();
+		obj = zoneServer->getObject(objectID);
+	} else {
+		obj = (SceneObject*) lua_touserdata(L, -7);
+	}
+
 	String effect = lua_tostring(L, -6);
 	String zone = lua_tostring(L, -5);
 	float x = lua_tonumber(L, -4);
@@ -3252,17 +4343,13 @@ int DirectorManager::playClientEffectLoc(lua_State* L) {
 	float y = lua_tonumber(L, -2);
 	int cell = lua_tonumber(L, -1);
 
-	ZoneServer* zoneServer = ServerCore::getZoneServer();
-
-	ManagedReference<CreatureObject*> creature = zoneServer->getObject(playerId).castTo<CreatureObject*>();
-
-	if (creature == nullptr)
+	if (obj == nullptr)
 		return 0;
 
 	PlayClientEffectLoc* effectLoc = new PlayClientEffectLoc(effect, zone, x, z, y, cell);
-	creature->broadcastMessage(effectLoc, true);
+	obj->broadcastMessage(effectLoc, true);
 
-	return 1;
+	return 0;
 }
 
 int DirectorManager::getPlayerQuestID(lua_State* L) {
@@ -3401,46 +4488,77 @@ void DirectorManager::removeQuestVectorMap(const String& keyString) {
 }
 
 int DirectorManager::createNavMesh(lua_State *L) {
+	if (checkArgumentCount(L, 6) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::createNavMesh";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+	String name  = lua_tostring(L, -1);
+	bool dynamic = lua_toboolean(L, -2);
+	float radius = lua_tonumber(L, -3);
+	float z = lua_tonumber(L, -4);
+	float x = lua_tonumber(L, -5);
+	String zoneName  = lua_tostring(L, -6);
 
-    if (checkArgumentCount(L, 6) == 1) {
-        String err = "incorrect number of arguments passed to DirectorManager::createNavMesh";
-        printTraceError(L, err);
-        ERROR_CODE = INCORRECT_ARGUMENTS;
-        return 0;
-    }
-    String name  = lua_tostring(L, -1);
-    bool dynamic = lua_toboolean(L, -2);
-    float radius = lua_tonumber(L, -3);
-    float z      = lua_tonumber(L, -4);
-    float x      = lua_tonumber(L, -5);
-    String zoneName  = lua_tostring(L, -6);
+	Zone* zone = ServerCore::getZoneServer()->getZone(zoneName);
 
-    Zone* zone = ServerCore::getZoneServer()->getZone(zoneName);
+	if (zone == nullptr) {
+		instance()-> error("Zone == nullptr in DirectorManager::createNavMesh (" + zoneName + ")");
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
 
-    if (zone == nullptr) {
-       instance()-> error("Zone == NULL in DirectorManager::createNavMesh (" + zoneName + ")");
-        ERROR_CODE = INCORRECT_ARGUMENTS;
-        return 0;
-    }
+	ManagedReference<NavArea*> navArea = ServerCore::getZoneServer()->createObject(STRING_HASHCODE("object/region_navmesh.iff"), "navareas", 0).castTo<NavArea*>();
+	if (name.length() == 0) {
+		name = String::valueOf(navArea->getObjectID());
+	}
 
-    ManagedReference<NavArea*> navArea = ServerCore::getZoneServer()->createObject(STRING_HASHCODE("object/region_navmesh.iff"), "navareas", 0).castTo<NavArea*>();
-    if (name.length() == 0) {
-        name = String::valueOf(navArea->getObjectID());
-    }
+	name = "screenplay_" + zoneName + "_" + name;
 
-    Core::getTaskManager()->scheduleTask([=]{
-        String str = name;
-        Vector3 position = Vector3(x, 0, z);
+	Core::getTaskManager()->scheduleTask([=]{
+		String str = name;
+		Vector3 position = Vector3(x, 0, z);
 
 		Locker locker(navArea);
 
-        navArea->disableMeshUpdates(!dynamic);
-        navArea->initializeNavArea(position, radius, zone, str);
-        zone->transferObject(navArea, -1, false);
-        zone->getPlanetManager()->addNavArea(str, navArea);
-    }, "create_lua_navmesh", 1000);
-    lua_pushlightuserdata(L, navArea);
-    return 1;
+		navArea->disableMeshUpdates(!dynamic);
+		navArea->initializeNavArea(position, radius, zone, str);
+
+		zone->transferObject(navArea, -1, false);
+		zone->getPlanetManager()->addNavArea(str, navArea);
+	}, "create_lua_navmesh", 1000);
+	lua_pushlightuserdata(L, navArea);
+	return 1;
+}
+
+int DirectorManager::destroyNavMesh(lua_State *L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::destroyNavMesh. Proper arguments is: (navmeshID)";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	uint64 navMeshID = lua_tointeger(L, -1);
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr)
+		return 0;
+
+	ManagedReference<NavArea*> navMesh = zoneServer->getObject(navMeshID).castTo<NavArea*>();
+
+	if (navMesh != nullptr) {
+		Locker locker(navMesh);
+
+		navMesh->destroyObjectFromWorld(true);
+
+		if (navMesh->isPersistent())
+			navMesh->destroyObjectFromDatabase(true);
+	}
+
+	return 0;
 }
 
 int DirectorManager::creatureTemplateExists(lua_State* L) {
@@ -3475,6 +4593,99 @@ int DirectorManager::printLuaError(lua_State* L) {
 	return 0;
 }
 
+int DirectorManager::logLua(lua_State* L) {
+	if (checkArgumentCount(L, 2) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::logLua";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	Lua* lua = instance()->getLuaInstance();
+
+	if (lua == nullptr) {
+		return 0;
+	}
+
+	/*	bin/scripts/utils/logger.lua
+		LT_ERROR = 1
+		LT_WARNING = 2
+		LT_LOG = 3
+		LT_INFO = 4
+		LT_DEBUG = 5
+		LT_TRACE = 6
+	*/
+
+	int logLevel = lua_tonumber(L, -2);
+	String message = lua_tostring(L, -1);
+
+	const int printTrace = 6;
+
+	switch(logLevel) {
+		case Logger::ERROR:
+			lua->error() << message;
+			break;
+		case Logger::WARNING:
+			lua->warning() << message;
+			break;
+		case Logger::LOG:
+			lua->log() << message;
+			break;
+		case Logger::INFO:
+			lua->info() << message;
+			break;
+		case Logger::DEBUG:
+			lua->debug() << message;
+			break;
+		case printTrace:
+			printTraceError(L, message);
+			break;
+		default:
+			lua->info() << message;
+			break;
+	}
+
+	return 0;
+}
+
+int DirectorManager::logLuaEvent(lua_State* L) {
+	if (checkArgumentCount(L, 2) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::logLuaEvent";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	int level = lua_tonumber(L, -2);
+	const char* message = lua_tostring(L, -1);
+	const int printTrace = 6;
+
+	switch(level) {
+		case Logger::ERROR:
+			getEventLogger().error() << message;
+			break;
+		case Logger::WARNING:
+			getEventLogger().warning() << message;
+			break;
+		case Logger::LOG:
+			getEventLogger().log() << message;
+			break;
+		case Logger::INFO:
+			getEventLogger().info() << message;
+			break;
+		case Logger::DEBUG:
+			getEventLogger().debug() << message;
+			break;
+		case printTrace:
+			printTraceError(L, message);
+			break;
+		default:
+			break;
+	}
+
+	return 0;
+}
+
 int DirectorManager::getSpawnPointInArea(lua_State* L) {
 	if (checkArgumentCount(L, 4) == 1) {
 		String err = "incorrect number of arguments passed to DirectorManager::getSpawnPointInArea";
@@ -3485,8 +4696,9 @@ int DirectorManager::getSpawnPointInArea(lua_State* L) {
 
 	String zoneName  = lua_tostring(L, -4);
 	Zone* zone = ServerCore::getZoneServer()->getZone(zoneName);
+
 	if (zone == nullptr) {
-		instance()-> error("Zone == NULL in DirectorManager::getSpawnPointInArea (" + zoneName + ")");
+		instance()-> error("Zone == nullptr in DirectorManager::getSpawnPointInArea (" + zoneName + ")");
 		ERROR_CODE = INCORRECT_ARGUMENTS;
 		return 0;
 	}
@@ -3498,20 +4710,22 @@ int DirectorManager::getSpawnPointInArea(lua_State* L) {
 	Sphere sphere(Vector3(x, y, zone->getHeightNoCache(x, y)), radius);
 	Vector3 result;
 
-	if (PathFinderManager::instance()->getSpawnPointInArea(sphere, zone, result)) {
-		lua_newtable(L);
-		lua_pushnumber(L, result.getX());
-		lua_pushnumber(L, result.getZ());
-		lua_pushnumber(L, result.getY());
-		lua_rawseti(L, -4, 3);
-		lua_rawseti(L, -3, 2);
-		lua_rawseti(L, -2, 1);
-		return 1;
-	} else {
-		String err = "Unable to generate spawn point in DirectorManager::getSpawnPointInArea, x: " + String::valueOf(x) + ", y: " + String::valueOf(y) + ", zone: " + zoneName + ", radius: " + String::valueOf(radius);
-		printTraceError(L, err);
-		return 0;
+	for (int i = 0; i < SPAWNPOINTSEARCHATTEMPTS; i++) {
+		if (PathFinderManager::instance()->getSpawnPointInArea(sphere, zone, result)) {
+			lua_newtable(L);
+			lua_pushnumber(L, result.getX());
+			lua_pushnumber(L, result.getZ());
+			lua_pushnumber(L, result.getY());
+			lua_rawseti(L, -4, 3);
+			lua_rawseti(L, -3, 2);
+			lua_rawseti(L, -2, 1);
+
+			return 1;
+		}
 	}
+
+	instance()->debug() << "Unable to generate spawn point in DirectorManager::getSpawnPointInArea, x: " + String::valueOf(x) + ", y: " + String::valueOf(y) + ", zone: " + zoneName + ", radius: " + String::valueOf(radius);
+	return 0;
 }
 
 int DirectorManager::getPlayerByName(lua_State* L) {
@@ -3554,6 +4768,42 @@ int DirectorManager::sendMail(lua_State* L) {
 
 	if (chatManager != nullptr)
 		chatManager->sendMail(senderName, subject, body, recipient);
+
+	return 0;
+}
+
+int DirectorManager::sendMailToOnlinePlayers(lua_State* L) {
+	if (checkArgumentCount(L, 3) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::sendMailToOnlinePlayers";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr)
+		return 0;
+
+	PlayerManager* playerManager = zoneServer->getPlayerManager();
+	ManagedReference<ChatManager*> chatManager = zoneServer->getChatManager();
+
+	if (playerManager == nullptr || chatManager == nullptr)
+		return 0;
+
+	String body = lua_tostring(L, -1);
+	String subject = lua_tostring(L, -2);
+	String senderName = lua_tostring(L, -3);
+
+	auto playerList = playerManager->getOnlinePlayerList();
+	auto playername = "";
+
+	for (int i = 0; i < playerList.size(); i++) {
+		auto playerID = playerList.get(i);
+		auto playerName = playerManager->getPlayerName(playerID);
+
+		chatManager->sendMail(senderName, subject, body, playerName);
+	}
 
 	return 0;
 }
@@ -3647,7 +4897,7 @@ int DirectorManager::getBadgeListByType(lua_State* L) {
 
 	int count = 0;
 
-	VectorMap<unsigned int, const Badge*>* badgeList = BadgeList::instance()->getMap();
+	const auto badgeList = BadgeList::instance()->getMap();
 
 	for (int i = 0; i < badgeList->size(); i++) {
 		const Badge* badge = badgeList->get(i);
@@ -3660,4 +4910,322 @@ int DirectorManager::getBadgeListByType(lua_State* L) {
 	}
 
 	return 1;
+}
+
+int DirectorManager::getGalaxyName(lua_State* L) {
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		return 0;
+	}
+
+	lua_pushstring(L, zoneServer->getGalaxyName().toCharArray());
+
+	return 1;
+}
+
+int DirectorManager::getQuestTasks(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::getQuestTasks";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	int questCrc = lua_tointeger(L, -1);
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		return 0;
+	}
+
+	PlayerManager* playerManager = zoneServer->getPlayerManager();
+
+	if (playerManager == nullptr) {
+		return 0;
+	}
+
+	Reference<QuestTasks*> questTasks = playerManager->getQuestTasks(questCrc);
+
+	if (questTasks) {
+		lua_pushlightuserdata(L, questTasks.get());
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int DirectorManager::broadcastToGalaxy(lua_State* L) {
+	if (checkArgumentCount(L, 2) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::broadcastToGalaxy";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	CreatureObject* creature = (CreatureObject*)lua_touserdata(L, -2);
+	String message = Lua::getStringParameter(L, -1);
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		return 0;
+	}
+
+	ChatManager* chatManager = zoneServer->getChatManager();
+
+	if (chatManager == nullptr)
+		return 0;
+
+	chatManager->broadcastGalaxy(creature, message);
+
+	return 1;
+}
+
+int DirectorManager::getWorldFloor(lua_State* L) {
+	if (checkArgumentCount(L, 3) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::getWorldFloor";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr)
+		return 0;
+
+	float x = lua_tonumber(L, -3);
+	float y = lua_tonumber(L, -2);
+	String zoneName = lua_tostring(L, -1);
+
+	Zone* zone = zoneServer->getZone(zoneName);
+
+	if (zone == nullptr)
+		return 0;
+
+	float z = CollisionManager::getWorldFloorCollision(x, y, zone, false);
+
+	lua_pushnumber(L, z);
+
+	return 1;
+}
+
+int DirectorManager::useCovertOvert(lua_State* L) {
+	bool result = ConfigManager::instance()->useCovertOvertSystem();
+
+	lua_pushboolean(L, result);
+
+	return 1;
+}
+
+int DirectorManager::generateShipDeed(lua_State* L) {
+	if (checkArgumentCount(L, 3) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::generateShipDeed";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	CreatureObject* player = (CreatureObject*)lua_touserdata(L, -3);
+	ShipChassisComponent* chassisBlueprint = (ShipChassisComponent*)lua_touserdata(L, -2);
+	CreatureObject* chassisDealer = (CreatureObject*)lua_touserdata(L, -1);
+
+	if (player == nullptr || chassisBlueprint == nullptr || chassisDealer == nullptr) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	auto shipManager = ShipManager::instance();
+
+	if (shipManager != nullptr && shipManager->createDeedFromChassis(player, chassisBlueprint, chassisDealer)) {
+		lua_pushboolean(L, true);
+		return 1;
+	}
+
+	lua_pushboolean(L, false);
+
+	return 1;
+}
+
+int DirectorManager::sellSpaceLoot(lua_State* L) {
+	if (checkArgumentCount(L, 3) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::sellSpaceLoot";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	CreatureObject* player = (CreatureObject*)lua_touserdata(L, -3);
+	ShipComponent* lootComponent = (ShipComponent*)lua_touserdata(L, -2);
+	CreatureObject* chassisDealer = (CreatureObject*)lua_touserdata(L, -1);
+
+	if (player == nullptr || lootComponent == nullptr || chassisDealer == nullptr) {
+		return 0;
+	}
+
+	Locker lock(player);
+	Locker clock(lootComponent, player);
+
+	TransactionLog trx(chassisDealer, player, lootComponent, TrxCode::SPACELOOTSOLD, true);
+
+	int rELevel = lootComponent->getReverseEngineeringLevel();
+
+	StringIdChatParameter soldMsg("@space/space_loot:sold_item");
+	StringBuffer itemName;
+	itemName << "@space/space_item:" << lootComponent->getObjectName()->getStringID();
+
+	int itemValue = 1000;
+
+	if (rELevel < 10) {
+		itemValue *= rELevel;
+	} else {
+		itemValue = 500;
+	}
+
+	soldMsg.setTO(itemName.toString());
+	soldMsg.setDI(itemValue);
+
+	// Send player sold message
+	player->sendSystemMessage(soldMsg);
+
+	trx.addState("sellValue", itemValue);
+
+	// Give player credits to bank
+	player->addBankCredits(itemValue, true);
+
+	// Destroy the loot component
+	lootComponent->destroyObjectFromWorld(true);
+	lootComponent->destroyObjectFromDatabase(true);
+
+	trx.commit();
+
+	return 0;
+}
+
+int DirectorManager::isJtlEnabled(lua_State* L) {
+	bool result = ConfigManager::instance()->isJtlEnabled();
+
+	lua_pushboolean(L, result);
+
+	return 1;
+}
+
+int DirectorManager::grantStarterShip(lua_State* L) {
+	if (checkArgumentCount(L, 2) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::grantStarterShip";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	CreatureObject* player = (CreatureObject*)lua_touserdata(L, -2);
+	String factionName = lua_tostring(L, -1);
+
+	if (player == nullptr || factionName.isEmpty()) {
+		return 0;
+	}
+
+	String generatedObjectTemplate = "";
+
+	if (factionName == "neutral") {
+		generatedObjectTemplate = "object/ship/player/player_prototype_hutt_light.iff";
+	} else if (factionName == "rebel") {
+		generatedObjectTemplate = "object/ship/player/player_prototype_z95.iff";
+	} else if (factionName == "imperial") {
+		generatedObjectTemplate = "object/ship/player/player_prototype_tiefighter.iff";
+	} else {
+		return 0;
+	}
+
+	auto zoneServer = player->getZoneServer();
+
+	if (zoneServer == nullptr) {
+		return 0;
+	}
+
+	auto zone = player->getZone();
+
+	if (zone == nullptr) {
+		return 0;
+	}
+
+	auto planetManager = zone->getPlanetManager();
+
+	if (planetManager == nullptr) {
+		return 0;
+	}
+
+	auto travelPoint = planetManager->getNearestPlanetTravelPoint(player->getWorldPosition(), 16000.f, true);
+
+	if (travelPoint == nullptr) {
+		return 0;
+	}
+
+	Locker lock(player);
+
+	ManagedReference<ShipObject*> ship = ShipManager::instance()->createPlayerShip(player, generatedObjectTemplate, "", true);
+
+	if (ship == nullptr) {
+		player->error() << "Failed to generate ship object from template: " << generatedObjectTemplate;
+		return 1;
+	}
+
+	// Player is locked, cross lock the ship to the player
+	Locker slocker(ship, player);
+
+	ship->setComponentMass(Components::REACTOR, 1500.f);
+	ship->setReactorGenerationRate(8000.f, false);
+	ship->setComponentMass(Components::ENGINE, 1500.f);
+	ship->setComponentMass(Components::SHIELD0, 1500.f);
+	ship->setComponentMass(Components::ARMOR0, 1500.f);
+	ship->setComponentMass(Components::ARMOR1, 1500.f);
+	ship->setComponentMass(Components::CAPACITOR, 1500.f);
+	ship->setCapacitorMaxEnergy(2000.f, false);
+	ship->setComponentMass(Components::WEAPON_START, 1500.f);
+
+	ManagedReference<ShipControlDevice*> shipControlDevice = cast<ShipControlDevice*>(zoneServer->getObject(ship->getControlDeviceID()).get());
+
+	if (shipControlDevice == nullptr) {
+		ship->destroyObjectFromDatabase(true);
+		ship->destroyObjectFromWorld(true);
+
+		player->error() << "grantStarterShip - null control device: " << generatedObjectTemplate;
+
+		return 0;
+	}
+
+	Locker deviceLock(shipControlDevice, player);
+
+	shipControlDevice->setParkingLocation(travelPoint->getPointName());
+
+	return 0;
+}
+
+int DirectorManager::drawClientPath(lua_State* L) {
+	if (checkArgumentCount(L, 7) == 1) {
+		String err = "incorrect number of arguments passed to DirectorManager::grantStarterShip";
+		printTraceError(L, err);
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	SceneObject* obj = (SceneObject*) lua_touserdata(L, -7);
+
+	float x1 = lua_tonumber(L, -6);
+	float z1 = lua_tonumber(L, -5);
+	float y1 = lua_tonumber(L, -4);
+	float x2 = lua_tonumber(L, -3);
+	float z2 = lua_tonumber(L, -2);
+	float y2 = lua_tonumber(L, -1);
+
+	CreateClientPathMessage* pathMessage = new CreateClientPathMessage();
+
+	pathMessage->addCoordinate(x1, z1, y1);
+	pathMessage->addCoordinate(x2, z2, y2);
+
+	obj->broadcastMessage(pathMessage, true);
+
+	return 0;
 }
