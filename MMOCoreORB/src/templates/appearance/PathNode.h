@@ -97,7 +97,7 @@ public:
 		return id;
 	}*/
 
-	uint32 getID();
+	uint32 getID() const;
 
 	inline Vector3 getPosition() const {
 		return Vector3(x, y, z);
