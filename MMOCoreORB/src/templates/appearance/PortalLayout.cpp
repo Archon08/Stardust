@@ -302,7 +302,7 @@ int PortalLayout::getFloorMeshID(int globalNodeID, int floorMeshToExclude) {
 			continue;
 
 		FloorMesh* floorMesh = getFloorMesh(i);
-		PathNode* node = floorMesh->getGlobalNode(globalNodeID);
+		const PathNode* node = floorMesh->getGlobalNode(globalNodeID);
 
 		if (node != nullptr)
 			return i;
