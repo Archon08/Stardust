@@ -29,7 +29,7 @@ void DroidPersonalityModuleDataComponent::initializeTransientMembers() {
 		return;
 	}
 
-	ManagedReference<DroidPersonalityModuleTemplate*> moduleTemplate = cast<DroidPersonalityModuleTemplate*>(droidComponent->getObjectTemplate());
+	Reference<DroidPersonalityModuleTemplate*> moduleTemplate = cast<DroidPersonalityModuleTemplate*>(droidComponent->getObjectTemplate());
 	if (moduleTemplate == nullptr) {
 		info("Module was null");
 		return;
