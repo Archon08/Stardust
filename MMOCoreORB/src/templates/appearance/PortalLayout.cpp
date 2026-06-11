@@ -334,7 +334,7 @@ void PortalLayout::parseCELSForm(IffStream* iffStream, int numCells) {
 	}
 }
 
-Vector<PathNode*>* PortalLayout::getPath(PathNode* node1, PathNode* node2) {
+Vector<const PathNode*>* PortalLayout::getPath(const PathNode* node1, const PathNode* node2) const {
 	return AStarAlgorithm<PathGraph, PathNode>::search<uint32>(node1->getPathGraph(), node1, node2);
 }
 
