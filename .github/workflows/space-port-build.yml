@@ -23,7 +23,7 @@ jobs:
             libdb5.3-dev db5.3-util \
             libmariadb-dev libmariadb-dev-compat \
             libssl-dev zlib1g-dev libpcre3-dev libreadline-dev \
-            libboost-dev libjemalloc-dev
+            libboost-dev libboost-thread-dev libboost-system-dev libjemalloc-dev
 
       - name: Checkout (with engine3 submodule)
         uses: actions/checkout@v4
@@ -42,6 +42,7 @@ jobs:
       - name: Configure
         working-directory: MMOCoreORB
         run: |
+          set -o pipefail
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCOMPILE_TESTS=OFF \
