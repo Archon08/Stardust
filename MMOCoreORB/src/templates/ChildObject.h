@@ -5,25 +5,34 @@
  *      Author: victor
  */
 
-#ifndef CHILDOBJECT_H_
-#define CHILDOBJECT_H_
+#pragma once
 
 #include "engine/util/u3d/Quaternion.h"
 #include "engine/lua/LuaObject.h"
 
 class ChildObject : public Object {
-
 protected:
 	Vector3 position;
 	Quaternion direction;
 	String templateFile;
 	int cellid;
 	int containmentType;
+	int componentSlot;
 
 public:
 	ChildObject() {
 		cellid = 0;
 		containmentType = 0;
+		componentSlot = -2;
+	}
+
+	ChildObject(const Vector3 pos, const Quaternion& dir, const String& templateF, int cellID, int contType, int shipCompSlot) {
+		position = pos;
+		direction = dir;
+		templateFile = templateF;
+		cellid = cellID;
+		containmentType = contType;
+		componentSlot = shipCompSlot;
 	}
 
 	ChildObject(const ChildObject& obj) : Object() {
@@ -32,17 +41,20 @@ public:
 		templateFile = obj.templateFile;
 		cellid = obj.cellid;
 		containmentType = obj.containmentType;
+		componentSlot = obj.componentSlot;
 	}
 
 	ChildObject& operator=(const ChildObject& obj) {
-		if (this == &obj)
+		if (this == &obj) {
 			return *this;
+		}
 
 		position = obj.position;
 		direction = obj.direction;
 		templateFile = obj.templateFile;
 		cellid = obj.cellid;
 		containmentType = obj.containmentType;
+		componentSlot = obj.componentSlot;
 
 		return *this;
 	}
@@ -58,6 +70,8 @@ public:
 		cellid = luaObject->getIntField("cellid");
 
 		containmentType = luaObject->getIntField("containmentType");
+
+		componentSlot = (int)luaObject->getFloatField("componentSlot", -2.f);
 	}
 
 	inline void setPosition(float x, float z, float y) {
@@ -80,25 +94,28 @@ public:
 		templateFile = file;
 	}
 
-	inline Vector3& getPosition() {
+	inline const Vector3& getPosition() const {
 		return position;
 	}
 
-	inline Quaternion& getDirection() {
+	inline const Quaternion& getDirection() const {
 		return direction;
 	}
 
-	inline String& getTemplateFile() {
+	inline const String& getTemplateFile() const {
 		return templateFile;
 	}
 
-	inline int getCellId() {
+	inline int getCellId() const {
 		return cellid;
 	}
 
-	inline int getContainmentType() {
+	inline int getContainmentType() const {
 		return containmentType;
+	}
+
+	inline int getComponentSlot() const {
+		return componentSlot;
 	}
 };
 
-#endif /* CHILDOBJECT_H_ */
