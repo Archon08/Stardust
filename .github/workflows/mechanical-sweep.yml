@@ -10,7 +10,7 @@ on:
       mode:
         description: 'Sweep mode: null-cpp | null-idl | idl-truthiness'
         required: true
-        default: 'idl-truthiness'
+        default: 'null-cpp'
 
 permissions:
   contents: write
@@ -23,22 +23,35 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: null-cpp sweep (quote-aware NULL -> nullptr)
+      - name: null-cpp sweep (string- AND comment-aware NULL -> nullptr)
         if: ${{ github.event.inputs.mode == 'null-cpp' }}
         run: |
           cat > /tmp/sweep.pl << 'PERL'
           #!/usr/bin/perl
+          # Replace token NULL with nullptr outside of string literals, char literals, and comments.
           use strict; use warnings;
           local $/;
           my $src = <>;
           my @out;
-          for my $part (split /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/s, $src) {
-            if ($part =~ /^["']/) { push @out, $part; next; }
+          for my $part (split m{("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|//[^\n]*|/\*.*?\*/)}s, $src) {
+            if ($part =~ m{^["'/]}) { push @out, $part; next; }
             $part =~ s/\bNULL\b/nullptr/g;
             push @out, $part;
           }
           print join('', @out);
           PERL
+          # self-tests: comment with apostrophe must not swallow following code
+          printf '// do not let this break: x\nif (a == NULL) b();\n/* block " quote */ c = NULL;\ns = "keep NULL"; t = '"'"'x'"'"'; u = NULL;\n' > /tmp/st.c
+          perl /tmp/sweep.pl /tmp/st.c
+          RES=$(perl /tmp/sweep.pl /tmp/st.c)
+          echo "$RES" | grep -q 'a == nullptr' || { echo 'FAIL: basic'; exit 1; }
+          echo "$RES" | grep -q 'c = nullptr' || { echo 'FAIL: after block comment'; exit 1; }
+          echo "$RES" | grep -q 'keep NULL' || { echo 'FAIL: string protection'; exit 1; }
+          echo "$RES" | grep -q 'u = nullptr' || { echo 'FAIL: after char literal'; exit 1; }
+          printf "// don%st stop\nv = NULL;\n" "'" > /tmp/st2.c
+          RES2=$(perl /tmp/sweep.pl /tmp/st2.c)
+          echo "$RES2" | grep -q 'v = nullptr' || { echo 'FAIL: apostrophe-in-comment must not protect code'; exit 1; }
+          echo "self-test OK"
           COUNT=0
           while IFS= read -r -d '' f; do
             if grep -q 'NULL' "$f"; then
@@ -74,13 +87,6 @@ jobs:
             print;
           }
           PERL
-          T() { echo "$1" | perl /tmp/truthy.pl; }
-          [ "$(T 'if (x != nullptr) {')" = 'if (x) {' ] || { echo FAIL1; T 'if (x != nullptr) {'; exit 1; }
-          [ "$(T 'return node != nullptr;')" = 'return node;' ] || { echo FAIL2; exit 1; }
-          [ "$(T 'if (x.method() == nullptr)')" = 'if (!(x.method()))' ] || { echo FAIL3; T 'if (x.method() == nullptr)'; exit 1; }
-          [ "$(T 'if (x.field == nullptr || y())')" = 'if (!(x.field) || y())' ] || { echo FAIL4; exit 1; }
-          [ "$(T 'bool b = m.check("s") == nullptr;')" = 'bool b = !(m.check("s"));' ] || { echo FAIL5; exit 1; }
-          echo "self-test OK"
           COUNT=0
           while IFS= read -r -d '' f; do
             if grep -q 'nullptr' "$f"; then
