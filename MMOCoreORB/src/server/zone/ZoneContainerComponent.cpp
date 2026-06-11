@@ -17,7 +17,7 @@ bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeA
 	if (newZone == nullptr)
 		return false;
 
-	if (!activeArea->isDeplyoed())
+	if (!activeArea->isDeployed())
 		activeArea->deploy();
 
 	Zone* zone = activeArea->getZone();
