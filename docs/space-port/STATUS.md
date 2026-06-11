@@ -26,3 +26,18 @@ unknown) is retired. 14 CI iterations, error curve: 292 -> 118 -> 324* -> 108 ->
 ### CI quirks (for whoever drives this next)
 - Workflows must exist on default branch `unstable` to be dispatchable; GITHUB_TOKEN pushes do NOT
   auto-trigger builds — dispatch manually after sweep pushes
+
+## 2026-06-11 — G1-CI: INIT-MACHINERY PASS ✅ (by artifact inspection)
+
+CI boot of the uplifted phase-1 binary (no client assets available in CI):
+- engine3 task system up (8 TaskSchedulers + 4 IoTaskSchedulers)
+- Berkeley DB loaded + object format conversion clean
+- 9/9 MySQL connections (ServerDatabase0-7 + MantisDatabase)
+- DistributedObjectBroker started on 44419 (ORB — most uplift-sensitive subsystem)
+- Lua content loading (VendorOutfitManager: 2,876 outfits)
+- Reached TRE/asset stage; crash occurs only in datatable-dependent managers
+  (PerformanceManager/SkillManager/PlayerCreationManager) — expected without TREs
+
+**Full G1 (operator-run, requires MTG+stardust TREs):** point conf/config.lua TrePath at the
+client files, build phase-1, run `tools/smoke/smoke.sh MMOCoreORB/bin` — asserts every
+configured zone (vanilla + the 6 custom planets) loads with no fatal markers.
