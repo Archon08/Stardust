@@ -230,7 +230,7 @@ Vector<float>* CollisionManager::getCellFloorCollision(float x, float y, CellObj
 	if (mesh == nullptr)
 		return nullptr;
 
-	AABBTree* tree = mesh->getAABBTree();
+	const AABBTree* tree = mesh->getAABBTree();
 
 	if (tree == nullptr)
 		return nullptr;
