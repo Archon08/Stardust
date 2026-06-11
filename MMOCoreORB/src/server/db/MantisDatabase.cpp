@@ -8,6 +8,8 @@
 
 #include "MantisDatabase.h"
 
+#include "MySqlDatabase.h"
+
 #include "conf/ConfigManager.h"
 
 Vector<Database*>* MantisDatabase::databases = nullptr;
@@ -29,7 +31,7 @@ MantisDatabase::MantisDatabase(ConfigManager* configManager) {
 
 	for (int i = 0; i < DEFAULT_SERVERDATABASE_INSTANCES; ++i) {
 		try {
-			Database* db = new engine::db::mysql::MySqlDatabase(String("MantisDatabase" + String::valueOf(i)), dbHost);
+			Database* db = new server::db::mysql::MySqlDatabase(String("MantisDatabase" + String::valueOf(i)), dbHost);
 			db->connect(dbName, dbUser, dbPass, dbPort);
 
 			databases->add(db);
