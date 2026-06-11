@@ -27,7 +27,7 @@ class FactoryHopperObserver extends Observer {
 	public int notifyObserverEvent(unsigned int eventType, Observable observable, ManagedObject arg1, long arg2) {
 		FactoryObject strongRef = factory;
 
-		if (strongRef == nullptr)
+		if (!(strongRef))
 			return 0;
 
 		if (eventType == ObserverEventType.OPENCONTAINER) {

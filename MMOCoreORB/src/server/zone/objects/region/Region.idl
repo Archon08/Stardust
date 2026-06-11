@@ -42,7 +42,7 @@ class Region extends ActiveArea {
 
 		CityRegion strongReference = cityRegion;
 
-		if (strongReference == nullptr)
+		if (!(strongReference))
 			return;
 
 		synchronized (strongReference) {
@@ -55,7 +55,7 @@ class Region extends ActiveArea {
 
 		CityRegion strongReference = cityRegion;
 
-		if (strongReference == nullptr)
+		if (!(strongReference))
 			return;
 
 		synchronized (strongReference) {

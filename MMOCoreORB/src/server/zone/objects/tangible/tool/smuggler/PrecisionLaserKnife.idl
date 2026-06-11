@@ -48,7 +48,7 @@ class PrecisionLaserKnife extends SlicingTool {
 	public native void updateCharges(int val);
 
 	public void useCharge(CreatureObject player) {
-		if (player == nullptr)
+		if (!(player))
 			return;
 
 		decreaseUseCount();

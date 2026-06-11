@@ -40,7 +40,7 @@ class CityTreasuryWithdrawalSession extends Facade {
 	public int cancelSession() {
 		CreatureObject creature = creatureObject;
 
-		if (creature != nullptr)
+		if (creature)
 			creature.dropActiveSession(SessionFacadeType.CITYWITHDRAW);
 		
 		return 0;

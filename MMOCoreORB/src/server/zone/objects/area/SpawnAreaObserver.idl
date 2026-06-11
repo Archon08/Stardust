@@ -24,7 +24,7 @@ class SpawnAreaObserver extends Observer implements Logger {
 	public abstract int notifyObserverEvent(unsigned int eventType, Observable observable, ManagedObject arg1, long arg2) {
 		SpawnArea area = spawnArea;
 
-		if (area == nullptr)
+		if (!(area))
 			return 1;
 		else
 			return area.notifyObserverEvent(eventType, observable, arg1, arg2);

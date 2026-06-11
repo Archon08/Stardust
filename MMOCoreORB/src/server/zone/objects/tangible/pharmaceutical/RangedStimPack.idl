@@ -115,7 +115,7 @@ class RangedStimPack extends StimPack {
 	public float getRange(CreatureObject creature = null) {
 		float modSkill = 0;
 
-		if (creature != nullptr) {
+		if (creature) {
 			modSkill = creature.getSkillMod("healing_range");
 		}
 

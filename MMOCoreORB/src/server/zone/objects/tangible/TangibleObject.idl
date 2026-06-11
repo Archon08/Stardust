@@ -812,7 +812,7 @@ class TangibleObject extends SceneObject {
 	}
 
 	public boolean hasAntiDecayKit() {
-		return antiDecayKitObject != nullptr;
+		return antiDecayKitObject;
 	}
 
 	@preLocked
@@ -820,7 +820,7 @@ class TangibleObject extends SceneObject {
 		if(!hasAntiDecayKit()) {
 			antiDecayKitObject = adk;
 
-			if(adk.getParent() != nullptr)
+			if(adk.getParent())
 				adk.destroyObjectFromWorld(true);
 
 			sendAttributeListTo(player);

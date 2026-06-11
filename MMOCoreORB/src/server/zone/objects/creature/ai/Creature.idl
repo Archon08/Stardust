@@ -138,49 +138,49 @@ class Creature extends AiAgent {
 	}
 
 	public float getTame() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return 0;
 
 		return super.npcTemplate.getTame();
 	}
 
 	public string getMeatType() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return "";
 
 		return super.npcTemplate.getMeatType();
 	}
 
 	public string getBoneType() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return "";
 
 		return super.npcTemplate.getBoneType();
 	}
 
 	public string getHideType() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return "";
 
 		return super.npcTemplate.getHideType();
 	}
 
 	public string getMilkType() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return "";
 
 		return super.npcTemplate.getMilkType();
 	}
 
 	public float getMilk() {
-		if (super.npcTemplate == nullptr || isEventMob())
+		if (!(super.npcTemplate) || isEventMob())
 			return 0;
 
 		return super.npcTemplate.getMilk();
 	}
 
 	public float getHideMax() {
-		if (super.npcTemplate == nullptr || isEventMob())
+		if (!(super.npcTemplate) || isEventMob())
 			return 0;
 
 		if (isBaby())
@@ -190,7 +190,7 @@ class Creature extends AiAgent {
 	}
 
 	public float getBoneMax() {
-		if (super.npcTemplate == nullptr || isEventMob())
+		if (!(super.npcTemplate) || isEventMob())
 			return 0;
 
 		if (isBaby())
@@ -200,7 +200,7 @@ class Creature extends AiAgent {
 	}
 
 	public float getMeatMax() {
-		if (super.npcTemplate == nullptr || isEventMob())
+		if (!(super.npcTemplate) || isEventMob())
 			return 0;
 
 		if (isBaby())
@@ -210,7 +210,7 @@ class Creature extends AiAgent {
 	}
 
 	public int getBaseXp() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return 0;
 
 		if (isBaby() || isEventMob())
@@ -220,7 +220,7 @@ class Creature extends AiAgent {
 	}
 
 	public string getControlDeviceTemplate() {
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return "";
 
 		return super.npcTemplate.getControlDeviceTemplate();
@@ -229,10 +229,10 @@ class Creature extends AiAgent {
 	public native boolean isMount();
 
 	public int getAdultLevel() {
-		if (super.petDeed != nullptr) {
+		if (super.petDeed) {
 			return super.petDeed.getLevel();
 		}	
-		if (super.npcTemplate == nullptr)
+		if (!(super.npcTemplate))
 			return super.getLevel();
 
 		return super.npcTemplate.getLevel();

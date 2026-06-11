@@ -293,7 +293,7 @@ class PlanetManager extends ManagedService implements Logger {
 	public boolean isInterplanetaryTravelAllowed(final string pointName) {
 		PlanetTravelPoint ptp = planetTravelPointList.get(pointName);
 
-		if (ptp == nullptr)
+		if (!(ptp))
 			return false;
 
 		return ptp.isInterplanetary();
@@ -307,7 +307,7 @@ class PlanetManager extends ManagedService implements Logger {
 	public boolean isIncomingTravelAllowed(final string pointName) {
 		PlanetTravelPoint ptp = planetTravelPointList.get(pointName);
 
-		if (ptp == nullptr)
+		if (!(ptp))
 			return false;
 
 		return ptp.isIncomingAllowed();

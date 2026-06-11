@@ -409,14 +409,14 @@ class PlayerObject extends IntangibleObject {
 	public native void sendMessage(BasePacket msg);
 
 	public synchronized void addOwnedStructure(StructureObject obj) {
-		if (obj == nullptr)
+		if (!(obj))
 			return;
 
 		ownedStructures.put(obj.getObjectID());
 	}
 
 	public synchronized void removeOwnedStructure(StructureObject obj) {
-		if (obj == nullptr)
+		if (!(obj))
 			return;
 
 		ownedStructures.drop(obj.getObjectID());
@@ -444,7 +444,7 @@ class PlayerObject extends IntangibleObject {
 
 	@dirty
 	public synchronized boolean isOwnedStructure(StructureObject obj) {
-		if (obj == nullptr)
+		if (!(obj))
 			return false;
 
 		return ownedStructures.contains(obj.getObjectID());
@@ -836,7 +836,7 @@ class PlayerObject extends IntangibleObject {
 	}
 
 	public void setConversatingCreature(CreatureObject creature) {
-		if (creature == nullptr)
+		if (!(creature))
 			conversatingCreature = 0;
 		else
 			conversatingCreature = creature.getObjectID();
@@ -935,14 +935,14 @@ class PlayerObject extends IntangibleObject {
 	}
 
 	public void setDeclaredResidence(BuildingObject residence) {
-		if (residence == nullptr)
+		if (!(residence))
 			declaredResidence = 0;
 		else
 			declaredResidence = residence.getObjectID();
 	}
 
 	public void setCloningFacility(BuildingObject cloningfac) {
-		if (cloningfac == nullptr)
+		if (!(cloningfac))
 			cloningFacility = 0;
 		else
 			cloningFacility = cloningfac.getObjectID();
@@ -1039,7 +1039,7 @@ class PlayerObject extends IntangibleObject {
 		if (hasSuiBoxWindowType(windowType)) {
 			SuiBox sui = getSuiBoxFromWindowType(windowType);
 			
-			if (sui != nullptr) {
+			if (sui) {
 				sendMessage(sui.generateCloseMessage());
 				removeSuiBox(sui.getBoxID());
 			}

@@ -31,11 +31,11 @@ class MissionReconActiveArea extends ActiveArea {
 		} else {
 			ReconMissionObjective strongReference = missionObjective;
 
-			if (strongReference != nullptr) {
+			if (strongReference) {
 				CreatureObject missionOwner = strongReference.getPlayerOwner();
 
 				if ((CreatureObject)player == missionOwner) {
-					if (completeTask == nullptr) {
+					if (!(completeTask)) {
 						completeTask = new CompleteMissionAfterCertainTimeTask(strongReference);
 					}
 
@@ -62,11 +62,11 @@ class MissionReconActiveArea extends ActiveArea {
 		} else {
 			ReconMissionObjective strongReference = missionObjective;
 
-			if (strongReference != nullptr) {
+			if (strongReference) {
 				CreatureObject missionOwner = strongReference.getPlayerOwner();
 
 				if ((CreatureObject)player == missionOwner) {
-					if (completeTask != nullptr) {
+					if (completeTask) {
 						missionOwner.sendSystemMessage("Reconnaissance aborted.");
 						completeTask.cancel();
 					}

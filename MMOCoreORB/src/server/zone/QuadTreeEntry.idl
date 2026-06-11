@@ -241,7 +241,7 @@ class QuadTreeEntry extends Observable {
 
 	@read
 	public boolean isInQuadTree() {
-		return node != nullptr;
+		return node;
 	}
 
 	/*@read

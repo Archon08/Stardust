@@ -21,7 +21,7 @@ class TravelTerminal extends Terminal {
 	public TravelTerminal() {		
 		Logger.setLoggingName("TravelTerminal");
 		
-		planetTravelPoint == nullptr;
+		!(planetTravelPoint);
 	}
 	
 	public void initializeTransientMembers() {
@@ -48,12 +48,12 @@ class TravelTerminal extends Terminal {
 	@local
 	@dirty
 	public PlanetTravelPoint getPlanetTravelPoint() {
-		if(planetTravelPoint != nullptr)
+		if(planetTravelPoint)
 		    return planetTravelPoint;
 	
 		Zone zone = getZone();
 		
-		if (zone != nullptr) {
+		if (zone) {
 			planetTravelPoint = zone.getPlanetManager().getNearestPlanetTravelPoint(this);
 		}
 
