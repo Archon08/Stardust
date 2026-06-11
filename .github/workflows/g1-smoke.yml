@@ -1,0 +1,114 @@
+name: g1-smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to smoke-test'
+        required: true
+        default: 'space-port/phase-1'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    timeout-minutes: 350
+    steps:
+      - name: Install toolchain & deps
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates cmake ninja-build g++ gcc make ccache \
+            default-jre-headless \
+            liblua5.3-dev lua5.3 \
+            libdb5.3-dev db5.3-util \
+            libmariadb-dev libmariadb-dev-compat mariadb-server mariadb-client \
+            libssl-dev zlib1g-dev libpcre3-dev libreadline-dev \
+            libboost-dev libboost-thread-dev libboost-system-dev libjemalloc-dev \
+            procps
+          apt-get install -y wget gnupg lsb-release software-properties-common
+          wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x /tmp/llvm.sh
+          /tmp/llvm.sh 17 || /tmp/llvm.sh 17
+          ln -sf /usr/bin/clang-17 /usr/local/bin/clang
+          ln -sf /usr/bin/clang++-17 /usr/local/bin/clang++
+          ln -sf /usr/bin/ld.lld-17 /usr/local/bin/ld.lld
+
+      - name: Checkout (with engine3 submodule)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          submodules: recursive
+
+      - name: ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ github.event.inputs.branch }}-smoke-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ github.event.inputs.branch }}-
+            ccache-
+
+      - name: Configure & build
+        working-directory: MMOCoreORB
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCOMPILE_TESTS=OFF \
+            -DENABLE_NATIVE=OFF \
+            -DENABLE_BUILD_CLIENT=OFF \
+            2>&1 | tee ../configure.log
+          ninja -C build 2>&1 | tail -5 | tee ../build.log
+
+      - name: Set up MariaDB + schema
+        shell: bash
+        run: |
+          mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
+          mysqld_safe --skip-grant-tables=0 &
+          for i in $(seq 1 30); do mysqladmin ping 2>/dev/null && break; sleep 2; done
+          mysql -e "CREATE DATABASE IF NOT EXISTS swgemu; CREATE USER IF NOT EXISTS 'swgemu'@'localhost' IDENTIFIED BY '123456'; CREATE USER IF NOT EXISTS 'swgemu'@'127.0.0.1' IDENTIFIED BY '123456'; GRANT ALL ON *.* TO 'swgemu'@'localhost'; GRANT ALL ON *.* TO 'swgemu'@'127.0.0.1'; FLUSH PRIVILEGES;"
+          mysql swgemu < MMOCoreORB/sql/swgemu.sql
+          [ -f MMOCoreORB/sql/datatables.sql ] && mysql swgemu < MMOCoreORB/sql/datatables.sql || true
+          [ -f MMOCoreORB/sql/mantis.sql ] && mysql swgemu < MMOCoreORB/sql/mantis.sql || true
+          mysql -e "SHOW DATABASES; USE swgemu; SHOW TABLES;" | head -20
+
+      - name: Boot check (init machinery up to TRE load)
+        working-directory: MMOCoreORB/bin
+        shell: bash
+        run: |
+          ls -la core3 || { echo "no core3 binary in bin/"; ls -la ../build/src/ | head; cp ../build/src/core3 . 2>/dev/null || exit 1; }
+          mkdir -p log databases navmeshes
+          timeout 180 ./core3 > ../../boot-stdout.log 2>&1 || true
+          echo "=== exit; stdout head ==="
+          head -60 ../../boot-stdout.log
+          echo "=== stdout tail ==="
+          tail -60 ../../boot-stdout.log
+          echo "=== core3.log (if present) ==="
+          tail -60 log/core3.log 2>/dev/null || echo "(none)"
+
+      - name: Grade boot
+        shell: bash
+        run: |
+          ALL=$(cat boot-stdout.log MMOCoreORB/bin/log/core3.log 2>/dev/null || cat boot-stdout.log)
+          PASS=1
+          # must NOT die before reaching meaningful init
+          echo "$ALL" | grep -qiE "segmentation|SIGSEGV|terminate called|fatal" && { echo "FATAL during init"; PASS=0; }
+          # must show evidence of init progress (config/lua/db/tre)
+          echo "$ALL" | grep -qiE "lua|config" || { echo "no lua/config init evidence"; PASS=0; }
+          # expected stopping point in CI: TRE archive load (no client assets present)
+          if echo "$ALL" | grep -qiE "tre"; then echo "reached TRE stage (expected CI stopping point)"; fi
+          [ $PASS -eq 1 ] && echo "G1-CI BOOT CHECK: PASS (full TRE-backed smoke is operator-run)" || { echo "G1-CI BOOT CHECK: FAIL"; exit 1; }
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: g1-smoke-logs-${{ github.run_number }}
+          path: |
+            boot-stdout.log
+            configure.log
+            MMOCoreORB/bin/log/
+          retention-days: 14
