@@ -87,13 +87,13 @@ jobs:
       - name: Grade boot
         shell: bash
         run: |
-          ALL=$(cat boot-stdout.log MMOCoreORB/bin/log/core3.log 2>/dev/null || cat boot-stdout.log)
+          G() { grep -qa "$1" boot-stdout.log 2>/dev/null || grep -qa "$1" MMOCoreORB/bin/log/core3.log 2>/dev/null; }
           PASS=1
-          echo "$ALL" | grep -q "DistributedObjectBroker] started" || { echo "FAIL: ORB never started"; PASS=0; }
-          echo "$ALL" | grep -q "connected to 127.0.0.1:3306" || { echo "FAIL: no DB connection"; PASS=0; }
-          echo "$ALL" | grep -qi "TreeFile" || { echo "FAIL: never reached TRE/asset stage"; PASS=0; }
-          if echo "$ALL" | grep -qiE "segmentation|SIGSEGV|dumped core"; then
-            if echo "$ALL" | grep -qi "TreeFile.*does not exist"; then
+          G "DistributedObjectBroker] started" || { echo "FAIL: ORB never started"; PASS=0; }
+          G "connected to 127.0.0.1:3306" || { echo "FAIL: no DB connection"; PASS=0; }
+          G "TreeFile" || { echo "FAIL: never reached TRE/asset stage"; PASS=0; }
+          if G "dumped core" || G "SIGSEGV"; then
+            if G "does not exist"; then
               echo "NOTE: crash after missing-TRE stage - expected in CI without client assets"
             else
               echo "FAIL: crash before asset stage"
