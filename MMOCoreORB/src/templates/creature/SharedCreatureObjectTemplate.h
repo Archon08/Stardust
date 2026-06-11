@@ -11,6 +11,8 @@
 #include "templates/SharedTangibleObjectTemplate.h"
 #include "templates/params/VectorParam.h"
 
+#include "engine/lua/Lua.h"
+
 class SharedCreatureObjectTemplate: public SharedTangibleObjectTemplate {
 protected:
 	IntegerParam gender;
