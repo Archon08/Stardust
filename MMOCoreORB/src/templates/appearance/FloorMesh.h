@@ -188,11 +188,7 @@ public:
 		return neighbors.size() < 3;
 	}
 
-	inline uint32 getID() const {
-		return triangleID;
-	}
-
-	inline uint32 getID() {
+	inline uint32 getID() const final {
 		return triangleID;
 	}
 
@@ -203,7 +199,7 @@ public:
 		neighbors.add(node);
 	}
 
-	inline Vector<TriangleNode*>* getNeighbors() {
+	inline const Vector<TriangleNode*>* getNeighbors() const final {
 		return &neighbors;
 	}
 
@@ -244,7 +240,7 @@ public:
 
 	Vector <Reference<MeshData*>> getTransformedMeshData(const Matrix4& parentTransform) const;
 
-	Vector<TriangleNode*>* getNeighbors(uint32 triangleID);
+	const Vector<TriangleNode*>* getNeighbors(uint32 triangleID) const;
 
 	TriangleNode* findNearestTriangle(const Vector3& point);
 
