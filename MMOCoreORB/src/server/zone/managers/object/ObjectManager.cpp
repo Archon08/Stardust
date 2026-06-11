@@ -788,9 +788,6 @@ void ObjectManager::deSerializeObject(ManagedObject* object, ObjectInputStream* 
 	try {
 		object->readObject(data);
 
-		if (object->isPersistent())
-			object->queueUpdateToDatabaseTask();
-
 	//	uint32 lastSaveCRC = managedObject->getLastCRCSave();
 
 		uint32 currentCRC = BaseProtocol::generateCRC(data);
@@ -876,8 +873,6 @@ SceneObject* ObjectManager::createObject(uint32 objectCRC, int persistenceLevel,
 
 	if (persistenceLevel > 0) {
 		updatePersistentObject(object);
-
-		object->queueUpdateToDatabaseTask();
 	}
 
 	return object;
@@ -914,8 +909,6 @@ ManagedObject* ObjectManager::createObject(const String& className, int persiste
 
 	if (persistenceLevel > 0) {
 		updatePersistentObject(object);
-
-		object->queueUpdateToDatabaseTask();
 	}
 
 	return object;
