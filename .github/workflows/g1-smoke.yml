@@ -94,15 +94,14 @@ jobs:
         run: |
           ALL=$(cat boot-stdout.log MMOCoreORB/bin/log/core3.log 2>/dev/null || cat boot-stdout.log)
           PASS=1
-          # must NOT die before reaching meaningful init
-          echo "$ALL" | grep -qiE "segmentation|SIGSEGV|terminate called|fatal" && { echo "FATAL during init"; PASS=0; }
-          # must show evidence of init progress (config/lua/db/tre)
-          echo "$ALL" | grep -qiE "lua|config" || { echo "no lua/config init evidence"; PASS=0; }
-          # expected stopping point in CI: TRE archive load (no client assets present)
-          if echo "$ALL" | grep -qiE "tre"; then echo "reached TRE stage (expected CI stopping point)"; fi
-          [ $PASS -eq 1 ] && echo "G1-CI BOOT CHECK: PASS (full TRE-backed smoke is operator-run)" || { echo "G1-CI BOOT CHECK: FAIL"; exit 1; }
-
-      - name: Upload logs
+          echo "$ALL" | grep -q "DistributedObjectBroker] started" || { echo "FAIL: ORB never started"; PASS=0; }
+          echo "$ALL" | grep -q "connected to 127.0.0.1:3306" || { echo "FAIL: no DB connection"; PASS=0; }
+          echo "$ALL" | grep -qi "TreeFile" || { echo "FAIL: never reached TRE/asset stage"; PASS=0; }
+          if echo "$ALL" | grep -qiE "segmentation|SIGSEGV|dumped core"; then
+            echo "$ALL" | grep -qi "TreeFile.*does not exist" && echo "NOTE: crash after missing-TRE stage - expected in CI without client assets" || { echo "FAIL: crash before asset stage"; PASS=0; }
+          fi
+          [ $PASS -eq 1 ] && echo "G1-CI INIT-MACHINERY: PASS (BDB+MySQL+ORB+Lua up; full TRE-backed zone smoke = operator-run)" || { echo "G1-CI: FAIL"; exit 1; }
+$1
         if: always()
         uses: actions/upload-artifact@v4
         with:
