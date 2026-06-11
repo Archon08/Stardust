@@ -77,7 +77,7 @@ class PoiBuilding extends BuildingObject {
 	}
 
 	public void activateDespawnEvent() {
-		if (despawnEvent != null)
+		if (despawnEvent != nullptr)
 			return;
 
 		despawnEvent = new DespawnLairOnPlayerDisappear(this);
@@ -85,7 +85,7 @@ class PoiBuilding extends BuildingObject {
 	}
 
 	public void clearDespawnEvent() {
-		if (despawnEvent == null)
+		if (despawnEvent == nullptr)
 			return;
 
 		despawnEvent.cancel();

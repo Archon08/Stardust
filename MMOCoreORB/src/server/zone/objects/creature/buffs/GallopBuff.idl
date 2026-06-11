@@ -18,11 +18,11 @@ class GallopBuff extends PlayerVehicleBuff {
 		super.activate(true);
 	
 		SceneObject rider = super.creature.getSlottedObject("rider");
-		if(rider == null)
+		if(rider == nullptr)
 			return;
 	
 		CreatureObject creo = rider.asCreatureObject();
-		if(creo != null)
+		if(creo != nullptr)
 			creo.removeMountedCombatSlow();
 	}
 
@@ -30,11 +30,11 @@ class GallopBuff extends PlayerVehicleBuff {
 		super.deactivate(true);
 
 		SceneObject rider = super.creature.getSlottedObject("rider");
-		if(rider == null)
+		if(rider == nullptr)
 			return;
 	
 		CreatureObject creo = rider.asCreatureObject();
-		if(creo != null)
+		if(creo != nullptr)
 			creo.addMountedCombatSlow();
 	}
 }

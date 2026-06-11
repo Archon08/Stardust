@@ -39,7 +39,7 @@ class CityRemoveMilitiaSession extends Facade {
 	public int cancelSession() {
 		CreatureObject creature = creatureObject;
 
-		if (creature != null)
+		if (creature != nullptr)
 			creature.dropActiveSession(SessionFacadeType.CITYMILITIA);
 		
 		return 0;

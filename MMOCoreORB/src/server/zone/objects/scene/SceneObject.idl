@@ -768,12 +768,12 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	@local
 	public void removePendingTask(final string name) {
 		synchronized (containerLock) {
-			if (pendingTasks == null)
+			if (pendingTasks == nullptr)
 				return;
 
 			Task task = pendingTasks.get(name);
 
-			if (task != null && task.isScheduled())
+			if (task != nullptr && task.isScheduled())
 				task.cancel();
 
 			pendingTasks.drop(name);
@@ -783,7 +783,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	@local
 	public PendingTasksMap getPendingTasks() {
 		synchronized (containerLock) {
-			if (pendingTasks == null) {
+			if (pendingTasks == nullptr) {
 				pendingTasks = new PendingTasksMap();
 			}
 
@@ -802,7 +802,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	@reference
 	public Task getPendingTask(final string name) {
 		synchronized (containerLock) {
-			if (pendingTasks == null)
+			if (pendingTasks == nullptr)
 				return null;
 
 			return pendingTasks.get(name);
@@ -812,7 +812,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	@dirty
 	public boolean containsPendingTask(final string name) {
 		synchronized (containerLock) {
-			if (pendingTasks == null)
+			if (pendingTasks == nullptr)
 				return false;
 
 			return pendingTasks.contains(name);
@@ -1058,7 +1058,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 
 	@dirty
 	public int getSlotDescriptorSize() {
-		if (templateObject.getSlotDescriptors() != null)
+		if (templateObject.getSlotDescriptors() != nullptr)
 			return templateObject.getSlotDescriptors().size();
 
 		return 0;
@@ -1240,7 +1240,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 
 	@read
 	public ZoneServer getZoneServer() {
-		if (server != null)
+		if (server != nullptr)
 			return server.getZoneServer();
 		else
 			return null;
@@ -1304,8 +1304,8 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	@local
 	@read
 	public boolean isVendor() {
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isVendorData();
 	}
 
@@ -1313,56 +1313,56 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 	@read
 	public boolean isGCWBase(){
 
-		return dataObjectComponent != null &&
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr &&
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isGCWBaseData();
 	}
 
 	@local
 	@read
 	public boolean isTurret() {
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isTurretData();
 	}
 
 	@local 
 	@read
 	public boolean isMinefield(){
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isMinefieldData();
 	}
 
 	@local
 	@read
 	public boolean isDetector() {
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isDetectorData();
 	}
 
 	@local
 	@read
 	public boolean isSecurityTerminal(){
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isSecurityTerminalData();
 	}
 
 	@local
 	@read
 	public boolean isTurretControlTerminal(){
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isTurretControlTerminalData();
 	}
 
 	@local
 	@read
 	public boolean isEventPerk() {
-		return dataObjectComponent != null && 
-		dataObjectComponent.get() != null &&
+		return dataObjectComponent != nullptr && 
+		dataObjectComponent.get() != nullptr &&
 		dataObjectComponent.get().isEventPerkData();
 	}
 
@@ -1934,7 +1934,7 @@ class SceneObject extends QuadTreeEntry implements Logger, Metrics {
 
 	@local
 	public void setPlanetMapCategory(PlanetMapCategory pmc) {
-		if (pmc == null)
+		if (pmc == nullptr)
 			planetMapCategory = 0;
 		else
 			planetMapCategory = pmc.getCrc();

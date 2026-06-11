@@ -1219,7 +1219,7 @@ class CreatureObject extends TangibleObject {
 	public boolean isOnline() {
 		PlayerObject ghost = getPlayerObject();
 
-		if (ghost == null)
+		if (ghost == nullptr)
 			return false;
 
 		return ghost.isOnline();
@@ -1227,22 +1227,22 @@ class CreatureObject extends TangibleObject {
 
 	@dirty
 	public boolean canTreatInjuries() {
-		return super.getPendingTask("injuryTreatment") == null;
+		return super.getPendingTask("injuryTreatment") == nullptr;
 	}
 
 	@dirty
 	public boolean canTreatStates() {
-		return super.getPendingTask("stateTreatment") == null;
+		return super.getPendingTask("stateTreatment") == nullptr;
 	}
 
 	@dirty
 	public boolean canTreatWounds() {
-		return super.getPendingTask("woundTreatment") == null;
+		return super.getPendingTask("woundTreatment") == nullptr;
 	}
 
 	@dirty
 	public boolean canTreatConditions() {
-		return super.getPendingTask("conditionTreatment") == null;
+		return super.getPendingTask("conditionTreatment") == nullptr;
 	}
 
 	@reference
@@ -1405,7 +1405,7 @@ class CreatureObject extends TangibleObject {
 	public abstract native void queueDizzyFallEvent();
 
 	public boolean hasDizzyEvent() {
-		return dizzyFallDownEvent != null;
+		return dizzyFallDownEvent != nullptr;
 	}
 
 	@preLocked
@@ -1481,7 +1481,7 @@ class CreatureObject extends TangibleObject {
 
 	@read
 	public boolean isGrouped() {
-		return group != null;
+		return group != nullptr;
 	}
 
 	@read
@@ -1568,7 +1568,7 @@ class CreatureObject extends TangibleObject {
 	public unsigned long getCreatureLinkID() {
 		CreatureObject strongRef = linkedCreature;
 
-		if (strongRef != null)
+		if (strongRef != nullptr)
 			return strongRef.getObjectID();
 		else
 			return 0;
@@ -1706,7 +1706,7 @@ class CreatureObject extends TangibleObject {
 
 	@read
 	public unsigned long getWeaponID() {
-		if (weapon == null)
+		if (weapon == nullptr)
 			return 0;
 		else
 			return weapon.getObjectID();
@@ -1727,7 +1727,7 @@ class CreatureObject extends TangibleObject {
 	public int getGuildID() {
 		GuildObject strongRef = guild;
 
-		if (strongRef != null)
+		if (strongRef != nullptr)
 			return strongRef.getGuildID();
 		else
 			return 0;
@@ -1737,7 +1737,7 @@ class CreatureObject extends TangibleObject {
 	public boolean isInGuild() {
 		GuildObject strongRef = guild;
 
-		return strongRef != null;
+		return strongRef != nullptr;
 	}
 
 	@preLocked
@@ -1747,7 +1747,7 @@ class CreatureObject extends TangibleObject {
 
 	@read
 	public unsigned long getGroupID() {
-		if (group != null)
+		if (group != nullptr)
 			return group.getObjectID();
 		else
 			return 0;

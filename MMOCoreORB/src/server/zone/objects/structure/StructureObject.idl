@@ -479,7 +479,7 @@ class StructureObject extends TangibleObject {
 
 	@dirty
 	public boolean hasNavmesh() {
-		return navArea != null;
+		return navArea != nullptr;
 	}
 
 	@preLocked

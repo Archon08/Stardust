@@ -89,7 +89,7 @@ class TheaterObject extends IntangibleObject {
 	}
 
 	public void activateDespawnEvent() {
-		if (despawnEvent != null)
+		if (despawnEvent != nullptr)
 			return;
 
 		despawnEvent = new DespawnLairOnPlayerDisappear(this);
@@ -97,7 +97,7 @@ class TheaterObject extends IntangibleObject {
 	}
 
 	public void clearDespawnEvent() {
-		if (despawnEvent == null)
+		if (despawnEvent == nullptr)
 			return;
 
 		despawnEvent.cancel();

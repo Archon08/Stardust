@@ -116,7 +116,7 @@ class ActiveArea extends SceneObject {
 
 	@dirty
 	public float getRadius2() {
-		if (areaShape != null) {
+		if (areaShape != nullptr) {
 			return areaShape.getRadius() * areaShape.getRadius();
 		} else {
 			return super.getRadius() * super.getRadius();
@@ -140,7 +140,7 @@ class ActiveArea extends SceneObject {
 
 	@preLocked
 	public void setRadius(float r) {
-		if (areaShape != null && r < areaShape.getRadius()) {
+		if (areaShape != nullptr && r < areaShape.getRadius()) {
 			r = areaShape.getRadius();
 		}
 
@@ -181,7 +181,7 @@ class ActiveArea extends SceneObject {
 	public void setAreaShape(AreaShape area) {
 		areaShape = area;
 
-		if (areaShape != null) {
+		if (areaShape != nullptr) {
 			setRadius(areaShape.getRadius());
 		}
 	}
