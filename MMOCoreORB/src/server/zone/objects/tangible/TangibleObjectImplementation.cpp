@@ -1092,7 +1092,7 @@ bool TangibleObjectImplementation::isAttackableBy(CreatureObject* object) {
 }
 
 void TangibleObjectImplementation::addActiveArea(ActiveArea* area) {
-	if (!area->isDeplyoed())
+	if (!area->isDeployed())
 		area->deploy();
 
 	Locker locker(&containerLock);
