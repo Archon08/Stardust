@@ -43,6 +43,10 @@ public:
 	PortalLayout();
 	~PortalLayout();
 
+	const PathGraph *getPathGraph() const {
+		return pathGraph;
+	}
+
 	PathGraph *getPathGraph() {
 		return pathGraph;
 	}
@@ -62,7 +66,7 @@ public:
 
 	int getFloorMeshID(int globalNodeID, int floorMeshToExclude);
 
-	Vector<PathNode*>* getPath(PathNode* node1, PathNode* node2);
+	Vector<const PathNode*>* getPath(const PathNode* node1, const PathNode* node2) const;
 
 	int getCellID(const String& cellName);
 
@@ -75,6 +79,10 @@ public:
 		return cellProperties.size();
 	}
 
+	inline const FloorMesh* getFloorMesh(int cellIndex) const {
+		return cellProperties.get(cellIndex)->getFloorMesh();
+	}
+
 	inline FloorMesh* getFloorMesh(int cellIndex) {
 		return cellProperties.get(cellIndex)->getFloorMesh();
 	}
@@ -85,6 +93,10 @@ public:
 
 	const Vector<Reference<CellProperty*> >& getCellProperties() {
 		return cellProperties;
+	}
+
+	inline const CellProperty* getCellProperty(int cellIndex) const {
+		return cellProperties.get(cellIndex);
 	}
 
 	inline CellProperty* getCellProperty(int cellIndex) {
