@@ -106,7 +106,7 @@ namespace zone {
 		void shutdown();
 
 		bool isObjectUpdateInProcess() {
-			return objectUpdateInProcess;
+			return objectUpdateInProgress;
 		}
 
 		ObjectDatabase* loadTable(const String& database, uint64 objectID = 0);
