@@ -7,23 +7,27 @@ on:
         description: 'Branch to sweep and push to'
         required: true
         default: 'space-port/phase-1'
+      mode:
+        description: 'Sweep mode: null-cpp (NULL->nullptr in cpp/h/idl) or null-idl (==/!= null -> nullptr in idl)'
+        required: true
+        default: 'null-idl'
 
 permissions:
   contents: write
 
 jobs:
-  null-to-nullptr:
+  sweep:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Quote-aware NULL -> nullptr sweep over MMOCoreORB/src
+      - name: null-cpp sweep (quote-aware NULL -> nullptr)
+        if: ${{ github.event.inputs.mode == 'null-cpp' }}
         run: |
           cat > /tmp/sweep.pl << 'PERL'
           #!/usr/bin/perl
-          # Replace token NULL with nullptr outside of string/char literals.
           use strict; use warnings;
           local $/;
           my $src = <>;
@@ -35,14 +39,6 @@ jobs:
           }
           print join('', @out);
           PERL
-          perl -c /tmp/sweep.pl 2>&1 || true
-          # self-test before touching the tree
-          printf 'x == NULL; s = "IS NULL"; c = %s;\n' "'a'" > /tmp/st.c
-          perl /tmp/sweep.pl /tmp/st.c
-          RES=$(perl /tmp/sweep.pl /tmp/st.c)
-          echo "$RES" | grep -q 'x == nullptr' || { echo 'SELF-TEST FAIL: replacement'; exit 1; }
-          echo "$RES" | grep -q 'IS NULL' || { echo 'SELF-TEST FAIL: string protection'; exit 1; }
-          echo "self-test OK"
           COUNT=0
           while IFS= read -r -d '' f; do
             if grep -q 'NULL' "$f"; then
@@ -53,10 +49,31 @@ jobs:
           echo "swept $COUNT files"
           git diff --shortstat
 
+      - name: null-idl sweep (==/!= null -> nullptr comparisons only; idlc passes nullptr through, NULL it emits is ambiguous vs modern Reference)
+        if: ${{ github.event.inputs.mode == 'null-idl' }}
+        run: |
+          # self-test
+          printf 'if (x != null) { y = a == null; } void f(TreeNode n = null);\n' > /tmp/st.idl
+          perl -pe 's/!=\s*null\b/!= nullptr/g; s/==\s*null\b/== nullptr/g' /tmp/st.idl
+          RES=$(perl -pe 's/!=\s*null\b/!= nullptr/g; s/==\s*null\b/== nullptr/g' /tmp/st.idl)
+          echo "$RES" | grep -q 'x != nullptr' || { echo 'SELF-TEST FAIL: neq'; exit 1; }
+          echo "$RES" | grep -q 'a == nullptr' || { echo 'SELF-TEST FAIL: eq'; exit 1; }
+          echo "$RES" | grep -q 'n = null)' || { echo 'SELF-TEST FAIL: default arg must stay null'; exit 1; }
+          echo "self-test OK"
+          COUNT=0
+          while IFS= read -r -d '' f; do
+            if grep -qE '(==|!=)[[:space:]]*null\b' "$f"; then
+              perl -i -pe 's/!=\s*null\b/!= nullptr/g; s/==\s*null\b/== nullptr/g' "$f"
+              COUNT=$((COUNT+1))
+            fi
+          done < <(find MMOCoreORB/src -type f -name '*.idl' -print0)
+          echo "swept $COUNT idl files"
+          git diff --shortstat
+
       - name: Commit and push
         run: |
           git config user.name "space-port-sweep"
           git config user.email "noreply@anthropic.com"
           git add -A MMOCoreORB/src
-          git commit -m "P1.4: mechanical NULL -> nullptr sweep over MMOCoreORB/src (quote-aware; modern engine3 Reference<T> requires nullptr comparisons)" || echo "nothing to commit"
+          git commit -m "P1.4: mechanical sweep (${{ github.event.inputs.mode }})" || echo "nothing to commit"
           git push origin HEAD:${{ github.event.inputs.branch }}
