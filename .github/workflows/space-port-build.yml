@@ -48,6 +48,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCOMPILE_TESTS=OFF \
             -DENABLE_NATIVE=OFF \
+            -DENABLE_BUILD_CLIENT=OFF \
             2>&1 | tee ../configure.log
 
       - name: Build
