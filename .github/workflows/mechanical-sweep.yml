@@ -23,28 +23,35 @@ jobs:
         run: |
           cat > /tmp/sweep.pl << 'PERL'
           #!/usr/bin/perl
-          # Replace token NULL with nullptr outside of string literals.
+          # Replace token NULL with nullptr outside of string/char literals.
           use strict; use warnings;
           local $/;
           my $src = <>;
           my @out;
-          # split on double-quoted strings and char literals, preserving them
-          for my $part (split /("(?:[^"\]|\.)*"|'(?:[^'\]|\.)*')/s, $src) {
+          for my $part (split /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/s, $src) {
             if ($part =~ /^["']/) { push @out, $part; next; }
             $part =~ s/\bNULL\b/nullptr/g;
             push @out, $part;
           }
           print join('', @out);
           PERL
+          perl -c /tmp/sweep.pl 2>&1 || true
+          # self-test before touching the tree
+          printf 'x == NULL; s = "IS NULL"; c = %s;\n' "'a'" > /tmp/st.c
+          perl /tmp/sweep.pl /tmp/st.c
+          RES=$(perl /tmp/sweep.pl /tmp/st.c)
+          echo "$RES" | grep -q 'x == nullptr' || { echo 'SELF-TEST FAIL: replacement'; exit 1; }
+          echo "$RES" | grep -q 'IS NULL' || { echo 'SELF-TEST FAIL: string protection'; exit 1; }
+          echo "self-test OK"
           COUNT=0
           while IFS= read -r -d '' f; do
-            if grep -ql '\bNULL\b' "$f" 2>/dev/null || grep -q 'NULL' "$f"; then
-              perl /tmp/sweep.pl "$f" > "$f.swept" && mv "$f.swept" "$f"
+            if grep -q 'NULL' "$f"; then
+              perl /tmp/sweep.pl "$f" > "$f.swept" && mv "$f.swept" "$f" || { rm -f "$f.swept"; echo "sweep failed: $f"; exit 1; }
               COUNT=$((COUNT+1))
             fi
           done < <(find MMOCoreORB/src -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.idl' \) -print0)
           echo "swept $COUNT files"
-          git diff --stat | tail -3
+          git diff --shortstat
 
       - name: Commit and push
         run: |
