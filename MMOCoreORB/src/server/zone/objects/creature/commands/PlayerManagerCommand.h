@@ -22,13 +22,13 @@ public:
 		ManagedReference<CreatureObject*> player = cast<CreatureObject*>(creature);
 		ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
 
-		if (ghost == NULL || ghost->getAdminLevel() < 15) {
+		if (ghost == nullptr || ghost->getAdminLevel() < 15) {
 			return 1;
 		}
 
 		ManagedReference<PlayerManager*> playerManager = player->getZoneServer()->getPlayerManager();
 
-		if (playerManager == NULL) {
+		if (playerManager == nullptr) {
 			creature->sendSystemMessage("playerManager not found");
 			return 0;
 		}
@@ -55,7 +55,7 @@ public:
 				oid = tokenizer.getLongToken();
 
 			ManagedReference<SceneObject*> targetObject = player->getZoneServer()->getObject(oid);
-			if (targetObject == NULL) {
+			if (targetObject == nullptr) {
 				player->sendSystemMessage("Unable to look up character");
 				return 1;
 			}
@@ -63,7 +63,7 @@ public:
 			Locker locker(targetObject, player);
 
 			CloseObjectsVector* vec = (CloseObjectsVector*)targetObject->getCloseObjects();
-			if (vec == NULL) {
+			if (vec == nullptr) {
 				player->sendSystemMessage("Object does not have a close object vector");
 				return 1;
 			}
@@ -75,12 +75,12 @@ public:
 			for (int i=0; i<vec->size(); i++) {
 				ManagedReference<SceneObject *> obj = vec->get(i).castTo<SceneObject *>();
 				resp << i << ": ";
-				if (obj == NULL) {
+				if (obj == nullptr) {
 					resp << "NULL Object" << endl;
 				} else {
 					Reference<SceneObject*> parent = obj->getParent().get();
 					resp << obj->getObjectID() << ":" << obj->getObjectTemplate()->getTemplateFileName();
-					if (parent == NULL)
+					if (parent == nullptr)
 						resp << " Parent: NULL";
 					else
 						resp << " Parent: " << parent->getObjectID();
@@ -159,7 +159,7 @@ public:
 	}
 
 	static void sendSyntax(CreatureObject* player) {
-		if (player != NULL) {
+		if (player != nullptr) {
 			player->sendSystemMessage("Syntax: /server playermanager [setxpmodifier] [value]");
 			player->sendSystemMessage("Syntax: /server playermanager [listjedi]");
 			player->sendSystemMessage("Syntax: /server playermanager [list_frsjedi]");

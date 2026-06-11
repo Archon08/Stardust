@@ -17,25 +17,25 @@ ContainerObjectsMap::ContainerObjectsMap() {
 	operationMode = NORMAL_LOAD;
 	containerObjects.setNoDuplicateInsertPlan();
 
-	oids = NULL;
-	unloadTask = NULL;
-	container = NULL;
-	containerLock = NULL;
+	oids = nullptr;
+	unloadTask = nullptr;
+	container = nullptr;
+	containerLock = nullptr;
 }
 
 ContainerObjectsMap::ContainerObjectsMap(const ContainerObjectsMap& c) {
 	operationMode = NORMAL_LOAD;
 	containerObjects.setNoDuplicateInsertPlan();
 
-	oids = NULL;
+	oids = nullptr;
 
 	copyData(c);
 }
 
 ContainerObjectsMap::~ContainerObjectsMap() {
-	if (oids != NULL) {
+	if (oids != nullptr) {
 		delete oids;
-		oids = NULL;
+		oids = nullptr;
 	}
 
 	cancelUnloadTask();
@@ -46,18 +46,18 @@ void ContainerObjectsMap::copyData(const ContainerObjectsMap& c) {
 	containerObjects = c.containerObjects;
 	lastAccess = c.lastAccess;
 
-	if (c.oids == NULL) {
-		if (oids != NULL)
+	if (c.oids == nullptr) {
+		if (oids != nullptr)
 			delete oids;
 
-		oids = NULL;
+		oids = nullptr;
 	} else {
 		oids = new VectorMap<uint64, uint64>(*c.oids);
 	}
 
-	unloadTask = NULL;
-	container = NULL;
-	containerLock = NULL;
+	unloadTask = nullptr;
+	container = nullptr;
+	containerLock = nullptr;
 }
 
 ContainerObjectsMap& ContainerObjectsMap::operator=(const ContainerObjectsMap& c) {
@@ -72,14 +72,14 @@ ContainerObjectsMap& ContainerObjectsMap::operator=(const ContainerObjectsMap& c
 void ContainerObjectsMap::loadObjects() {
 	lastAccess.updateToCurrentTime();
 
-	if (oids == NULL)
+	if (oids == nullptr)
 		return;
 
 	Locker locker(containerLock);
 
 	WMB();
 
-	if (oids == NULL)
+	if (oids == nullptr)
 		return;
 
 	VectorMap<uint64, uint64> oidsCopy = *oids;
@@ -89,12 +89,12 @@ void ContainerObjectsMap::loadObjects() {
 
 		Reference<SceneObject*> object = Core::getObjectBroker()->lookUp(oid).castTo<SceneObject*>();
 
-		if (object != NULL)
+		if (object != nullptr)
 			containerObjects.put(oid, object);
 	}
 
 	delete oids;
-	oids = NULL;
+	oids = nullptr;
 
 	if (operationMode == DELAYED_LOAD) {
 		scheduleContainerUnload();
@@ -102,7 +102,7 @@ void ContainerObjectsMap::loadObjects() {
 
 	ManagedReference<SceneObject*> sceno = container.get();
 
-	if (sceno != NULL) {
+	if (sceno != nullptr) {
 		Core::getTaskManager()->executeTask([sceno] () {
 			if (sceno->getZoneServer()->isServerShuttingDown())
 				return;
@@ -118,7 +118,7 @@ void ContainerObjectsMap::scheduleContainerUnload() {
 
 	uint64 delay = 1800000 + System::random(1800000); // 30 - 60 minutes
 
-	if (unloadTask != NULL) {
+	if (unloadTask != nullptr) {
 		if (unloadTask->isScheduled()) {
 			unloadTask->reschedule(delay);
 		} else {
@@ -143,20 +143,20 @@ void ContainerObjectsMap::unloadObjects() {
 	for (int i = 0; i < containerObjects.size(); i++) {
 		SceneObject* obj = containerObjects.get(i);
 
-		if (obj != NULL) {
+		if (obj != nullptr) {
 			uint64 oid = obj->getObjectID();
 			vector->put(oid, oid);
 			containerCopy.add(obj);
 		}
 	}
 
-	if (!oids.compareAndSet(NULL, vector)) {
+	if (!oids.compareAndSet(nullptr, vector)) {
 		delete vector;
 	}
 
 	containerObjects.removeAll();
 
-	unloadTask = NULL;
+	unloadTask = nullptr;
 
 	locker.release();
 
@@ -166,7 +166,7 @@ void ContainerObjectsMap::unloadObjects() {
 	for (int i = 0; i < containerCopy.size(); i++) {
 		SceneObject* obj = containerCopy.get(i);
 
-		if (obj != NULL) {
+		if (obj != nullptr) {
 			Locker olocker(obj);
 			parent->broadcastDestroy(obj, true);
 			obj->removeObjectFromZone(zone, parent);
@@ -181,7 +181,7 @@ void ContainerObjectsMap::notifyLoadFromDatabase() {
 bool ContainerObjectsMap::toBinaryStream(ObjectOutputStream* stream) {
 	Locker locker(containerLock);
 
-	if (oids != NULL)
+	if (oids != nullptr)
 		return oids->toBinaryStream(stream);
 	else
 		return containerObjects.toBinaryStream(stream);
@@ -192,11 +192,11 @@ bool ContainerObjectsMap::parseFromBinaryStream(ObjectInputStream* stream) {
 	case NORMAL_LOAD:
 		return containerObjects.parseFromBinaryStream(stream);
 	case DELAYED_LOAD:
-		if (oids == NULL) {
+		if (oids == nullptr) {
 			auto vector = new VectorMap<uint64, uint64>();
 			bool res = vector->parseFromBinaryStream(stream);
 
-			if (!oids.compareAndSet(NULL, vector)) {
+			if (!oids.compareAndSet(nullptr, vector)) {
 				delete vector;
 			}
 
@@ -213,7 +213,7 @@ void ContainerObjectsMap::setContainer(SceneObject* obj) {
 	container = obj;
 	containerLock = obj->getContainerLock();
 
-	if (operationMode == DELAYED_LOAD && oids == NULL) {
+	if (operationMode == DELAYED_LOAD && oids == nullptr) {
 		scheduleContainerUnload();
 	}
 }
@@ -251,7 +251,7 @@ void ContainerObjectsMap::put(uint64 oid, SceneObject* object) {
 void ContainerObjectsMap::removeElementAt(int index) {
 	Locker locker(containerLock);
 
-	if (oids != NULL)
+	if (oids != nullptr)
 		oids->removeElementAt(index);
 	else
 		containerObjects.removeElementAt(index);
@@ -268,7 +268,7 @@ int ContainerObjectsMap::size() {
 bool ContainerObjectsMap::contains(uint64 oid) {
 	ReadLocker locker(containerLock);
 
-	if (oids != NULL)
+	if (oids != nullptr)
 		return oids->contains(oid);
 	else
 		return containerObjects.contains(oid);
@@ -277,7 +277,7 @@ bool ContainerObjectsMap::contains(uint64 oid) {
 void ContainerObjectsMap::removeAll() {
 	Locker locker(containerLock);
 
-	if (oids != NULL)
+	if (oids != nullptr)
 		oids->removeAll();
 	else
 		containerObjects.removeAll();
@@ -286,17 +286,17 @@ void ContainerObjectsMap::removeAll() {
 void ContainerObjectsMap::drop(uint64 oid) {
 	Locker locker(containerLock);
 
-	if (oids != NULL)
+	if (oids != nullptr)
 		oids->drop(oid);
 	else
 		containerObjects.drop(oid);
 }
 
 void ContainerObjectsMap::cancelUnloadTask() {
-	if (unloadTask != NULL) {
+	if (unloadTask != nullptr) {
 		if (Core::getTaskManager())
 			unloadTask->cancel();
 
-		unloadTask = NULL;
+		unloadTask = nullptr;
 	}
 }

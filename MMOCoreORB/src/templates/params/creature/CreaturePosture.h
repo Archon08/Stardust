@@ -265,7 +265,7 @@ public:
 	void loadMovementData() {
 		IffStream* iffStream = TemplateManager::instance()->openIffFile("datatables/movement/movement_human.iff");
 
-		if (iffStream == NULL) {
+		if (iffStream == nullptr) {
 			error("Could not load movement data.");
 			return;
 		}

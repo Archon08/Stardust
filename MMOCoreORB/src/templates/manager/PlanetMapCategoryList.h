@@ -24,7 +24,7 @@ public:
 			HashTable<int, Reference<PlanetMapCategory*> >(256),
 			HashTableIterator<int, Reference<PlanetMapCategory*> >(this) {
 
-		setNullValue(NULL);
+		setNullValue(nullptr);
 	}
 
 	bool containsKey(const String& key) {

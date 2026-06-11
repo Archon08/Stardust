@@ -27,7 +27,7 @@ namespace server {
 
    public:
 	   ObjectCreatorMap() {
-		   HashTable<TypeId, Value>::setNullValue(NULL);
+		   HashTable<TypeId, Value>::setNullValue(nullptr);
 	   }
    };
 
@@ -40,7 +40,7 @@ namespace server {
    public:
 	   BaseClassType createObject(UniqueIdType uniqueID) {
 		   if (!objectCreator.containsKey(uniqueID))
-			   return NULL;
+			   return nullptr;
 
 		   return objectCreator.get(uniqueID)();
 	   }

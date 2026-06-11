@@ -20,12 +20,12 @@
 void StructureMaintenanceTask::run() {
 	ManagedReference<StructureObject*> strongRef = structureObject.get();
 
-	if (strongRef == NULL)
+	if (strongRef == nullptr)
 		return;
 
 	ZoneServer* zoneServer = strongRef->getZoneServer();
 
-	if (zoneServer == NULL || zoneServer->isServerShuttingDown())
+	if (zoneServer == nullptr || zoneServer->isServerShuttingDown())
 		return;
 
 	if (zoneServer->isServerLoading()) {
@@ -40,7 +40,7 @@ void StructureMaintenanceTask::run() {
 
 	ManagedReference<CreditObject*> creditObj = CreditManager::getCreditObject(oid);
 
-	if (creditObj == NULL) {
+	if (creditObj == nullptr) {
 		info("Player does not have a valid credit object, destroying.", true);
 		StructureManager::instance()->destroyStructure(strongRef);
 
@@ -72,7 +72,7 @@ void StructureMaintenanceTask::run() {
 
 	// add city tax to the week maintenance
 	ManagedReference<CityRegion*> city = strongRef->getCityRegion().get();
-	if(strongRef->isBuildingObject() && city != NULL){
+	if(strongRef->isBuildingObject() && city != nullptr){
 		oneWeekMaintenance += city->getPropertyTax() / 100.0f * oneWeekMaintenance;
 	}
 
@@ -119,11 +119,11 @@ void StructureMaintenanceTask::run() {
 void StructureMaintenanceTask::sendMailMaintenanceWithdrawnFromBank(const String& creoName, StructureObject* structure) {
 	ManagedReference<ChatManager*> chatManager = structure->getZoneServer()->getChatManager();
 
-	if (chatManager != NULL) {
+	if (chatManager != nullptr) {
 		UnicodeString subject = "@player_structure:structure_maintenance_empty_subject";
 
 		String zoneName = "the void";
-		if (structure->getZone() != NULL) {
+		if (structure->getZone() != nullptr) {
 			zoneName = structure->getZone()->getZoneName();
 		}
 
@@ -139,7 +139,7 @@ void StructureMaintenanceTask::sendMailMaintenanceWithdrawnFromBank(const String
 void StructureMaintenanceTask::sendMailDecay(const String& creoName, StructureObject* structure) {
 	ManagedReference<ChatManager*> chatManager = structure->getZoneServer()->getChatManager();
 
-	if (chatManager != NULL) {
+	if (chatManager != nullptr) {
 		UnicodeString subject = "@player_structure:mail_structure_damage_sub";
 
 		//Your %TT %TO is currently at %DI percent condition. It will be destroyed if it reaches 0. If you wish to keep this structure, you should immediately add maintenance.
@@ -150,7 +150,7 @@ void StructureMaintenanceTask::sendMailDecay(const String& creoName, StructureOb
 		}
 
 		String zoneName = "the void";
-		if (structure->getZone() != NULL) {
+		if (structure->getZone() != nullptr) {
 			zoneName = structure->getZone()->getZoneName();
 		}
 
@@ -167,11 +167,11 @@ void StructureMaintenanceTask::sendMailCondemned(const String& creoName, Structu
 	//Create an email.
 	ManagedReference<ChatManager*> chatManager = structure->getZoneServer()->getChatManager();
 
-	if (chatManager != NULL) {
+	if (chatManager != nullptr) {
 		UnicodeString subject = "@player_structure:structure_condemned_subject";
 
 		String zoneName = "the void";
-		if (structure->getZone() != NULL) {
+		if (structure->getZone() != nullptr) {
 			zoneName = structure->getZone()->getZoneName();
 		}
 

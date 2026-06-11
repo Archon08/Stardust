@@ -38,7 +38,7 @@ class Layer : public TemplateVariable<'LAYR'> {
 	int filterFlag;
 
 public:
-	Layer(Layer* par = NULL) {
+	Layer(Layer* par = nullptr) {
 		parent = par;
 		boundariesFlag = 0;
 		filterFlag = 0;

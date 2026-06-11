@@ -29,21 +29,21 @@ public:
 	void handleBuff(SceneObject* creature, ManagedObject* object, int64 param) {
 
 		ManagedReference<CreatureObject*> creo = cast<CreatureObject*>( creature);
-		if (creo == NULL)
+		if (creo == nullptr)
 			return;
 
 		// Client Effect upon hit (needed)
 		creo->playEffect("clienteffect/pl_force_armor_hit.cef", "");
 
 		ManagedReference<PlayerObject*> playerObject = creo->getPlayerObject();
-		if (playerObject == NULL)
+		if (playerObject == nullptr)
 			return;
 
 		// TODO: Force Rank modifiers.
 		int forceCost = param * 0.15;
 		if (playerObject->getForcePower() <= forceCost) { // Remove buff if not enough force.
 			Buff* buff = creo->getBuff(BuffCRC::JEDI_FORCE_ARMOR_2);
-			if (buff != NULL) {
+			if (buff != nullptr) {
 				Locker locker(buff);
 
 				creo->removeBuff(buff);

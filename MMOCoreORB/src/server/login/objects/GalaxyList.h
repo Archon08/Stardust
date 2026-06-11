@@ -21,7 +21,7 @@ public:
 	}
 
 	~GalaxyList() {
-		if (galaxies != NULL)
+		if (galaxies != nullptr)
 			delete galaxies;
 	}
 

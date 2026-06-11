@@ -42,7 +42,7 @@ public:
 		Locker guard(&mutex);
 
 		if (index < 0 || index >= buffList.size())
-			return NULL;
+			return nullptr;
 
 		Buff* buff = buffList.elementAt(index).getValue();
 
@@ -55,7 +55,7 @@ public:
 		if (buffList.contains(buffcrc))
 			return buffList.get(buffcrc);
 
-		return NULL;
+		return nullptr;
 	}
 
 	long long getModifierByName(const String& skillMod) {

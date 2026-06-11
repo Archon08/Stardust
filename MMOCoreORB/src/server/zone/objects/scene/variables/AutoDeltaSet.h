@@ -44,10 +44,10 @@ public:
 		return set.parseFromBinaryStream(stream);
 	}
 
-	virtual void add(const K& key, DeltaMessage* message = NULL, int updates = 1) {
+	virtual void add(const K& key, DeltaMessage* message = nullptr, int updates = 1) {
 		set.add(key);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -58,13 +58,13 @@ public:
 		}
 	}
 
-	virtual bool drop(const K& key, DeltaMessage* message = NULL, int updates = 1) {
+	virtual bool drop(const K& key, DeltaMessage* message = nullptr, int updates = 1) {
 		if (!set.contains(key))
 			return false;
 
 		set.remove(key);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -77,10 +77,10 @@ public:
 		return true;
 	}
 
-	virtual void removeAll(DeltaMessage* msg = NULL) {
+	virtual void removeAll(DeltaMessage* msg = nullptr) {
 		set.removeAll();
 
-		if (msg != NULL) {
+		if (msg != nullptr) {
 			msg->startList(1, ++updateCounter);
 			msg->insertByte(2);
 		}

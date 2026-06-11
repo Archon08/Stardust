@@ -34,7 +34,7 @@ void PetDeedImplementation::loadTemplateData(SharedObjectTemplate* templateData)
 	DeedImplementation::loadTemplateData(templateData);
 	PetDeedTemplate* deedData = dynamic_cast<PetDeedTemplate*>(templateData);
 
-	if (deedData == NULL)
+	if (deedData == nullptr)
 		return;
 
 	controlDeviceObjectTemplate = deedData->getControlDeviceObjectTemplate();
@@ -124,7 +124,7 @@ void PetDeedImplementation::fillAttributeList(AttributeListMessage* alm, Creatur
 	CreatureTemplateManager* creatureTemplateManager = CreatureTemplateManager::instance();
 	ManagedReference<CreatureTemplate*> petTemplate =  creatureTemplateManager->getTemplate( mobileTemplate.hashCode() );
 	bool allowRanged = false;
-	if (petTemplate != NULL) {
+	if (petTemplate != nullptr) {
 		if (petTemplate->getWeapons().size() > 0) {
 			allowRanged = true;
 		}
@@ -190,7 +190,7 @@ CreatureAttackMap* PetDeedImplementation::getAttacks() {
 String PetDeedImplementation::getTemplateName() {
 	CreatureTemplateManager* creatureTemplateManager = CreatureTemplateManager::instance();
 	ManagedReference<CreatureTemplate*> petTemplate =  creatureTemplateManager->getTemplate( mobileTemplate.hashCode() );
-	if (petTemplate == NULL) {
+	if (petTemplate == nullptr) {
 		return "";
 	}
 
@@ -212,11 +212,11 @@ void PetDeedImplementation::updateCraftingValues(CraftingValues* values, bool fi
 	ManagedReference<ManufactureSchematic*> manufact = values->getManufactureSchematic();
 	float clFactor = 0;
 
-	if (manufact == NULL) {
+	if (manufact == nullptr) {
 		String templateName;
 		SharedObjectTemplate* templ = getObjectTemplate();
 
-		if (templ != NULL) {
+		if (templ != nullptr) {
 			templateName = templ->getFullTemplateString();
 		}
 
@@ -288,7 +288,7 @@ void PetDeedImplementation::updateCraftingValues(CraftingValues* values, bool fi
 	}
 	CreatureTemplateManager* creatureTemplateManager = CreatureTemplateManager::instance();
 	ManagedReference<CreatureTemplate*> petTemplate =  creatureTemplateManager->getTemplate( mobileTemplate.hashCode() );
-	if (petTemplate != NULL) {
+	if (petTemplate != nullptr) {
 		// get min CL from the template
 		int skinFactor = petTemplate->getLevel();
 		if (level > 75) {
@@ -321,7 +321,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 			return 1;
 		}
 
-		if(player->getPendingTask("sampledeed") != NULL) {
+		if(player->getPendingTask("sampledeed") != nullptr) {
 			player->sendSystemMessage("@bio_engineer:harvest_dna_already_harvesting");
 			return 1;
 		}
@@ -342,14 +342,14 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		if (generated || !isASubChildOf(player))
 			return 1;
 
-		if (player->isInCombat() || player->getParentRecursively(SceneObjectType::BUILDING) != NULL) {
+		if (player->isInCombat() || player->getParentRecursively(SceneObjectType::BUILDING) != nullptr) {
 			player->sendSystemMessage("@pet/pet_menu:cant_call"); //You can only unpack vehicles while Outside and not in Combat.
 			return 1;
 		}
 
 		ManagedReference<SceneObject*> datapad = player->getSlottedObject("datapad");
 
-		if (datapad == NULL) {
+		if (datapad == nullptr) {
 			player->sendSystemMessage("Datapad doesn't exist when trying to call pet");
 			return 1;
 		}
@@ -366,7 +366,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		for (int i = 0; i < datapad->getContainerObjectsSize(); ++i) {
 			ManagedReference<SceneObject*> object = datapad->getContainerObject(i);
 
-			if (object != NULL && object->isPetControlDevice()) {
+			if (object != nullptr && object->isPetControlDevice()) {
 				PetControlDevice* device = cast<PetControlDevice*>( object.get());
 
 				if (device->getPetType() == PetManager::CREATUREPET) {
@@ -390,7 +390,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		for (int i = 0; i < ghost->getActivePetsSize(); ++i) {
 			ManagedReference<AiAgent*> object = ghost->getActivePet(i);
 
-			if (object != NULL && object->isCreature()) {
+			if (object != nullptr && object->isCreature()) {
 				if (++currentlySpawned >= maxPets) {
 					player->sendSystemMessage("@pet/pet_menu:too_many"); // You can't control any more pets. Store one first
 					return 1;
@@ -503,7 +503,7 @@ int PetDeedImplementation::handleObjectMenuSelect(CreatureObject* player, byte s
 		//Remove the deed from it's container.
 		ManagedReference<SceneObject*> deedContainer = getParent().get();
 
-		if (deedContainer != NULL) {
+		if (deedContainer != nullptr) {
 			destroyObjectFromWorld(true);
 		}
 

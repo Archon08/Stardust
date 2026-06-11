@@ -33,32 +33,32 @@ public:
 
 		Zone* zone = player->getZone();
 
-		if (zone == NULL)
+		if (zone == nullptr)
 			return;
 
 		GCWManager* gcwMan = zone->getGCWManager();
 
-		if (gcwMan == NULL)
+		if (gcwMan == nullptr)
 			return;
 
 		ManagedReference<TangibleObject*> turret = turretObject.get();
 
-		if (turret == NULL)
+		if (turret == nullptr)
 			return;
 
 		TurretDataComponent* turretData  = cast<TurretDataComponent*>(turret->getDataObjectComponent()->get());
 
-		if (turretData == NULL)
+		if (turretData == nullptr)
 			return;
 
 		ManagedReference<TangibleObject*> control = turretControl.get();
 
-		if (control == NULL)
+		if (control == nullptr)
 			return;
 
 		TurretControlTerminalDataComponent* controlData = cast<TurretControlTerminalDataComponent*>(control->getDataObjectComponent()->get());
 
-		if (controlData == NULL)
+		if (controlData == nullptr)
 			return;
 
 		if (!gcwMan->canUseTurret(turret, control, player)) {

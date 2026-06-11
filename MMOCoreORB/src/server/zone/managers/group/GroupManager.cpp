@@ -31,8 +31,8 @@ GroupManager::GroupManager() {
 }
 
 bool GroupManager::playerIsInvitingOwnPet(CreatureObject* inviter, CreatureObject* target) {
-	return inviter != NULL
-			&& target != NULL
+	return inviter != nullptr
+			&& target != nullptr
 			&& target->isPet()
 			&& target->getCreatureLinkID() != 0
 			&& target->getCreatureLinkID() == inviter->getObjectID();
@@ -112,7 +112,7 @@ void GroupManager::inviteToGroup(CreatureObject* leader, CreatureObject* target)
 		unsigned long long ownerId = target->getCreatureLinkID();
 		ManagedReference<CreatureObject*> owner = target->getZoneServer()->getObject(ownerId).castTo<CreatureObject*>();
 
-		if (owner != NULL && owner != leader)
+		if (owner != nullptr && owner != leader)
 			owner->sendSystemMessage("@pet/pet_menu:pet_invited"); // Your pet has been invited to join your group.
 
 		joinGroup(target);
@@ -126,26 +126,26 @@ void GroupManager::joinGroup(CreatureObject* player) {
 
 	Zone* zone = player->getZone();
 
-	if (zone == NULL)
+	if (zone == nullptr)
 		return;
 
 	ManagedReference<ZoneServer*> server = zone->getZoneServer();
 	ManagedReference<SceneObject*> object = server->getObject(inviterID);
 
-	if (object == NULL || !object->isPlayerCreature() || object == player)
+	if (object == nullptr || !object->isPlayerCreature() || object == player)
 		return;
 
 	CreatureObject* inviter = cast<CreatureObject*>( object.get());
-	GroupObject* group = NULL;
+	GroupObject* group = nullptr;
 
 	Locker clocker(inviter, player);
 
 	group = inviter->getGroup();
 
-	if (group == NULL) {
+	if (group == nullptr) {
 		group = createGroup(inviter);
 
-		if (group == NULL)
+		if (group == nullptr)
 			return;
 	}
 
@@ -246,7 +246,7 @@ GroupObject* GroupManager::createGroup(CreatureObject* leader) {
 
 	// clear inviter's LFG setting once a group is created
 	Reference<PlayerObject*> ghost = leader->getSlottedObject("ghost").castTo<PlayerObject*>();
-	if (ghost != NULL)
+	if (ghost != nullptr)
 		ghost->clearCharacterBit(PlayerObject::LFG, true);
 
 	if (leader->getGroupInviterID() != 0)
@@ -257,7 +257,7 @@ GroupObject* GroupManager::createGroup(CreatureObject* leader) {
 		ManagedReference<Facade*> facade = leader->getActiveSession(SessionFacadeType::ENTERTAINING);
 		ManagedReference<EntertainingSession*> session = dynamic_cast<EntertainingSession*> (facade.get());
 
-		if (session != NULL && session->isPlayingMusic()) {
+		if (session != nullptr && session->isPlayingMusic()) {
 			group->setBandSong(session->getPerformanceName());
 
 			for (int i = 0; i < group->getGroupSize(); ++i) {
@@ -268,7 +268,7 @@ GroupObject* GroupManager::createGroup(CreatureObject* leader) {
 					ManagedReference<Facade*> otherFacade = groupMember->getActiveSession(SessionFacadeType::ENTERTAINING);
 					ManagedReference<EntertainingSession*> otherSession = dynamic_cast<EntertainingSession*> (otherFacade.get());
 
-					if (otherSession != NULL && otherSession->isPlayingMusic()) {
+					if (otherSession != nullptr && otherSession->isPlayingMusic()) {
 						if (otherSession->getPerformanceName() != group->getBandSong()) {
 							groupMember->sendSystemMessage("@performance:music_join_band_stop"); // You must play the same song as the band.
 							otherSession->stopPlayingMusic();
@@ -286,7 +286,7 @@ GroupObject* GroupManager::createGroup(CreatureObject* leader) {
 				ManagedReference<Facade*> facade = groupMember->getActiveSession(SessionFacadeType::ENTERTAINING);
 				ManagedReference<EntertainingSession*> session = dynamic_cast<EntertainingSession*> (facade.get());
 
-				if (session != NULL && session->isPlayingMusic()) {
+				if (session != nullptr && session->isPlayingMusic()) {
 					String bandSong = group->getBandSong();
 					String song = session->getPerformanceName();
 
@@ -309,12 +309,12 @@ GroupObject* GroupManager::createGroup(CreatureObject* leader) {
 void GroupManager::leaveGroup(ManagedReference<GroupObject*> group, CreatureObject* player) {
 	// Pre: player locked
 	// Post: player locked
-	if (group == NULL)
+	if (group == nullptr)
 		return;
 
 	try {
 		ChatRoom* groupChat = group->getChatRoom();
-		if (groupChat != NULL && player->isPlayerCreature()) {
+		if (groupChat != nullptr && player->isPlayerCreature()) {
 			CreatureObject* playerCreature = cast<CreatureObject*>(player);
 
 			Locker gclocker(groupChat, playerCreature);
@@ -322,7 +322,7 @@ void GroupManager::leaveGroup(ManagedReference<GroupObject*> group, CreatureObje
 			groupChat->sendDestroyTo(playerCreature);
 
 			ChatRoom* parentRoom = groupChat->getParent();
-			if (parentRoom != NULL)
+			if (parentRoom != nullptr)
 				parentRoom->sendDestroyTo(playerCreature);
 		}
 
@@ -331,9 +331,9 @@ void GroupManager::leaveGroup(ManagedReference<GroupObject*> group, CreatureObje
 		if (!group->isOtherMemberPlayingMusic(player))
 			group->setBandSong("");
 
-		player->updateGroup(NULL);
+		player->updateGroup(nullptr);
 
-		//if (player != NULL && player->isOnline() && !player->isLoggingOut())
+		//if (player != nullptr && player->isOnline() && !player->isLoggingOut())
 		if (player->isPlayerCreature())
 			player->sendSystemMessage("@group:removed");
 
@@ -708,17 +708,17 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 
 		//Get the corpse's inventory.
 		SceneObject* lootContainer = corpse->getSlottedObject("inventory");
-		if (lootContainer == NULL)
+		if (lootContainer == nullptr)
 			return;
 
 		//Set permissions on all loot items to block theft.
 		for (int i = 0; i < lootContainer->getContainerObjectsSize(); ++i) {
 			SceneObject* lootItem = lootContainer->getContainerObject(i);
-			if (lootItem == NULL)
+			if (lootItem == nullptr)
 				continue;
 
 			ContainerPermissions* itemPerms = lootItem->getContainerPermissions();
-			if (itemPerms == NULL)
+			if (itemPerms == nullptr)
 				continue;
 
 			itemPerms->setDenyPermission("player", ContainerPermissions::OPEN);
@@ -730,7 +730,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 		//Add group members within range to the Lottery.
 		for (int i = 0; i < group->getGroupSize(); ++i) {
 			ManagedReference<CreatureObject*> member = group->getGroupMember(i);
-			if (member == NULL || !member->isPlayerCreature())
+			if (member == nullptr || !member->isPlayerCreature())
 				continue;
 
 			if (!member->isInRange(corpse, 128.f)) {
@@ -751,14 +751,14 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 		//Pre: Corpse is locked.
 		//Post: Corpse is locked.
 
-		if (group == NULL || corpse == NULL)
+		if (group == nullptr || corpse == nullptr)
 			return;
 
 		Locker glocker(group, corpse);
 
 		//Get the corpse's inventory.
 		SceneObject* lootContainer = corpse->getSlottedObject("inventory");
-		if (lootContainer == NULL)
+		if (lootContainer == nullptr)
 			return;
 		int totalItems = lootContainer->getContainerObjectsSize();
 
@@ -766,7 +766,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 		Vector<CreatureObject*> candidates;
 		for (int i = 0; i < group->getGroupSize(); ++i) {
 			ManagedReference<CreatureObject*> member = group->getGroupMember(i);
-			if (member == NULL || !member->isPlayerCreature())
+			if (member == nullptr || !member->isPlayerCreature())
 				continue;
 
 			if (!member->isInRange(corpse, 128.f))
@@ -784,17 +784,17 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 		for (int i = totalItems - 1; i >= 0; --i) {
 			//Get the loot item.
 			SceneObject* object = lootContainer->getContainerObject(i);
-				if (object == NULL)
+				if (object == nullptr)
 					continue;
 
 			//Make sure the item is not left on the corpse for another member.
 			ContainerPermissions* itemPerms = object->getContainerPermissions();
-			if (itemPerms == NULL || itemPerms->getOwnerID() != 0)
+			if (itemPerms == nullptr || itemPerms->getOwnerID() != 0)
 				continue;
 
 			//Pick a winner for the item.
 			ManagedReference<CreatureObject*> winner = candidates.get(System::random(candidates.size() - 1));
-			if (winner == NULL)
+			if (winner == nullptr)
 				continue;
 
 			Locker wclocker(winner, corpse);
@@ -805,7 +805,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 
 		//Reschedule corpse destruction.
 		ManagedReference<CreatureObject*> leader = group->getLeader();
-		if (leader != NULL) {
+		if (leader != nullptr) {
 			Locker lclocker(leader, corpse);
 			leader->getZoneServer()->getPlayerManager()->rescheduleCorpseDestruction(leader, corpse);
 			return;
@@ -816,12 +816,12 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 		//Pre: winner and corpse are locked.
 		//Post: winner and corpse are locked.
 
-		if (winner == NULL || object == NULL)
+		if (winner == nullptr || object == nullptr)
 			return;
 
 		//Set the winner as owner of the item.
 		ContainerPermissions* itemPerms = object->getContainerPermissions();
-		if (itemPerms == NULL)
+		if (itemPerms == nullptr)
 			return;
 
 		itemPerms->setOwner(winner->getObjectID());
@@ -832,7 +832,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 
 		//Transfer the item to the winner.
 		SceneObject* winnerInventory = winner->getSlottedObject("inventory");
-		if (winnerInventory == NULL)
+		if (winnerInventory == nullptr)
 			return;
 
 		if (winnerInventory->isContainerFullRecursive()) {
@@ -841,7 +841,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 			StringIdChatParameter problem("group", "problem_transferring"); //"There was a problem transferring items to your inventory.  You may pick them up from the corpse."
 			winner->sendSystemMessage(problem);
 
-			if (stillGrouped && group != NULL) {
+			if (stillGrouped && group != nullptr) {
 				StringIdChatParameter unable("group", "unable_to_transfer"); //"Unable to transfer %TO to %TT.  The item is available on the corpse for %TT to retrieve.
 				unable.setTO(object->getObjectID());
 				unable.setTT(winner->getObjectID());

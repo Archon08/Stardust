@@ -71,7 +71,7 @@ void VehicleObjectImplementation::fillAttributeList(AttributeListMessage* alm, C
 	alm->insertAttribute("cat_armor_effectiveness.armor_eff_elemental_electrical", ele.toString());
 
 	ManagedReference<CreatureObject* > linkedCreature = this->linkedCreature.get();
-	if( linkedCreature == NULL )
+	if( linkedCreature == nullptr )
 		return;
 
 	alm->insertAttribute("@obj_attr_n:owner", linkedCreature->getFirstName());
@@ -81,11 +81,11 @@ void VehicleObjectImplementation::fillAttributeList(AttributeListMessage* alm, C
 void VehicleObjectImplementation::notifyInsertToZone(Zone* zone) {
 	SceneObjectImplementation::notifyInsertToZone(zone);
 
-	if( this->linkedCreature == NULL )
+	if( this->linkedCreature == nullptr )
 		return;
 
 	ManagedReference<CreatureObject* > linkedCreature = this->linkedCreature.get();
-	if( linkedCreature == NULL )
+	if( linkedCreature == nullptr )
 		return;
 
 	// Decay customized paint (if any)
@@ -121,7 +121,7 @@ void VehicleObjectImplementation::notifyInsertToZone(Zone* zone) {
 bool VehicleObjectImplementation::checkInRangeGarage() {
 	Reference<SceneObject*> garage = StructureManager::instance()->getInRangeParkingGarage(_this.getReferenceUnsafeStaticCast());
 
-	if (garage == NULL)
+	if (garage == nullptr)
 		return false;
 
 	return true;
@@ -135,7 +135,7 @@ int VehicleObjectImplementation::handleObjectMenuSelect(CreatureObject* player, 
 		try {
 			ManagedReference<ControlDevice* > strongRef = controlDevice.get();
 
-			if (strongRef != NULL)
+			if (strongRef != nullptr)
 				strongRef->storeObject(player);
 		} catch (Exception& e) {
 
@@ -159,12 +159,12 @@ void VehicleObjectImplementation::repairVehicle(CreatureObject* player) {
 		
 		ManagedReference<ActiveArea*> activeArea = getActiveRegion();
 
-		if (activeArea != NULL && activeArea->isRegion()) {
+		if (activeArea != nullptr && activeArea->isRegion()) {
 			Region* region = cast<Region*>( activeArea.get());
 
 			ManagedReference<CityRegion*> gb = region->getCityRegion().get();
 			
-			if (gb == NULL)
+			if (gb == nullptr)
 				return;
 
 			if (gb->isBanned(player->getObjectID()))  {
@@ -207,7 +207,7 @@ void VehicleObjectImplementation::sendRepairConfirmTo(CreatureObject* player) {
 	int tax = 0;
 
 	ManagedReference<CityRegion*> city = getCityRegion().get();
-	if(city != NULL && city->getGarageTax() > 0){
+	if(city != nullptr && city->getGarageTax() > 0){
 		repairCost += repairCost * city->getGarageTax() / 100;
 	}
 
@@ -243,7 +243,7 @@ int VehicleObjectImplementation::notifyObjectDestructionObservers(TangibleObject
 
 	ManagedReference<CreatureObject* > linkedCreature = this->linkedCreature.get();
 
-	if (linkedCreature != NULL) {
+	if (linkedCreature != nullptr) {
 		if (!isDisabled())
 			linkedCreature->sendSystemMessage("@pet/pet_menu:veh_disabled");
 

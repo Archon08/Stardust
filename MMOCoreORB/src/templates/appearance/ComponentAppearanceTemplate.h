@@ -85,7 +85,7 @@ public:
 
 			AppearanceTemplate* templ = TemplateManager::instance()->getAppearanceTemplate("appearance/" + meshFile);
 
-			if (templ == NULL) {
+			if (templ == nullptr) {
 				System::out << "Template not found appearance/" << meshFile;
 				continue;
 			}

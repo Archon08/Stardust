@@ -117,7 +117,7 @@ void TreeFile::readNameBlock(FileInputStream* fileStream) {
 	for (int i = 0; i < totalRecords; ++i) {
 		TreeFileRecord* record = records.get(i);
 
-		if (treeArchive != NULL)
+		if (treeArchive != nullptr)
 			treeArchive->addRecord(((char*) uncompressedData) + record->getNameOffset(), record);
 	}
 

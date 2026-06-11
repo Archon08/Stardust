@@ -224,7 +224,7 @@ public:
 
 		Values* values = new Values(subtitle ,min, max, precision, filler, combine);
 
-		valueList.setNullValue(NULL);
+		valueList.setNullValue(nullptr);
 		valueList.put(subtitle, values);
 
 		if (classTitle == "null" || classTitle == "" || (name == "")) {

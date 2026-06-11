@@ -30,7 +30,7 @@ public:
 
 		ManagedReference<SceneObject*> targetObject = server->getZoneServer()->getObject(target);
 
-		if (targetObject == NULL || !targetObject->isCreatureObject()) {
+		if (targetObject == nullptr || !targetObject->isCreatureObject()) {
 			return INVALIDTARGET;
 		}
 
@@ -42,7 +42,7 @@ public:
 
 			ManagedReference<CreatureObject*> creatureTarget = targetObject.castTo<CreatureObject*>();
 
-			if (creatureTarget != NULL) {
+			if (creatureTarget != nullptr) {
 				Locker clocker(creatureTarget, creature);
 
 				ManagedReference<Buff*> buff = new Buff(creatureTarget, getNameCRC(), 120, BuffType::JEDI);
@@ -55,7 +55,7 @@ public:
 
 				creatureTarget->addBuff(buff);
 
-				CombatManager::instance()->broadcastCombatSpam(creature, creatureTarget, NULL, 0, "cbt_spam", combatSpam + "_hit", 1);
+				CombatManager::instance()->broadcastCombatSpam(creature, creatureTarget, nullptr, 0, "cbt_spam", combatSpam + "_hit", 1);
 			}
 
 		}

@@ -21,7 +21,7 @@ void ConsumableImplementation::loadTemplateData(SharedObjectTemplate* templateDa
 
 	ConsumableTemplate* consumable = dynamic_cast<ConsumableTemplate*>(templateData);
 
-	if (consumable == NULL)
+	if (consumable == nullptr)
 		return;
 
 	duration = consumable->getDuration();
@@ -316,7 +316,7 @@ int ConsumableImplementation::handleObjectMenuSelect(CreatureObject* player, byt
 		break;
 	}
 
-	if (buff != NULL) {
+	if (buff != nullptr) {
 		Locker locker(buff);
 
 		player->addBuff(buff);

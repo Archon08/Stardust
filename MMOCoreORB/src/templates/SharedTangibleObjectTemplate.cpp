@@ -72,7 +72,7 @@ void SharedTangibleObjectTemplate::parseFileData(IffStream* iffStream) {
 	for (int i = 0; i < variableCount; ++i) {
 		Chunk* chunk = iffStream->openChunk();
 
-		if (chunk == NULL)
+		if (chunk == nullptr)
 			continue;
 
 		if (chunk->getChunkID() == 'XXXX') {

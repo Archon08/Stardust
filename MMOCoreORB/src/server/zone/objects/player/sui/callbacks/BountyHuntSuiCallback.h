@@ -20,7 +20,7 @@ public:
   virtual void run(CreatureObject* creature, SuiBox* sui, uint32 eventIndex, Vector<UnicodeString>* args) {
     bool cancelPressed = (eventIndex == 1);
 
-		if (!sui->isInputBox() || creature == NULL || cancelPressed || args->size() <= 0) {
+		if (!sui->isInputBox() || creature == nullptr || cancelPressed || args->size() <= 0) {
 			return;
 		}
 
@@ -64,7 +64,7 @@ public:
 				String playerName = player->getFirstName();
 				StringBuffer zBroadcast;
 				zBroadcast << "\\#ffb90f" << playerName << " is now on the bounty hunter \\#e51b1bTerminal!";
-				player->getZoneServer()->getChatManager()->broadcastGalaxy(NULL, zBroadcast.toString());
+				player->getZoneServer()->getChatManager()->broadcastGalaxy(nullptr, zBroadcast.toString());
 			}
 			else creature->sendSystemMessage("You have insufficient funds!");
 		} catch(Exception& e) { }

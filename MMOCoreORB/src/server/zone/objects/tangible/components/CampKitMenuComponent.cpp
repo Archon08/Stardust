@@ -36,10 +36,10 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 	TangibleObject* tano = cast<TangibleObject*>(sceneObject);
 
-	if (tano == NULL || !player->isPlayerCreature())
+	if (tano == nullptr || !player->isPlayerCreature())
 		return 0;
 
-	if (player->getZone() == NULL)
+	if (player->getZone() == nullptr)
 		return 0;
 
 	if (!sceneObject->isASubChildOf(player))
@@ -49,7 +49,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 		/// Get Camp Kit Template
 		CampKitTemplate* campKitData = cast<CampKitTemplate*> (sceneObject->getObjectTemplate());
-		if (campKitData == NULL) {
+		if (campKitData == nullptr) {
 			error("No CampKitTemplate for: " + String::valueOf(sceneObject->getServerObjectCRC()));
 			return 0;
 		}
@@ -57,25 +57,25 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 		/// Get Camp Template
 		SharedObjectTemplate* templateData = TemplateManager::instance()->getTemplate(campKitData->getSpawnObjectTemplate().hashCode());
 		CampStructureTemplate* campStructureData = cast<CampStructureTemplate*> (templateData);
-		if (campStructureData == NULL) {
+		if (campStructureData == nullptr) {
 			error("No CampStructureTemplate for: " + campKitData->getSpawnObjectTemplate());
 			return 0;
 		}
 
 		ManagedReference<ZoneServer*> zoneServer = player->getZoneServer();
-		if (zoneServer == NULL) {
+		if (zoneServer == nullptr) {
 			error("ZoneServer is null when trying to create camp");
 			return 0;
 		}
 
 		ManagedReference<Zone*> zone = player->getZone();
-		if (zone == NULL) {
+		if (zone == nullptr) {
 			error("Zone is null when trying to create camp");
 			return 0;
 		}
 
 		ManagedReference<PlanetManager*> planetManager = zone->getPlanetManager();
-		if (planetManager == NULL) {
+		if (planetManager == nullptr) {
 			error("Unable to get PlanetManager when placing camp");
 			return 0;
 		}
@@ -83,7 +83,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 		/// Get Ghost
 		Reference<PlayerObject*> ghost = player->getSlottedObject("ghost").castTo<PlayerObject*>();
-		if (ghost == NULL) {
+		if (ghost == nullptr) {
 			error("PlayerCreature has no ghost: " + String::valueOf(player->getObjectID()));
 			return 0;
 		}
@@ -100,7 +100,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 			return 0;
 		}
 
-		if(player->getParent() != NULL && player->getParent().get()->isCellObject()) {
+		if(player->getParent() != nullptr && player->getParent().get()->isCellObject()) {
 			player->sendSystemMessage("@camp:error_inside");
 			return 0;
 		}
@@ -116,7 +116,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 		}
 
 		ManagedReference<CityRegion*> region = player->getCityRegion().get();
-		if(region != NULL) {
+		if(region != nullptr) {
 			player->sendSystemMessage("@camp:error_muni_true");
 			return 0;
 		}
@@ -266,7 +266,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 		/// Remove Camp
 		TangibleObject* tano = cast<TangibleObject*>(sceneObject);
-		if(tano != NULL)
+		if(tano != nullptr)
 			tano->decreaseUseCount();
 
 

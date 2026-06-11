@@ -200,7 +200,7 @@ void NameManager::fillNames() {
 
 		info("parsing restricted names list: restrictednames.lst", true);
 
-		BannedNameSet* setp = NULL;
+		BannedNameSet* setp = nullptr;
 
 		String line;
 		bool isset = false;

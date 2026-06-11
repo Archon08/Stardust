@@ -26,7 +26,7 @@ public:
       Locker locker(&mutex);
       Reference<SortedVector<uint32>* > account = ips.get(ip);
       
-      if (account == NULL) {
+      if (account == nullptr) {
         account = new SortedVector<uint32>();        
         account->setNoDuplicateInsertPlan();
         account->put(accountId);
@@ -47,7 +47,7 @@ public:
        
        Reference<SortedVector<uint32>* > account = ips.get(ip);
        
-       if (account == NULL)
+       if (account == nullptr)
          return;
          
         account->drop(accountId);
@@ -63,7 +63,7 @@ public:
     SortedVector<uint32> ret;
     Reference<SortedVector<uint32>*> accounts = ips.get(ip);
     
-    if (accounts != NULL)
+    if (accounts != nullptr)
       ret.addAll(*accounts);
     
     mutex.runlock();

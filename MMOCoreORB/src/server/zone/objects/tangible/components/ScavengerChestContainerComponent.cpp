@@ -11,19 +11,19 @@ bool ScavengerChestContainerComponent::checkContainerPermission(SceneObject* con
 
 	ManagedReference<ScavengerChest*> chest = cast<ScavengerChest*>(container);
 
-	if (chest == NULL)
+	if (chest == nullptr)
 		return false;
 
 	Locker guard(chest);
 
 	EventPerkDataComponent* gameData = cast<EventPerkDataComponent*>(chest->getDataObjectComponent()->get());
 
-	if (gameData == NULL)
+	if (gameData == nullptr)
 		return false;
 
 	EventPerkDeed* deed = gameData->getDeed();
 
-	if (deed == NULL)
+	if (deed == nullptr)
 		return false;
 
 	ManagedReference<CreatureObject*> owner = deed->getOwner().get();
@@ -62,12 +62,12 @@ int ScavengerChestContainerComponent::canAddObject(SceneObject* sceneObject, Sce
 }
 
 int ScavengerChestContainerComponent::notifyObjectRemoved(SceneObject* container, SceneObject*, SceneObject* destination) const {
-	if (destination == NULL)
+	if (destination == nullptr)
 		return 0;
 
 	ManagedReference<SceneObject*> rootParent = destination->getParent().get();
 
-	if (rootParent != NULL && rootParent->isCreatureObject()) {
+	if (rootParent != nullptr && rootParent->isCreatureObject()) {
 		CreatureObject* creature = cast<CreatureObject*>(rootParent.get());
 
 		ContainerPermissions* permissions = container->getContainerPermissions();
@@ -77,24 +77,24 @@ int ScavengerChestContainerComponent::notifyObjectRemoved(SceneObject* container
 
 		ManagedReference<ScavengerChest*> chest = cast<ScavengerChest*>(container);
 
-		if (chest == NULL)
+		if (chest == nullptr)
 			return 0;
 
 		EventPerkDataComponent* gameData = cast<EventPerkDataComponent*>(chest->getDataObjectComponent()->get());
 
-		if (gameData == NULL)
+		if (gameData == nullptr)
 			return 0;
 
 		EventPerkDeed* deed = gameData->getDeed();
 
-		if (deed == NULL)
+		if (deed == nullptr)
 			return 0;
 
 		ManagedReference<CreatureObject*> owner = deed->getOwner().get();
 
 		Locker guard(chest);
 
-		if (creature != NULL && creature != owner)
+		if (creature != nullptr && creature != owner)
 			chest->addtoLootedList(creature->getObjectID());
 	}
 

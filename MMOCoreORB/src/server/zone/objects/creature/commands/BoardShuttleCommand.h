@@ -42,7 +42,7 @@ public:
 
 		ManagedReference<Zone*> zone = creature->getZone();
 
-		if (zone == NULL)
+		if (zone == nullptr)
 			return GENERALERROR;
 
 		ManagedReference<PlanetManager*> planetManager = zone->getPlanetManager();
@@ -50,7 +50,7 @@ public:
 		Reference<PlanetTravelPoint*> closestPoint = planetManager->getNearestPlanetTravelPoint(creature, 128.f);
 
 		// Check to make sure the creature is within range of a PlanetTravelPoint
-		if (closestPoint == NULL) {
+		if (closestPoint == nullptr) {
 			// Could do @player_structure:boarding_too_far here but this allows you to know in-game that no point was found
 			creature->sendSystemMessage("There is no shuttle nearby.");
 			return GENERALERROR;
@@ -59,7 +59,7 @@ public:
 		ManagedReference<CreatureObject*> shuttle = closestPoint->getShuttle();
 
 		// Is there a shuttle object related to this point?
-		if (shuttle == NULL) {
+		if (shuttle == nullptr) {
 			creature->error("WARNING: Missing a shuttle object:" + closestPoint->toString());
 
 			// Different error so it's obvious from in-game that the shuttle did not link to this travel point.
@@ -103,7 +103,7 @@ public:
 		ManagedReference<TicketObject*> ticketObject = server->getZoneServer()->getObject(ticketoid).castTo<TicketObject*>();
 
 		//If no ticket was passed as the target, then send the selection box.
-		if (ticketObject == NULL) {
+		if (ticketObject == nullptr) {
 			sendTicketSelectionBoxTo(creature, tickets);
 			return SUCCESS;
 		}
@@ -121,7 +121,7 @@ public:
 
 		ManagedReference<Zone*> arrivalZone = server->getZoneServer()->getZone(arrivalPlanet);
 
-		if (arrivalZone == NULL) {
+		if (arrivalZone == nullptr) {
 			creature->sendSystemMessage("@travel:route_not_available"); //This ticket's route is no longer available.
 			return GENERALERROR;
 		}
@@ -224,7 +224,7 @@ private:
 
 		ManagedReference<SceneObject*> inventory = creature->getSlottedObject("inventory");
 
-		if (inventory == NULL)
+		if (inventory == nullptr)
 			return tickets;
 
 		int totalObjects = inventory->getContainerObjectsSize();

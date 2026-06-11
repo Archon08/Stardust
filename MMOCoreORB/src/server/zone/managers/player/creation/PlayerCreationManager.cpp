@@ -62,7 +62,7 @@ void PlayerCreationManager::loadRacialCreationData() {
 	IffStream* iffStream = templateManager->openIffFile(
 			"datatables/creation/attribute_limits.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == nullptr) {
 		error("Could not open attribute limits file.");
 		return;
 	}
@@ -122,7 +122,7 @@ void PlayerCreationManager::loadProfessionDefaultsInfo() {
 	IffStream* iffStream = templateManager->openIffFile(
 			"creation/profession_defaults.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == nullptr) {
 		error("Could not open creation profession data.");
 		return;
 	}
@@ -138,7 +138,7 @@ void PlayerCreationManager::loadProfessionDefaultsInfo() {
 		String path = pfdt.getPathBySkillName(name);
 		iffStream = templateManager->openIffFile(path);
 
-		if (iffStream == NULL)
+		if (iffStream == nullptr)
 			continue;
 
 		Reference<ProfessionDefaultsInfo*> pdi = new ProfessionDefaultsInfo();
@@ -169,7 +169,7 @@ void PlayerCreationManager::loadProfessionDefaultsInfo() {
 		Reference<ProfessionDefaultsInfo*> pdi = professionDefaultsInfo.get(
 				key);
 
-		if (pdi == NULL)
+		if (pdi == nullptr)
 			continue;
 
 		for (int i = 1; i < 10; ++i) {
@@ -188,7 +188,7 @@ void PlayerCreationManager::loadDefaultCharacterItems() {
 	IffStream* iffStream = TemplateManager::instance()->openIffFile(
 			"creation/default_pc_equipment.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == nullptr) {
 		error("Couldn't load creation default items.");
 		return;
 	}
@@ -232,7 +232,7 @@ void PlayerCreationManager::loadHairStyleInfo() {
 	IffStream* iffStream = TemplateManager::instance()->openIffFile(
 			"creation/default_pc_hairstyles.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == nullptr) {
 		error("Couldn't load creation hair styles.");
 		return;
 	}
@@ -281,7 +281,7 @@ void PlayerCreationManager::loadLuaConfig() {
 	loadLuaStartingItems(lua);
 
 	delete lua;
-	lua = NULL;
+	lua = nullptr;
 }
 
 void PlayerCreationManager::loadLuaStartingItems(Lua* lua) {
@@ -365,7 +365,7 @@ bool PlayerCreationManager::createCharacter(ClientCreateCharacterCallback* callb
 			dynamic_cast<PlayerCreatureTemplate*>(templateManager->getTemplate(
 					serverObjectCRC));
 
-	if (playerTemplate == NULL) {
+	if (playerTemplate == nullptr) {
 		error("Unknown player template selected: " + raceFile);
 		return false;
 	}
@@ -376,7 +376,7 @@ bool PlayerCreationManager::createCharacter(ClientCreateCharacterCallback* callb
 
 	RacialCreationData* raceData = racialCreationData.get(fileName);
 
-	if (raceData == NULL)
+	if (raceData == nullptr)
 		raceData = racialCreationData.get(0); //Just get the first race, since they tried to create a race that doesn't exist.
 
 	String profession, customization, hairTemplate, hairCustomization;
@@ -887,7 +887,7 @@ void PlayerCreationManager::addStartingItemsInto(CreatureObject* creature,
 
 	if (creature == NULL || container == NULL
 			|| !creature->isPlayerCreature()) {
-		instance()->info("addStartingItemsInto: NULL or not PlayerCreature");
+		instance()->info("addStartingItemsInto: nullptr or not PlayerCreature");
 		return;
 	}
 
@@ -895,7 +895,7 @@ void PlayerCreationManager::addStartingItemsInto(CreatureObject* creature,
 			dynamic_cast<PlayerCreatureTemplate*>(creature->getObjectTemplate());
 
 	if (playerTemplate == NULL) {
-		instance()->info("addStartingItemsInto: playerTemplate NULL");
+		instance()->info("addStartingItemsInto: playerTemplate nullptr");
 		return;
 	}
 
@@ -916,7 +916,7 @@ void PlayerCreationManager::addStartingItemsInto(CreatureObject* creature,
 	//Add profession specific items.
 	PlayerObject* player = creature->getPlayerObject();
 	if (player == NULL) {
-		instance()->info("addStartingItemsInto: playerObject NULL");
+		instance()->info("addStartingItemsInto: playerObject nullptr");
 		return;
 	}
 
@@ -974,13 +974,13 @@ void PlayerCreationManager::addStartingWeaponsInto(CreatureObject* creature,
 			dynamic_cast<PlayerCreatureTemplate*>(creature->getObjectTemplate());
 
 	if (playerTemplate == NULL) {
-		instance()->info("addStartingWeaponsInto: playerTemplate NULL");
+		instance()->info("addStartingWeaponsInto: playerTemplate nullptr");
 		return;
 	}
 
 	PlayerObject* player = creature->getPlayerObject();
 	if (player == NULL) {
-		instance()->info("addStartingWeaponsInto: playerObject NULL");
+		instance()->info("addStartingWeaponsInto: playerObject nullptr");
 		return;
 	}
 
@@ -1075,16 +1075,16 @@ void PlayerCreationManager::addRacialMods(CreatureObject* creature,
 	// Get inventory.
 	if (!equipmentOnly) {
 		SceneObject* inventory = creature->getSlottedObject("inventory");
-		if (inventory == NULL) {
+		if (inventory == nullptr) {
 			return;
 		}
 
-		if (startingItems != NULL) {
+		if (startingItems != nullptr) {
 			for (int i = 0; i < startingItems->size(); ++i) {
 				ManagedReference<SceneObject*> item = zoneServer->createObject(
 						startingItems->get(i).hashCode(), 1);
 
-				if (item != NULL) {
+				if (item != nullptr) {
 					if (!inventory->transferObject(item, -1, false)) {
 						item->destroyObjectFromDatabase(true);
 					}

@@ -34,7 +34,7 @@ void SkillModManager::init() {
 		error("Cannot read configuration, using default");
 		setDefaults();
 		delete lua;
-		lua = NULL;
+		lua = nullptr;
 		return;
 	}
 
@@ -73,7 +73,7 @@ void SkillModManager::init() {
 	}
 
 	delete lua;
-	lua = NULL;
+	lua = nullptr;
 	return;
 
 }
@@ -109,12 +109,12 @@ void SkillModManager::verifyWearableSkillMods(CreatureObject* creature) {
 
 	for(int i = 0; i < creature->getSlottedObjectsSize(); ++i) {
 		ManagedReference<TangibleObject*> object = creature->getSlottedObject(i).castTo<TangibleObject*>();
-		if(object == NULL || usedObjects.contains(object.get()))
+		if(object == nullptr || usedObjects.contains(object.get()))
 			continue;
 
 		if(object->isWearableObject()) {
 			WearableObject* wearable = cast<WearableObject*>(object.get());
-			if(wearable != NULL) {
+			if(wearable != nullptr) {
 
 				VectorMap<String, int>* wearableSkillMods = wearable->getWearableSkillMods();
 
@@ -135,7 +135,7 @@ void SkillModManager::verifyWearableSkillMods(CreatureObject* creature) {
 			}
 		} else if (object->isWearableContainerObject()) {
 			WearableContainerObject* wearable = cast<WearableContainerObject*>(object.get());
-			if(wearable != NULL) {
+			if(wearable != nullptr) {
 
 				VectorMap<String, int>* wearableSkillMods = wearable->getWearableSkillMods();
 
@@ -156,7 +156,7 @@ void SkillModManager::verifyWearableSkillMods(CreatureObject* creature) {
 			}
 		} else if (object->isWeaponObject()) {
 			WeaponObject* weapon = cast<WeaponObject*>(object.get());
-			if(weapon != NULL) {
+			if(weapon != nullptr) {
 
 				VectorMap<String, int>* wearableSkillMods = weapon->getWearableSkillMods();
 
@@ -191,7 +191,7 @@ void SkillModManager::verifyStructureSkillMods(TangibleObject* tano) {
 		return;
 
 	CreatureObject* creature = cast<CreatureObject*>(tano);
-	if (creature == NULL)
+	if (creature == nullptr)
 		return;
 
 	//Locker locker(creature);
@@ -201,14 +201,14 @@ void SkillModManager::verifyStructureSkillMods(TangibleObject* tano) {
 
 	ManagedReference<SceneObject*> parent = creature->getRootParent();
 
-	if (parent == NULL) {
-		if (creature->getCurrentCamp() != NULL) {
+	if (parent == nullptr) {
+		if (creature->getCurrentCamp() != nullptr) {
 			ManagedReference<CampSiteActiveArea*> campArea = creature->getCurrentCamp();
 			parent = campArea->getCamp();
 		}
 	}
 
-	if (parent != NULL && parent->isStructureObject()) {
+	if (parent != nullptr && parent->isStructureObject()) {
 		StructureObject* structure = parent.castTo<StructureObject*>();
 
 		VectorMap<String, int>* templateMods = structure->getTemplateSkillMods();
@@ -299,14 +299,14 @@ bool SkillModManager::compareMods(VectorMap<String, int>& mods, CreatureObject* 
 
 	SkillModList* skillModList = creature->getSkillModList();
 
-	if(skillModList == NULL) {
+	if(skillModList == nullptr) {
 		error("NULL SkillmodList for " + creature->getFirstName());
 		return false;
 	}
 
 	SkillModGroup* group = skillModList->getSkillModGroup(type);
 
-	if(group == NULL){
+	if(group == nullptr){
 		error("NULL SkillModGroup for " + creature->getFirstName());
 		return false;
 	}
@@ -348,7 +348,7 @@ bool SkillModManager::compareMods(VectorMap<String, int>& mods, CreatureObject* 
 	if(match == false) {
 		warning(compare.toString());
 
-		if(creature->getPlayerObject() != NULL) {
+		if(creature->getPlayerObject() != nullptr) {
 			if(creature->getPlayerObject()->getDebug()) {
 				creature->sendSystemMessage(compare.toString());
 			}

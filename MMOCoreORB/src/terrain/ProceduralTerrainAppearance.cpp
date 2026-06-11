@@ -54,10 +54,10 @@ ProceduralTerrainAppearance::ProceduralTerrainAppearance() : Logger("ProceduralT
 
 ProceduralTerrainAppearance::~ProceduralTerrainAppearance() {
 	delete terrainGenerator;
-	terrainGenerator = NULL;
+	terrainGenerator = nullptr;
 
 	delete terrainMaps;
-	terrainMaps = NULL;
+	terrainMaps = nullptr;
 
 	for (int i = customTerrain.size() - 1; i >= 0; --i) {
 		delete customTerrain.get(i);
@@ -504,7 +504,7 @@ TerrainGenerator* ProceduralTerrainAppearance::addTerrainModification(engine::ut
 		error("could not deserialize terrain modification iff file");
 		error(e.getMessage());
 		delete terrain;
-		return NULL;
+		return nullptr;
 	}
 
 	Vector<Layer*>* layers = terrain->getLayersGroup()->getLayers();
@@ -526,7 +526,7 @@ TerrainGenerator* ProceduralTerrainAppearance::addTerrainModification(engine::ut
 	TerrainGenerator* oldLayer = terrainModifications.put(objectid, terrain);
 	customTerrain.add(terrain);
 
-	if (oldLayer != NULL) {
+	if (oldLayer != nullptr) {
 		customTerrain.removeElement(oldLayer);
 		delete oldLayer;
 	}
@@ -539,8 +539,8 @@ TerrainGenerator* ProceduralTerrainAppearance::removeTerrainModification(uint64 
 
 	TerrainGenerator* layer = terrainModifications.remove(objectid);
 
-	if (layer == NULL)
-		return NULL;
+	if (layer == nullptr)
+		return nullptr;
 
 	customTerrain.removeElement(layer);
 

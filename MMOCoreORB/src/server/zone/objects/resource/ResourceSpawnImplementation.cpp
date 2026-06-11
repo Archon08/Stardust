@@ -133,7 +133,7 @@ void ResourceSpawnImplementation::createSpawnMaps(bool jtl, int minpool, int max
 	for (int i = 0; i < zonenames.size(); ++i) {
 
 		Zone* zone = server->getZoneServer()->getZone(zonenames.get(i));
-		if (zone == NULL)
+		if (zone == nullptr)
 			continue;
 
 		SpawnDensityMap newMap(isType("ore"), concentration, zone->getMinX(),
@@ -227,11 +227,11 @@ void ResourceSpawnImplementation::extractResource(const String& zoneName, int un
 }
 
 Reference<ResourceContainer*> ResourceSpawnImplementation::createResource(int units) {
-   	Reference<ResourceContainer*> newResource = NULL;
+   	Reference<ResourceContainer*> newResource = nullptr;
 
    	newResource = (getZoneServer()->createObject(containerCRC, 2)).castTo<ResourceContainer*>();
 
-   	if(newResource == NULL) {
+   	if(newResource == nullptr) {
    		error("Unable to create resource container, using generic.  CRC attempted was: " + String::valueOf(containerCRC));
    		print();
    		String genericContainer = "object/resource_container/organic_food.iff";

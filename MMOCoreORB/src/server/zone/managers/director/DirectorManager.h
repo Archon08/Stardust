@@ -77,7 +77,7 @@ namespace server {
 		DirectorManager();
 
 		~DirectorManager() {
-			sharedMemory = NULL;
+			sharedMemory = nullptr;
 		}
 
 		void loadPersistentEvents();

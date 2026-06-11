@@ -89,14 +89,14 @@ public:
 
 	void TearDown() {
 		// Perform clean up of common constructs here.
-		if (playerManager != NULL) {
+		if (playerManager != nullptr) {
 			playerManager->finalize();
-			playerManager = NULL;
+			playerManager = nullptr;
 		}
 
-		zone = NULL;
-		processServer = NULL;
-		zoneServer = NULL;
+		zone = nullptr;
+		processServer = nullptr;
+		zoneServer = nullptr;
 	}
 };
 
@@ -171,7 +171,7 @@ TEST_F(ZoneTest, InRangeTest) {
 
 	zone->transferObject(scene, -1);
 
-	ASSERT_TRUE(scene->getZone() != NULL);
+	ASSERT_TRUE(scene->getZone() != nullptr);
 
 	SortedVector<ManagedReference<QuadTreeEntry*> > objects;
 

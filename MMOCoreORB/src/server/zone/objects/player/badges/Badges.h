@@ -78,7 +78,7 @@ public:
 		setBadge(badge);
 	}
 	void setBadge(const Badge* badge) {
-		if (badge == NULL) return;
+		if (badge == nullptr) return;
 
 		Locker locker(this);
 
@@ -104,7 +104,7 @@ public:
 	}
 
 	void unsetBadge(Badge* badge) {
-		if (badge == NULL) return;
+		if (badge == nullptr) return;
 		Locker locker(this);
 
 		const int badgeIndex = badge->getIndex();

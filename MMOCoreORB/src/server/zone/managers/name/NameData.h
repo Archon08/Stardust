@@ -22,8 +22,8 @@ class NameData: public Object {
 
 public:
 	NameData() {
-		firstNameRules = NULL;
-		lastNameRules = NULL;
+		firstNameRules = nullptr;
+		lastNameRules = nullptr;
 
 		beginningConsonantOdds = 0;
 		middleConsonantOdds = 0;

@@ -43,7 +43,7 @@ public:
 
 	LootGroupCollectionEntry* get(int i) {
 		if (i < 0 || i >= entries.size())
-			return NULL;
+			return nullptr;
 
 		return &entries.get(i);
 	}

@@ -32,7 +32,7 @@ bool ResourceTree::buildTreeFromClient() {
 
 	IffStream* iffStream = templateManager->openIffFile("datatables/resource/resource_tree.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == nullptr) {
 		info("The Resource Tree could not be found.", true);
 		return false;
 	}

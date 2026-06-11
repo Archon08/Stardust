@@ -37,7 +37,7 @@ public:
 
 		ManagedReference<SceneObject*> targetObject = server->getZoneServer()->getObject(target);
 
-		if (targetObject == NULL || !targetObject->isCreatureObject()) {
+		if (targetObject == nullptr || !targetObject->isCreatureObject()) {
 			return INVALIDTARGET;
 		}
 
@@ -67,7 +67,7 @@ public:
 														creature->sendSystemMessage("Your target can not be snared with " + skillNameDisplay + " for another " +  getCooldownString(timeRemaining->miliDifference() * -1));
 										}
 
-										else if (targetCreature != NULL) {
+										else if (targetCreature != nullptr) {
 											Locker clocker(targetCreature, creature);
 
 											ManagedReference<Buff*> buff = new Buff(targetCreature, getNameCRC(), 6, BuffType::OTHER);

@@ -23,7 +23,7 @@ public:
 			DataTableCell* cell = cells.remove(0);
 
 			delete cell;
-			cell = NULL;
+			cell = nullptr;
 		}
 	}
 

@@ -34,7 +34,7 @@ public:
 
 		ManagedReference<AiAgent*> ai = server->getZoneServer()->getObject(target).castTo<AiAgent*>();
 
-		if (ai == NULL)
+		if (ai == nullptr)
 			return INVALIDTARGET;
 
 		Locker locker(ai, creature);
@@ -105,7 +105,7 @@ public:
 		}
 
 		ManagedReference<GroupObject*> group = creature->getGroup();
-		if (group == NULL)
+		if (group == nullptr)
 			return GENERALERROR;
 
 		GroupLootTask* task = new GroupLootTask(group, creature, ai, lootAll);
@@ -129,18 +129,18 @@ public:
 		if (totalItems < 1) return NOPICKUPITEMS;
 
 		ContainerPermissions* contPerms = lootContainer->getContainerPermissions();
-		if (contPerms == NULL) return NOPICKUPITEMS;
+		if (contPerms == nullptr) return NOPICKUPITEMS;
 
 		SceneObject* playerInventory = creature->getSlottedObject("inventory");
-		if (playerInventory == NULL) return NOPICKUPITEMS;
+		if (playerInventory == nullptr) return NOPICKUPITEMS;
 
 		//Check each loot item to see if the player owns it.
 		for (int i = totalItems - 1; i >= 0; --i) {
 			SceneObject* object = lootContainer->getContainerObject(i);
-			if (object == NULL) continue;
+			if (object == nullptr) continue;
 
 			ContainerPermissions* itemPerms = object->getContainerPermissions();
-			if (itemPerms == NULL) continue;
+			if (itemPerms == nullptr) continue;
 
 			//Check if player owns the loot item.
 			uint64 itemOwnerID = itemPerms->getOwnerID();

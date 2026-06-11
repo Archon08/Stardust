@@ -10,29 +10,29 @@
 #include "templates/customization/BasicRangedIntCustomizationVariable.h"
 
 AssetCustomizationManagerTemplate::AssetCustomizationManagerTemplate() {
-	ulstTable = NULL;
+	ulstTable = nullptr;
 	ulstTableCount = 0;
-	ucmpTable = NULL;
+	ucmpTable = nullptr;
 	ucmpTableCount = 0;
-	vnofTable = NULL;
+	vnofTable = nullptr;
 	vnofTableCount = 0;
-	nameTable = NULL;
+	nameTable = nullptr;
 	nameTableCount = 0;
-	pnofTable = NULL;
+	pnofTable = nullptr;
 	pnofTableCount = 0;
-	defvTable = NULL;
+	defvTable = nullptr;
 	defvTableCount = 0;
-	irngTable = NULL;
+	irngTable = nullptr;
 	irngTableCount = 0;
-	rtypTable = NULL;
+	rtypTable = nullptr;
 	rtypTableCount = 0;
-	uidxTable = NULL;
+	uidxTable = nullptr;
 	uidxTableCount = 0;
-	llstTable = NULL;
+	llstTable = nullptr;
 	llstTableCount = 0;
-	lidxTable = NULL;
+	lidxTable = nullptr;
 	lidxTableCount = 0;
-	cidxTable = NULL;
+	cidxTable = nullptr;
 	cidxTableCount = 0;
 }
 
@@ -53,7 +53,7 @@ AssetCustomizationManagerTemplate::~AssetCustomizationManagerTemplate() {
 
 void* AssetCustomizationManagerTemplate::getCustomizationVariablesFromMap(uint16 key, uint64 a2, bool skipSharedOwner, VectorMap<String, Reference<CustomizationVariable*> >& result) {
 	void* uidxResult = searchUidx(key);
-	void* returnValue = NULL;
+	void* returnValue = nullptr;
 
 	if (uidxResult) {
 		//Logger::console.info("UIDXRESULT NOT NULL", true);
@@ -105,7 +105,7 @@ void* AssetCustomizationManagerTemplate::getCustomizationVariablesFromMap(uint16
 		//Logger::console.info("UIDXRESULT NULL", true);
 	returnValue = searchLidx(key);
 
-	if (returnValue != NULL) {
+	if (returnValue != nullptr) {
 		//Logger::console.info("RETURN VALUE NOT NULL", true);
 
 		uint16 v23 = *((uint16*)returnValue + 1);

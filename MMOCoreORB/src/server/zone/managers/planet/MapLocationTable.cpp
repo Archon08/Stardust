@@ -12,10 +12,10 @@
 void MapLocationTable::transferObject(SceneObject* object) {
 	PlanetMapCategory* pmc = object->getPlanetMapSubCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		pmc = object->getPlanetMapCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		return;
 
 	int index = locations.find(pmc->getName());
@@ -39,10 +39,10 @@ void MapLocationTable::transferObject(SceneObject* object) {
 void MapLocationTable::dropObject(SceneObject* object) {
 	PlanetMapCategory* pmc = object->getPlanetMapSubCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		pmc = object->getPlanetMapCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		return;
 
 	int index = locations.find(pmc->getName());
@@ -61,10 +61,10 @@ void MapLocationTable::dropObject(SceneObject* object) {
 bool MapLocationTable::containsObject(SceneObject* object) {
 	PlanetMapCategory* pmc = object->getPlanetMapSubCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		pmc = object->getPlanetMapCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		return false;
 
 	int index = locations.find(pmc->getName());
@@ -87,10 +87,10 @@ bool MapLocationTable::containsObject(SceneObject* object) {
 void MapLocationTable::updateObjectsIcon(SceneObject* object, byte icon) {
 	PlanetMapCategory* pmc = object->getPlanetMapSubCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		pmc = object->getPlanetMapCategory();
 
-	if (pmc == NULL)
+	if (pmc == nullptr)
 		return;
 
 	int index = locations.find(pmc->getName());

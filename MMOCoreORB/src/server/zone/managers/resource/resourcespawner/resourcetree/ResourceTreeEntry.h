@@ -104,9 +104,9 @@ public:
 
 		containerCRC = 0;
 
-		attributeMap.setNullValue(NULL);
+		attributeMap.setNullValue(nullptr);
 
-		myNode = NULL;
+		myNode = nullptr;
 	}
 
 	/**

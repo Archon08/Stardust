@@ -25,7 +25,7 @@ void DataTableIff::clearDataTable() {
 		DataTableRow* row = rows.remove(0);
 
 		delete row;
-		row = NULL;
+		row = nullptr;
 	}
 }
 

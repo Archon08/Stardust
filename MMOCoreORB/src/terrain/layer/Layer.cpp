@@ -71,13 +71,13 @@ void Layer::parseFromIffStream(engine::util::IffStream* iffStream, Version<'0003
 
 		IffTemplateVariable* rule = parseBoundary(iffStream);
 
-		if (rule == NULL) {
+		if (rule == nullptr) {
 			rule = parseFilter(iffStream);
 
-			if (rule == NULL) {
+			if (rule == nullptr) {
 				rule = parseAffector(iffStream);
 
-				if (rule == NULL) {
+				if (rule == nullptr) {
 					uint32 type = iffStream->getNextFormType();
 
 					if (type != 'LAYR') {
@@ -94,18 +94,18 @@ void Layer::parseFromIffStream(engine::util::IffStream* iffStream, Version<'0003
 
 		}
 
-		if (rule != NULL) {
+		if (rule != nullptr) {
 			Boundary* boundary = dynamic_cast<Boundary*>(rule);
 			FilterProceduralRule* filter = dynamic_cast<FilterProceduralRule*>(rule);
 			AffectorProceduralRule* affector = dynamic_cast<AffectorProceduralRule*>(rule);
 
-			if (filter != NULL)
+			if (filter != nullptr)
 				filters.add(filter);
 
-			if (boundary != NULL)
+			if (boundary != nullptr)
 				boundaries.add(boundary);
 
-			if (affector != NULL) {
+			if (affector != nullptr) {
 				affectors.add(affector);
 
 				/*if (affector->isEnabled()) {
@@ -120,7 +120,7 @@ void Layer::parseFromIffStream(engine::util::IffStream* iffStream, Version<'0003
 }
 
 IffTemplateVariable* Layer::parseAffector(IffStream* iffStream) {
-	IffTemplateVariable* res = NULL;
+	IffTemplateVariable* res = nullptr;
 	uint32 type = iffStream->getNextFormType();
 
 	switch (type) {
@@ -216,18 +216,18 @@ IffTemplateVariable* Layer::parseAffector(IffStream* iffStream) {
 		break;
 	}
 	default:
-		res = NULL;
+		res = nullptr;
 		break;
 	}
 
-	if (res != NULL)
+	if (res != nullptr)
 		res->readObject(iffStream);
 
 	return res;
 }
 
 IffTemplateVariable* Layer::parseBoundary(IffStream* iffStream) {
-	IffTemplateVariable* res = NULL;
+	IffTemplateVariable* res = nullptr;
 	uint32 type = iffStream->getNextFormType();
 
 	switch (type) {
@@ -254,18 +254,18 @@ IffTemplateVariable* Layer::parseBoundary(IffStream* iffStream) {
 		iffStream->skipChunks();
 		break;
 	default:
-		res = NULL;
+		res = nullptr;
 		break;
 	}
 
-	if (res != NULL)
+	if (res != nullptr)
 		res->readObject(iffStream);
 
 	return res;
 }
 
 IffTemplateVariable* Layer::parseFilter(IffStream* iffStream) {
-	IffTemplateVariable* res = NULL;
+	IffTemplateVariable* res = nullptr;
 	uint32 type = iffStream->getNextFormType();
 
 	switch (type) {
@@ -294,11 +294,11 @@ IffTemplateVariable* Layer::parseFilter(IffStream* iffStream) {
 		break;
 	}
 	default:
-		res = NULL;
+		res = nullptr;
 		break;
 	}
 
-	if (res != NULL)
+	if (res != nullptr)
 		res->readObject(iffStream);
 
 	return res;

@@ -40,7 +40,7 @@ void SelectorBehavior::childFailed() {
 
 		} while (!currentChild->checkConditions());
 	} catch (ArrayIndexOutOfBoundsException &e) { // TODO (dannuic): Why doesn't this ever happen? currentPos just decrements and no exception is thrown...
-		currentChild = NULL;
+		currentChild = nullptr;
 		currentPos = 0;
 		endWithFailure();
 	}

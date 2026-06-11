@@ -31,7 +31,7 @@ public:
 		rewardedSchematics = list.rewardedSchematics;
 	}
 
-	bool add(DraftSchematic* schematic, DeltaMessage* message = NULL, int updates = 1);
+	bool add(DraftSchematic* schematic, DeltaMessage* message = nullptr, int updates = 1);
 
 	bool addRewardedSchematic(DraftSchematic* schematic, short type, int quantity);
 

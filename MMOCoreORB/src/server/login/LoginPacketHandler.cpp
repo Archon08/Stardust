@@ -25,7 +25,7 @@ LoginPacketHandler::LoginPacketHandler(const String& s, LoginProcessServerImplem
 void LoginPacketHandler::handleMessage(Message* pack) {
 	Reference<LoginClient*> client = server->getLoginClient(pack->getClient());
 
-	if (client == NULL)
+	if (client == nullptr)
 		return;
 
 	StringBuffer msg;
@@ -99,7 +99,7 @@ void LoginPacketHandler::handleDeleteCharacterMessage(LoginClient* client, Messa
 
     	Reference<ResultSet*> moveResults = ServerDatabase::instance()->executeQuery(moveStatement.toString());
 
-    	if(moveResults == NULL || moveResults.get()->getRowsAffected() == 0){
+    	if(moveResults == nullptr || moveResults.get()->getRowsAffected() == 0){
     		dbDelete = 1;
     		StringBuffer errMsg;
     		errMsg << "ERROR: Could not move character to deleted_characters table. " << endl;
@@ -110,7 +110,7 @@ void LoginPacketHandler::handleDeleteCharacterMessage(LoginClient* client, Messa
 
     	Reference<ResultSet*> verifyResults  = ServerDatabase::instance()->executeQuery(verifyStatement.toString());
 
-    	if(verifyResults == NULL || verifyResults.get()->getRowsAffected() == 0){
+    	if(verifyResults == nullptr || verifyResults.get()->getRowsAffected() == 0){
     		dbDelete = 1;
     		StringBuffer errMsg;
         	errMsg << "ERROR: Could not verify character was moved to deleted_characters " << endl;
@@ -130,7 +130,7 @@ void LoginPacketHandler::handleDeleteCharacterMessage(LoginClient* client, Messa
     	try {
     		Reference<ResultSet*> deleteResults = ServerDatabase::instance()->executeQuery(deleteStatement);
 
-    		if(deleteResults == NULL || deleteResults.get()->getRowsAffected() == 0){
+    		if(deleteResults == nullptr || deleteResults.get()->getRowsAffected() == 0){
     			StringBuffer errMsg;
     			errMsg << "ERROR: Unable to delete character from character table. " << endl;
     			errMsg << "QUERY: " << deleteStatement.toString();

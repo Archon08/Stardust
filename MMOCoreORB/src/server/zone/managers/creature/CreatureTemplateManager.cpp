@@ -28,7 +28,7 @@ CreatureTemplateManager::CreatureTemplateManager() : Logger("CreatureTemplateMan
 		lua->setLogging(true);
 	}
 
-	hashTable.setNullValue(NULL);
+	hashTable.setNullValue(nullptr);
 
 	lua_register(lua->getLuaState(), "includeFile", includeFile);
 	lua_register(lua->getLuaState(), "addTemplate", addTemplate);
@@ -133,7 +133,7 @@ int CreatureTemplateManager::loadTemplates() {
 		ret = false;
 	}
 
-	lua = NULL;
+	lua = nullptr;
 
 	if (!ret)
 		ERROR_CODE = GENERAL_ERROR;

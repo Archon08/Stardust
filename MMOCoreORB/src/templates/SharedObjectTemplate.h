@@ -302,7 +302,7 @@ public:
 	AppearanceTemplate* getAppearanceTemplate();
 
 	const Vector < Vector<String> >* getArrangementDescriptors() const {
-		if (arrangementDescriptors == NULL) {
+		if (arrangementDescriptors == nullptr) {
 			const static Vector < Vector<String> > EMPTY_DESCRIPTORS;
 			return &EMPTY_DESCRIPTORS;
 		} else
@@ -338,8 +338,8 @@ public:
 	}
 
 	inline Vector<String>* getSlotDescriptors() {
-		if (slotDescriptors == NULL)
-			return NULL;
+		if (slotDescriptors == nullptr)
+			return nullptr;
 		else
 			return slotDescriptors->getSlots();
 	}

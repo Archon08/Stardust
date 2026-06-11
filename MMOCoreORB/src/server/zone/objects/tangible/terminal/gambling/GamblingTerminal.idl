@@ -357,7 +357,7 @@ class GamblingTerminal extends Terminal {
 	 * This method handles all game-related messages based on the event that is happening
 	 * @pre { this object is locked }
 	 * @post { this object is locked }
-	 * @param player Protagonist of the event, may be set to NULL for a variety of events
+	 * @param player Protagonist of the event, may be set to nullptr for a variety of events
 	 * @param event The switch argument to decide what needs to be sent 
 	 */
 	public native void statusUpdate(CreatureObject player, int event);

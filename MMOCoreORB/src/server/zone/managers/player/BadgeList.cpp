@@ -4,14 +4,14 @@
 #include "templates/manager/DataArchiveStore.h"
 
 BadgeList::BadgeList() : Logger("BadgeList") {
-	badges.setNullValue(NULL);
-	names.setNullValue(NULL);
+	badges.setNullValue(nullptr);
+	names.setNullValue(nullptr);
 	loadData();
 }
 BadgeList::~BadgeList() {
 	for (int i = 0; i < badges.size(); i++) {
 		const Badge* badge = badges.get(i);
-		if (badge != NULL) {
+		if (badge != nullptr) {
 			delete badge;
 		}
 	}
@@ -44,7 +44,7 @@ void BadgeList::loadData() {
 
 	IffStream* iffStream = DataArchiveStore::instance()->openIffFile("datatables/badge/badge_map.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == nullptr) {
 		info("Couldn't load badge map.", true);
 		return;
 	}
@@ -69,7 +69,7 @@ void BadgeList::loadData() {
 }
 
 void BadgeList::add(Badge* badge) {
-	if (badge == NULL) return;
+	if (badge == nullptr) return;
 
 	badges.put(badge->getIndex(), badge);
 	names.put(badge->getKey(), badge);

@@ -61,8 +61,8 @@ void FloorMeshTriangleNode::readObject(IffStream* iffStream) {
 
 FloorMesh::FloorMesh() {
 	setLoggingName("FloorMesh");
-	pathGraph = NULL;
-	aabbTree = NULL;
+	pathGraph = nullptr;
+	aabbTree = nullptr;
 	connectedEdges.setInsertPlan(SortedVector<EdgeID>::NO_DUPLICATE);
 	uncrossableEdges.setInsertPlan(SortedVector<EdgeID>::NO_DUPLICATE);
 	blockingEdges.setInsertPlan(SortedVector<EdgeID>::NO_DUPLICATE);
@@ -71,13 +71,13 @@ FloorMesh::FloorMesh() {
 }
 
 FloorMesh::~FloorMesh() {
-	if (pathGraph != NULL) {
+	if (pathGraph != nullptr) {
 		delete pathGraph;
-		pathGraph = NULL;
+		pathGraph = nullptr;
 	}
 
 	delete aabbTree;
-	aabbTree = NULL;
+	aabbTree = nullptr;
 
 	for (int i = 0; i < tris.size(); ++i)
 		delete tris.get(i);
@@ -148,7 +148,7 @@ Vector<TriangleNode*>* FloorMesh::getNeighbors(uint32 triangleID) {
 
 TriangleNode* FloorMesh::findNearestTriangle(const Vector3& point) {
 	float dist = MAX_FLOAT;
-	TriangleNode* found = NULL;
+	TriangleNode* found = nullptr;
 
 	for (int i = 0; i < tris.size(); ++i) {
 		TriangleNode* node = tris.getUnsafe(i);
@@ -163,7 +163,7 @@ TriangleNode* FloorMesh::findNearestTriangle(const Vector3& point) {
 		}
 	}
 
-	if (found == NULL) {
+	if (found == nullptr) {
 		StringBuffer msg;
 		msg << "ERROR findNearestTriangle NULL tris.size() = " << tris.size() << "point: x:" << point.getX() << " y:"
 				<< point.getY() << " z:" << point.getZ() << endl;

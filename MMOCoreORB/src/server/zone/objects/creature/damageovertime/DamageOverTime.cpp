@@ -28,7 +28,7 @@ DamageOverTime::DamageOverTime(CreatureObject* attacker,
 							   uint32 dur,
 							   int secondaryStrength) {
 
-	if (attacker != NULL)
+	if (attacker != nullptr)
 		setAttackerID(attacker->getObjectID());
 
 	setType(tp);
@@ -102,7 +102,7 @@ uint32 DamageOverTime::applyDot(CreatureObject* victim) {
 	uint32 power = 0;
 	ManagedReference<CreatureObject*> attacker = victim->getZoneServer()->getObject(attackerID).castTo<CreatureObject*>();
 
-	if (attacker == NULL)
+	if (attacker == nullptr)
 		attacker = victim;
 
 	switch(type) {

@@ -23,7 +23,7 @@ void RandomPool::initialize(LuaObject includes, const String& excludes, int size
 	ResourcePool::initializeByTable(includes, excludes);
 
 	for(int i = 0; i < size; ++i)
-		pool.add(NULL);
+		pool.add(nullptr);
 }
 
 void RandomPool::addResource(ManagedReference<ResourceSpawn*> resourceSpawn, const String& poolSlot) {
@@ -34,7 +34,7 @@ void RandomPool::addResource(ManagedReference<ResourceSpawn*> resourceSpawn, con
 
 		ManagedReference<ResourceSpawn* > spawninpool = pool.get(i);
 
-		if(spawninpool == NULL) {
+		if(spawninpool == nullptr) {
 			pool.setElementAt(i, resourceSpawn);
 			hasRoom = true;
 			break;

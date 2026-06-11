@@ -14,7 +14,7 @@ void CharacterBuilderTerminalImplementation::loadTemplateData(SharedObjectTempla
 
 	CharacterBuilderTerminalTemplate* terminalData = dynamic_cast<CharacterBuilderTerminalTemplate*>(templateData);
 
-	if (terminalData == NULL)
+	if (terminalData == nullptr)
 		return;
 
 	rootNode = terminalData->getItemList();
@@ -42,7 +42,7 @@ int CharacterBuilderTerminalImplementation::handleObjectMenuSelect(CreatureObjec
 void CharacterBuilderTerminalImplementation::sendInitialChoices(CreatureObject* player) {
 	//info("entering sendInitialChoices", true);
 
-	if (rootNode == NULL) {
+	if (rootNode == nullptr) {
 		player->sendSystemMessage("There was an error initializing the menu for this character builder terminal. Sorry for the inconvenience.");
 		return;
 	}
@@ -61,13 +61,13 @@ void CharacterBuilderTerminalImplementation::enhanceCharacter(CreatureObject* pl
 
 	ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
 
-	if (ghost == NULL)
+	if (ghost == nullptr)
 		return;
 
 	for (int i = 0; i < ghost->getActivePetsSize(); i++) {
 		ManagedReference<AiAgent*> pet = ghost->getActivePet(i);
 
-		if (pet != NULL) {
+		if (pet != nullptr) {
 			Locker crossLocker(pet, player);
 
 			pm->enhanceCharacter(pet);
@@ -105,12 +105,12 @@ void CharacterBuilderTerminalImplementation::giveLanguages(CreatureObject* playe
 void CharacterBuilderTerminalImplementation::grantGlowyBadges(CreatureObject* player) {
 	CharacterBuilderTerminalTemplate* terminalTemplate = dynamic_cast<CharacterBuilderTerminalTemplate*>(templateObject.get());
 
-	if (terminalTemplate == NULL)
+	if (terminalTemplate == nullptr)
 		return;
 
 	PlayerObject* ghost = player->getPlayerObject();
 
-	if (ghost == NULL)
+	if (ghost == nullptr)
 		return;
 
 	Vector<int> ids = terminalTemplate->getGlowyBadgeIds();
@@ -126,12 +126,12 @@ void CharacterBuilderTerminalImplementation::grantJediInitiate(CreatureObject* p
 
 	CharacterBuilderTerminalTemplate* terminalTemplate = dynamic_cast<CharacterBuilderTerminalTemplate*>(templateObject.get());
 
-	if (terminalTemplate == NULL)
+	if (terminalTemplate == nullptr)
 		return;
 
 	PlayerObject* ghost = player->getPlayerObject();
 
-	if (ghost == NULL)
+	if (ghost == nullptr)
 		return;
 
 	SkillManager* skillManager = server->getSkillManager();

@@ -33,7 +33,7 @@ public:
 			if (creature->isPlayerCreature()) {
 				PlayerObject* ghost = creature->getPlayerObject();
 
-				if (ghost == NULL)
+				if (ghost == nullptr)
 					return GENERALERROR;
 
 				if (!ghost->hasAbility("admin")) {
@@ -52,7 +52,7 @@ public:
 
 				ManagedReference<CharacterBuilderTerminal*> blueFrog = ( zserv->createObject(blueFrogTemplate.hashCode(), 0)).castTo<CharacterBuilderTerminal*>();
 
-				if (blueFrog == NULL)
+				if (blueFrog == nullptr)
 					return GENERALERROR;
 
 				Locker clocker(blueFrog, creature);
@@ -66,7 +66,7 @@ public:
 				blueFrog->initializePosition(x, z, y);
 								blueFrog->setDirection(creature->getDirectionW(), creature->getDirectionX(), creature->getDirectionY(), creature->getDirectionZ());
 
-				if (parent != NULL && parent->isCellObject())
+				if (parent != nullptr && parent->isCellObject())
 					parent->transferObject(blueFrog, -1);
 				else
 					creature->getZone()->transferObject(blueFrog, -1, true);

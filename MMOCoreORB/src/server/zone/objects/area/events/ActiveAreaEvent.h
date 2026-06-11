@@ -45,7 +45,7 @@ namespace server {
 		   ManagedReference<ActiveArea*> area = activeArea.get();
 		   ManagedReference<SceneObject*> object = sceneObject.get();
 
-		   if (area == NULL || object == NULL)
+		   if (area == nullptr || object == nullptr)
 			   return;
 
 		   Locker clocker(object);

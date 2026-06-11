@@ -59,7 +59,7 @@ void AccountManager::loginAccount(LoginClient* client, Message* packet) {
 
 	ManagedReference<Account*> account = validateAccountCredentials(client, username, password);
 
-	if (account == NULL)
+	if (account == nullptr)
 		return;
 
 	//TODO: This should probably be refactored at some point.
@@ -104,7 +104,7 @@ Account* AccountManager::validateAccountCredentials(LoginClient* client, const S
 	String passwordStored;
 	Account* account = getAccount(query.toString(), passwordStored, true); //force update of mysql rows to update galaxy bans
 
-	if(account == NULL) {
+	if(account == nullptr) {
 
 		//The user name didn't exist, so we check if auto registration is enabled and create a new account
 		if (isAutoRegistrationEnabled() && client != NULL) {

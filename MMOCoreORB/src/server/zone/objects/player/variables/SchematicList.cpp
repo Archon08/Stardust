@@ -29,13 +29,13 @@ void SchematicList::addRewardedSchematics(SceneObject* player) {
 	if (player->isPlayerObject()) {
 		PlayerObject* ghost = cast<PlayerObject*>(player);
 
-		if (ghost != NULL) {
+		if (ghost != nullptr) {
 			Vector<ManagedReference<DraftSchematic* > > schematics;
 
 			for (int i = rewardedSchematics.size() - 1; i >= 0; --i) {
 				DraftSchematic* schem = rewardedSchematics.elementAt(i).getKey();
 
-				if (schem->getDraftSchematicTemplate() != NULL) {
+				if (schem->getDraftSchematicTemplate() != nullptr) {
 					schematics.add(schem);
 				} else {
 					rewardedSchematics.drop(schem);
@@ -92,7 +92,7 @@ bool SchematicList::add(DraftSchematic* schematic, DeltaMessage* message, int up
 
 	bool val = vector.add(schematic);
 
-	if (val && message != NULL) {
+	if (val && message != nullptr) {
 		if (updates != 0)
 			message->startList(updates, updateCounter += updates);
 
@@ -112,7 +112,7 @@ bool SchematicList::contains(DraftSchematic* schematic) {
 
 		DraftSchematic* existingSchematic = get(i);
 
-		if(existingSchematic == NULL)
+		if(existingSchematic == nullptr)
 			continue;
 
 		if((existingSchematic->getClientObjectCRC() == schematic->getClientObjectCRC()) &&
@@ -130,7 +130,7 @@ bool SchematicList::contains(Vector<ManagedReference<DraftSchematic* > > filtere
 
 		DraftSchematic* existingSchematic = filteredschematics.get(i);
 
-		if(existingSchematic == NULL)
+		if(existingSchematic == nullptr)
 			continue;
 
 		if((existingSchematic->getClientObjectCRC() == schematic->getClientObjectCRC()) &&

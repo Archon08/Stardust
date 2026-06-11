@@ -24,16 +24,16 @@ public:
 		return 'MESH';
 	}
 	MeshAppearanceTemplate() {
-		aabbTree = NULL;
-		boundingSphere = NULL;
+		aabbTree = nullptr;
+		boundingSphere = nullptr;
 	}
 
 	~MeshAppearanceTemplate() {
 		delete aabbTree;
-		aabbTree = NULL;
+		aabbTree = nullptr;
 
 		delete boundingSphere;
-		boundingSphere = NULL;
+		boundingSphere = nullptr;
 	}
 
 	void createAABB();
@@ -49,7 +49,7 @@ public:
 	bool testCollide(float x, float z, float y, float radius) const;
 
 	inline void getTriangles(Vector<Triangle*>& triangles) {
-		if (aabbTree != NULL)
+		if (aabbTree != nullptr)
 			aabbTree->getTriangles(triangles);
 	}
 

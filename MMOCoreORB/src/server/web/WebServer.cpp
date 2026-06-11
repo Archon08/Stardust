@@ -18,7 +18,7 @@ int WebServer::sessionTimeout;
 
 WebServer::WebServer() {
 
-	configManager = NULL;
+	configManager = nullptr;
 
 	// Lookup zone to have access to playerobjects
 	zoneServer = DistributedObjectBroker::instance()->lookUp("ZoneServer").castTo<ZoneServer*>().get();
@@ -86,7 +86,7 @@ void WebServer::whitelistInit() {
 
 	info("Parsing access whitelist 'conf/webusers.lst'", true);
 
-	if(zoneServer == NULL) {
+	if(zoneServer == nullptr) {
 		error("Zone server lookup failed, unable to verify users for access");
 		return;
 	}
@@ -163,12 +163,12 @@ void WebServer::mongooseMgrInit() {
 		"listening_ports", ports.toCharArray(),
 		"enable_directory_listing", "no",
 		"document_root", "../doc/www",
-		NULL
+		nullptr
 	};
 
-	ctx = mg_start(&uriHandler, NULL, options);
+	ctx = mg_start(&uriHandler, nullptr, options);
 
-	if(ctx == NULL)
+	if(ctx == nullptr)
 		info("Failed to initialize", true);
 	else
 		info("Initialized", true);
@@ -213,7 +213,7 @@ void* WebServer::handleRequest(struct mg_connection *conn, const struct mg_reque
 	Servlet* servlet = contexts.get(context);
 
 	/// If the session isn't valid, only the login servlet is Accessable
-	if((servlet == NULL || servlet->getContext() != "login") && !session->isAuthenticated()) {
+	if((servlet == nullptr || servlet->getContext() != "login") && !session->isAuthenticated()) {
 		session->debug("NOT Authenticated forwarding to /login");
 		forward(conn, "/login", session->getRequest());
 		return (void*)1;
@@ -225,16 +225,16 @@ void* WebServer::handleRequest(struct mg_connection *conn, const struct mg_reque
 			return (void*)1;
 		}*/
 
-		if(servlet != NULL && servlet->getContext() == "login") {
+		if(servlet != nullptr && servlet->getContext() == "login") {
 			forward(conn, "/main", session->getRequest());
 			return (void*)1;
 		}
 
-		if(servlet != NULL)
+		if(servlet != nullptr)
 			session->debug("Authenticated for /" + servlet->getContext());
 	}
 
-	if(servlet != NULL) {
+	if(servlet != nullptr) {
 
 		servlet->handleRequest(conn, session->getRequest(), session->getResponse());
 
@@ -250,7 +250,7 @@ void WebServer::dispatch(String location, HttpSession* session) {
 
 	Servlet* servlet = contexts.get(location);
 
-	if(servlet != NULL) {
+	if(servlet != nullptr) {
 
 		servlet->handleGet(session->getRequest(), session->getResponse());
 	}

@@ -33,13 +33,13 @@ bool CombatManager::startCombat(CreatureObject* attacker, TangibleObject* defend
 	if (attacker == defender)
 		return false;
 
-	if (attacker->getZone() == NULL || defender->getZone() == NULL)
+	if (attacker->getZone() == nullptr || defender->getZone() == nullptr)
 		return false;
 
 	if (attacker->isRidingMount()) {
 		ManagedReference<CreatureObject*> parent = attacker->getParent().get().castTo<CreatureObject*>();
 
-		if (parent == NULL || !parent->isMount())
+		if (parent == nullptr || !parent->isMount())
 			return false;
 
 		if (parent->hasBuff(STRING_HASHCODE("gallop")))
@@ -56,7 +56,7 @@ bool CombatManager::startCombat(CreatureObject* attacker, TangibleObject* defend
 		return false;
 
 	CreatureObject *creo = defender->asCreatureObject();
-	if (creo != NULL && creo->isIncapacitated() && creo->isFeigningDeath() == false) {
+	if (creo != nullptr && creo->isIncapacitated() && creo->isFeigningDeath() == false) {
 		if (allowIncapTarget) {
 			attacker->clearState(CreatureState::PEACE);
 			return true;
@@ -70,16 +70,16 @@ bool CombatManager::startCombat(CreatureObject* attacker, TangibleObject* defend
 	if (attacker->isPlayerCreature() && !attacker->hasDefender(defender)) {
 		ManagedReference<WeaponObject*> weapon = attacker->getWeapon();
 
-		if (weapon != NULL && weapon->isJediWeapon())
+		if (weapon != nullptr && weapon->isJediWeapon())
 			VisibilityManager::instance()->increaseVisibility(attacker, 25);
 	}
 
 	Locker clocker(defender, attacker);
 
-	if (creo != NULL && creo->isPlayerCreature() && !creo->hasDefender(attacker)) {
+	if (creo != nullptr && creo->isPlayerCreature() && !creo->hasDefender(attacker)) {
 		ManagedReference<WeaponObject*> weapon = creo->getWeapon();
 
-		if (weapon != NULL && weapon->isJediWeapon())
+		if (weapon != nullptr && weapon->isJediWeapon())
 			VisibilityManager::instance()->increaseVisibility(creo, 25);
 	}
 
@@ -98,7 +98,7 @@ bool CombatManager::attemptPeace(CreatureObject* attacker) {
 
 			TangibleObject* defender = cast<TangibleObject*>( object.get());
 
-			if (defender == NULL)
+			if (defender == nullptr)
 				continue;
 
 			try {
@@ -156,7 +156,7 @@ void CombatManager::forcePeace(CreatureObject* attacker) {
 	for (int i = 0; i < defenderList->size(); ++i) {
 		ManagedReference<SceneObject*> object = defenderList->getSafe(i);
 
-		if (object == NULL || !object->isTangibleObject())
+		if (object == nullptr || !object->isTangibleObject())
 			continue;
 
 		TangibleObject* defender = cast<TangibleObject*>( object.get());
@@ -182,7 +182,7 @@ void CombatManager::forcePeace(CreatureObject* attacker) {
 int CombatManager::doCombatAction(CreatureObject* attacker, WeaponObject* weapon, TangibleObject* defenderObject, const CreatureAttackData& data) {
 	//info("entering doCombat action with data ", true);
 
-	if (data.getCommand() == NULL)
+	if (data.getCommand() == nullptr)
 		return -3;
 
 	if (!startCombat(attacker, defenderObject, true, data.getHitIncapTarget()))
@@ -210,7 +210,7 @@ int CombatManager::doCombatAction(CreatureObject* attacker, WeaponObject* weapon
 		while (areaDefenders->size() > 0) {
 			for (int i = areaDefenders->size()-1; i >= 0 ; i--) {
 				TangibleObject* tano = areaDefenders->get(i);
-				if (tano == attacker ||  tano == NULL) {
+				if (tano == attacker ||  tano == nullptr) {
 					areaDefenders->remove(i);
 					continue;
 				}
@@ -246,10 +246,10 @@ int CombatManager::doCombatAction(CreatureObject* attacker, WeaponObject* weapon
 	if (shouldGcwTef || shouldBhTef) {
 		ManagedReference<CreatureObject*> attackingCreature = attacker->isPet() ? attacker->getLinkedCreature() : attacker;
 
-		if (attackingCreature != NULL) {
+		if (attackingCreature != nullptr) {
 			PlayerObject* ghost = attackingCreature->getPlayerObject();
 
-			if (ghost != NULL) {
+			if (ghost != nullptr) {
 				Locker olocker(attackingCreature, attacker);
 				ghost->updateLastPvpCombatActionTimestamp(shouldGcwTef, shouldBhTef);
 			}
@@ -261,13 +261,13 @@ int CombatManager::doCombatAction(CreatureObject* attacker, WeaponObject* weapon
 
 int CombatManager::doCombatAction(TangibleObject* attacker, WeaponObject* weapon, TangibleObject* defender, CombatQueueCommand* command) {
 
-	if (command == NULL)
+	if (command == nullptr)
 		return -3;
 
 	const CreatureAttackData data = CreatureAttackData("", command, defender->getObjectID());
 	int damage = 0;
 
-	if (weapon != NULL){
+	if (weapon != nullptr){
 		damage = doTargetCombatAction(attacker, weapon, defender, data);
 
 		if (data.getCommand()->isAreaAction() || data.getCommand()->isConeAction()) {
@@ -296,7 +296,7 @@ int CombatManager::doTargetCombatAction(CreatureObject* attacker, WeaponObject* 
 	if (tano->isCreatureObject()) {
 		CreatureObject* defender = tano->asCreatureObject();
 
-		if (defender->getWeapon() == NULL)
+		if (defender->getWeapon() == nullptr)
 			return 0;
 
 		damage = doTargetCombatAction(attacker, weapon, defender, data, shouldGcwTef, shouldBhTef);
@@ -425,7 +425,7 @@ int CombatManager::doTargetCombatAction(TangibleObject* attacker, WeaponObject* 
 	if (tano->isCreatureObject()) {
 		CreatureObject* defenderObject = tano->asCreatureObject();
 
-		if (defenderObject->getWeapon() != NULL)
+		if (defenderObject->getWeapon() != nullptr)
 			damage = doTargetCombatAction(attacker, weapon, defenderObject, data);
 	} else {
 		// TODO: implement, tano->tano damage
@@ -435,7 +435,7 @@ int CombatManager::doTargetCombatAction(TangibleObject* attacker, WeaponObject* 
 }
 
 int CombatManager::doTargetCombatAction(TangibleObject* attacker, WeaponObject* weapon, CreatureObject* defenderObject, const CreatureAttackData& data) {
-	if(defenderObject == NULL || !defenderObject->isAttackableBy(attacker))
+	if(defenderObject == nullptr || !defenderObject->isAttackableBy(attacker))
 		return 0;
 
 	if (defenderObject->isEntertaining())
@@ -460,7 +460,7 @@ int CombatManager::doTargetCombatAction(TangibleObject* attacker, WeaponObject* 
 	//Send Attack Combat Spam
 	data.getCommand()->sendAttackCombatSpam(attacker, defenderObject, hitVal, damage, data);
 
-	CombatAction* combatAction = NULL;
+	CombatAction* combatAction = nullptr;
 
 	switch (hitVal) {
 	case MISS:
@@ -1605,7 +1605,7 @@ int CombatManager::getHitChance(TangibleObject* attacker, CreatureObject* target
 
 			//info("Secondaries defenses prevailed", true);
 			// this means use defensive acuity, which mean random 1, 2, or 3
-			if (targetWeapon == NULL)
+			if (targetWeapon == nullptr)
 				return System::random(2) + 1;
 
 			if (def == "block")
@@ -2121,7 +2121,7 @@ int CombatManager::applyDamage(CreatureObject* attacker, WeaponObject* weapon, T
 }
 
 void CombatManager::sendMitigationCombatSpam(CreatureObject* defender, TangibleObject* item, uint32 damage, int type) {
-	if (defender == NULL || !defender->isPlayerCreature())
+	if (defender == nullptr || !defender->isPlayerCreature())
 			return;
 
 	int color = 0; //text color
@@ -2138,25 +2138,25 @@ void CombatManager::sendMitigationCombatSpam(CreatureObject* defender, TangibleO
 		color = 1; //green, unconfirmed
 		file = "cbt_spam";
 		stringName = "forceshield_hit";
-		item = NULL;
+		item = nullptr;
 		break;
 	case FORCEFEEDBACK:
 		color = 2; //red, confirmed
 		file = "cbt_spam";
 		stringName = "forcefeedback_hit";
-		item = NULL;
+		item = nullptr;
 		break;
 	case FORCEABSORB:
 		color = 0; //white, unconfirmed
 		file = "cbt_spam";
 		stringName = "forceabsorb_hit";
-		item = NULL;
+		item = nullptr;
 		break;
 	case FORCEARMOR:
 		color = 1; //green, confirmed
 		file = "cbt_spam";
 		stringName = "forcearmor_hit";
-		item = NULL;
+		item = nullptr;
 		break;
 	case ARMOR:
 		color = 1; //green, confirmed
@@ -2167,28 +2167,28 @@ void CombatManager::sendMitigationCombatSpam(CreatureObject* defender, TangibleO
 		color = 0; //white, confirmed
 		file = "combat_effects";
 		stringName = "mitigate_damage";
-		item = NULL;
+		item = nullptr;
 		break;
 	default:
 		break;
 	}
 
-	CombatSpam* spam = new CombatSpam(defender, NULL, defender, item, damage, file, stringName, color);
+	CombatSpam* spam = new CombatSpam(defender, nullptr, defender, item, damage, file, stringName, color);
 	defender->sendMessage(spam);
 }
 
 void CombatManager::broadcastCombatSpam(TangibleObject* attacker, TangibleObject* defender, TangibleObject* item, int damage, const String& file, const String& stringName, byte color) {
-	if (attacker == NULL)
+	if (attacker == nullptr)
 		return;
 
 	Zone* zone = attacker->getZone();
-	if (zone == NULL)
+	if (zone == nullptr)
 		return;
 
 	CloseObjectsVector* vec = (CloseObjectsVector*) attacker->getCloseObjects();
 	SortedVector<QuadTreeEntry*> closeObjects;
 
-	if (vec != NULL) {
+	if (vec != nullptr) {
 		closeObjects.removeAll(vec->size(), 10);
 		vec->safeCopyReceiversTo(closeObjects, CloseObjectsVector::PLAYERTYPE);
 	} else {
@@ -2222,7 +2222,7 @@ void CombatManager::broadcastCombatAction(CreatureObject * attacker, TangibleObj
 	uint64 weaponID = weapon->getObjectID();
 
 	CreatureObject *dcreo = defenderObject->asCreatureObject();
-	if (dcreo != NULL) { // All of this funkiness only applies to creo targets, tano's don't animate hits or posture changes
+	if (dcreo != nullptr) { // All of this funkiness only applies to creo targets, tano's don't animate hits or posture changes
 
 		dcreo->updatePostures(false); // Commit pending posture changes to the client and notify observers
 
@@ -2260,7 +2260,7 @@ void CombatManager::broadcastCombatAction(CreatureObject * attacker, TangibleObj
 }
 
 void CombatManager::requestDuel(CreatureObject* player, CreatureObject* targetPlayer) {
-	/* Pre: player != targetPlayer and not NULL; player is locked
+	/* Pre: player != targetPlayer and not nullptr; player is locked
 	 * Post: player requests duel to targetPlayer
 	 */
 
@@ -2291,7 +2291,7 @@ void CombatManager::requestDuel(CreatureObject* player, CreatureObject* targetPl
 		for (int i = 0; i < targetGhost->getActivePetsSize(); i++) {
 			ManagedReference<AiAgent*> pet = targetGhost->getActivePet(i);
 
-			if (pet != NULL) {
+			if (pet != nullptr) {
 				BaseMessage* petpvpstat = new UpdatePVPStatusMessage(pet, player,
 						pet->getPvpStatusBitmask()
 						| CreatureFlag::ATTACKABLE
@@ -2312,7 +2312,7 @@ void CombatManager::requestDuel(CreatureObject* player, CreatureObject* targetPl
 		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
 			ManagedReference<AiAgent*> pet = ghost->getActivePet(i);
 
-			if (pet != NULL) {
+			if (pet != nullptr) {
 				BaseMessage* petpvpstat = new UpdatePVPStatusMessage(pet, targetPlayer,
 						pet->getPvpStatusBitmask()
 						| CreatureFlag::ATTACKABLE
@@ -2336,7 +2336,7 @@ void CombatManager::requestDuel(CreatureObject* player, CreatureObject* targetPl
 }
 
 void CombatManager::requestEndDuel(CreatureObject* player, CreatureObject* targetPlayer) {
-	/* Pre: player != targetPlayer and not NULL; player is locked
+	/* Pre: player != targetPlayer and not nullptr; player is locked
 	 * Post: player requested to end the duel with targetPlayer
 	 */
 
@@ -2367,7 +2367,7 @@ void CombatManager::requestEndDuel(CreatureObject* player, CreatureObject* targe
 		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
 			ManagedReference<AiAgent*> pet = ghost->getActivePet(i);
 
-			if (pet != NULL) {
+			if (pet != nullptr) {
 				targetPlayer->removeDefender(pet);
 				pet->sendPvpStatusTo(targetPlayer);
 
@@ -2390,7 +2390,7 @@ void CombatManager::requestEndDuel(CreatureObject* player, CreatureObject* targe
 		for (int i = 0; i < targetGhost->getActivePetsSize(); i++) {
 			ManagedReference<AiAgent*> pet = targetGhost->getActivePet(i);
 
-			if (pet != NULL) {
+			if (pet != nullptr) {
 				player->removeDefender(pet);
 				pet->sendPvpStatusTo(player);
 
@@ -2411,12 +2411,12 @@ void CombatManager::requestEndDuel(CreatureObject* player, CreatureObject* targe
 }
 
 void CombatManager::freeDuelList(CreatureObject* player, bool spam) {
-	/* Pre: player not NULL and is locked
+	/* Pre: player not nullptr and is locked
 	 * Post: player removed and warned all of the objects from its duel list
 	 */
 	PlayerObject* ghost = player->getPlayerObject();
 
-	if (ghost == NULL || ghost->isDuelListEmpty())
+	if (ghost == nullptr || ghost->isDuelListEmpty())
 		return;
 
 	player->info("freeing duel list");
@@ -2425,7 +2425,7 @@ void CombatManager::freeDuelList(CreatureObject* player, bool spam) {
 		ManagedReference<CreatureObject*> targetPlayer = ghost->getDuelListObject(0);
 		PlayerObject* targetGhost = targetPlayer->getPlayerObject();
 
-		if (targetPlayer != NULL && targetGhost != NULL && targetPlayer.get() != player) {
+		if (targetPlayer != nullptr && targetGhost != nullptr && targetPlayer.get() != player) {
 			try {
 				Locker clocker(targetPlayer, player);
 
@@ -2441,7 +2441,7 @@ void CombatManager::freeDuelList(CreatureObject* player, bool spam) {
 					for (int i = 0; i < ghost->getActivePetsSize(); i++) {
 						ManagedReference<AiAgent*> pet = ghost->getActivePet(i);
 
-						if (pet != NULL) {
+						if (pet != nullptr) {
 							targetPlayer->removeDefender(pet);
 							pet->sendPvpStatusTo(targetPlayer);
 
@@ -2464,7 +2464,7 @@ void CombatManager::freeDuelList(CreatureObject* player, bool spam) {
 					for (int i = 0; i < targetGhost->getActivePetsSize(); i++) {
 						ManagedReference<AiAgent*> pet = targetGhost->getActivePet(i);
 
-						if (pet != NULL) {
+						if (pet != nullptr) {
 							player->removeDefender(pet);
 							pet->sendPvpStatusTo(player);
 
@@ -2497,7 +2497,7 @@ void CombatManager::freeDuelList(CreatureObject* player, bool spam) {
 }
 
 void CombatManager::declineDuel(CreatureObject* player, CreatureObject* targetPlayer) {
-	/* Pre: player != targetPlayer and not NULL; player is locked
+	/* Pre: player != targetPlayer and not nullptr; player is locked
 	 * Post: player declined Duel to targetPlayer
 	 */
 
@@ -2523,7 +2523,7 @@ bool CombatManager::areInDuel(CreatureObject* player1, CreatureObject* player2) 
 	PlayerObject* ghost1 = player1->getPlayerObject().get();
 	PlayerObject* ghost2 = player2->getPlayerObject().get();
 
-	if (ghost1 != NULL && ghost2 != NULL) {
+	if (ghost1 != nullptr && ghost2 != nullptr) {
 		if (ghost1->requestedDuelTo(player2) && ghost2->requestedDuelTo(player1))
 			return true;
 	}
@@ -2561,7 +2561,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 
 	Zone* zone = attacker->getZone();
 
-	if (zone == NULL)
+	if (zone == nullptr)
 		return defenders;
 
 	PlayerManager* playerManager = zone->getZoneServer()->getPlayerManager();
@@ -2597,7 +2597,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 
 		SortedVector<QuadTreeEntry*> closeObjects;
 
-		if (vec != NULL) {
+		if (vec != nullptr) {
 			closeObjects.removeAll(vec->size(), 10);
 			vec->safeCopyTo(closeObjects);
 		} else {
@@ -2613,7 +2613,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 			TangibleObject* tano = object->asTangibleObject();
 			CreatureObject* creo = object->asCreatureObject();
 
-			if (tano == NULL) {
+			if (tano == nullptr) {
 				continue;
 			}
 
@@ -2637,7 +2637,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 					continue;
 			}
 
-			if (creo != NULL && creo->isFeigningDeath() == false && creo->isIncapacitated()) {
+			if (creo != nullptr && creo->isFeigningDeath() == false && creo->isIncapacitated()) {
 				//error("object is incapacitated");
 				continue;
 			}
@@ -2683,14 +2683,14 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 int CombatManager::getArmorTurretReduction(CreatureObject* attacker, TangibleObject* defender, int damageType) {
 	int resist = 0;
 
-	if (defender != NULL && defender->isTurret()) {
+	if (defender != nullptr && defender->isTurret()) {
 		DataObjectComponentReference* data = defender->getDataObjectComponent();
 
-		if (data != NULL) {
+		if (data != nullptr) {
 
 			TurretDataComponent* turretData = cast<TurretDataComponent*>(data->get());
 
-			if (turretData != NULL) {
+			if (turretData != nullptr) {
 
 				switch (damageType) {
 				case SharedWeaponObjectTemplate::KINETIC:
@@ -2828,7 +2828,7 @@ void CombatManager::checkForTefs(CreatureObject* attacker, CreatureObject* defen
 	ManagedReference<CreatureObject*> attackingCreature = attacker->isPet() ? attacker->getLinkedCreature() : attacker;
 	ManagedReference<CreatureObject*> targetCreature = defender->isPet() || defender->isVehicleObject() ? defender->getLinkedCreature() : defender;
 
-	if (attackingCreature != NULL && targetCreature != NULL && attackingCreature->isPlayerCreature() && targetCreature->isPlayerCreature() && !areInDuel(attackingCreature, targetCreature)) {
+	if (attackingCreature != nullptr && targetCreature != nullptr && attackingCreature->isPlayerCreature() && targetCreature->isPlayerCreature() && !areInDuel(attackingCreature, targetCreature)) {
 
 		if (!(*shouldGcwTef) && (attackingCreature->getFaction() != targetCreature->getFaction()) && (attackingCreature->getFactionStatus() == FactionStatus::OVERT) && (targetCreature->getFactionStatus() == FactionStatus::OVERT))
 			*shouldGcwTef = true;

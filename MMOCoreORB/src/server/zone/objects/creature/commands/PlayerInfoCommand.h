@@ -29,7 +29,7 @@ public:
 			targetObject = creature->getZoneServer()->getObject(creature->getTargetID()).castTo<CreatureObject*>();
 		}
 
-		if (targetObject == NULL || !targetObject->isPlayerCreature()) {
+		if (targetObject == nullptr || !targetObject->isPlayerCreature()) {
 			targetObject = creature;
 		}
 
@@ -49,7 +49,7 @@ public:
 		promptText << "Name: " << targetObject->getCustomObjectName().toString()  << endl;
 		promptText << "ObjectID: " << targetObject->getObjectID() << endl;
 
-		if (ghost != NULL) {
+		if (ghost != nullptr) {
 			promptText << "Online Status: ";
 
 			if(ghost->isOnline())
@@ -78,7 +78,7 @@ public:
 
 		promptText << endl << "Level: " << targetObject->getLevel() << endl;
 
-		if (ghost != NULL) {
+		if (ghost != nullptr) {
 			promptText << "totalSkillPointsWasted = " << totalSkillPointsWasted << " skillPoints var:" << ghost->getSkillPoints() << endl;
 
 			promptText << endl << "Ability list:" << endl;
@@ -97,7 +97,7 @@ public:
 				promptText << "Hologrind professions:\n";
 
 				BadgeList* badgeList = BadgeList::instance();
-				if (badgeList != NULL) {
+				if (badgeList != nullptr) {
 					for (int i = 0; i < holoProfessions->size(); ++i) {
 						byte prof = holoProfessions->get(i);
 						const Badge* badge = badgeList->get(prof);
@@ -115,7 +115,7 @@ public:
 				MissionManager* missionManager = creature->getZoneServer()->getMissionManager();
 				Vector<uint64>* hunterList =  missionManager->getHuntersHuntingTarget(targetObject->getObjectID());
 
-				if (hunterList != NULL) {
+				if (hunterList != nullptr) {
 					for (int i = 0; i < hunterList->size(); i++) {
 						promptText << "Hunter #" << i << ": " << hunterList->get(i) << endl;
 					}
@@ -131,13 +131,13 @@ public:
 		ManagedReference<SceneObject*> bank = targetObject->getSlottedObject("bank");
 		ManagedReference<SceneObject*> datapad = targetObject->getSlottedObject("datapad");
 
-		promptText << "Inventory: " << (inventory == NULL ? String("NULL") : String::valueOf(inventory->getObjectID()));
+		promptText << "Inventory: " << (inventory == nullptr ? String("NULL") : String::valueOf(inventory->getObjectID()));
 		promptText << endl;
 
-		promptText << "Bank: " << (bank == NULL ? String("NULL") : String::valueOf(bank->getObjectID()));
+		promptText << "Bank: " << (bank == nullptr ? String("NULL") : String::valueOf(bank->getObjectID()));
 		promptText << endl;
 
-		promptText << "Datapad: " << (datapad == NULL ? String("NULL") : String::valueOf(datapad->getObjectID()));
+		promptText << "Datapad: " << (datapad == nullptr ? String("NULL") : String::valueOf(datapad->getObjectID()));
 		promptText << endl;
 
 

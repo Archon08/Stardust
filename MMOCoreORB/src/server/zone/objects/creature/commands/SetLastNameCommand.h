@@ -27,7 +27,7 @@ public:
 
 		Reference<SceneObject*> targetObj = zoneServer->getObject(target);
 
-		if(targetObj == NULL || !targetObj->isPlayerCreature()) {
+		if(targetObj == nullptr || !targetObj->isPlayerCreature()) {
 			creature->sendSystemMessage("Invalid target. This command only works on players");
 			return INVALIDTARGET;
 		}
@@ -109,7 +109,7 @@ public:
 		PlayerObject* targetGhost = targetCreature->getPlayerObject();
 		ManagedReference<PlayerManager*> playerManager = server->getPlayerManager();
 
-		if (targetGhost != NULL && targetGhost->hasGodMode() && playerManager != NULL) {
+		if (targetGhost != nullptr && targetGhost->hasGodMode() && playerManager != nullptr) {
 			playerManager->updatePermissionName(targetCreature, targetGhost->getAdminLevel());
 		}
 

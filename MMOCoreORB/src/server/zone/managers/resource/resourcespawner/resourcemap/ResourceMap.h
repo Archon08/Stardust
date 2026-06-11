@@ -50,7 +50,7 @@ class ZoneResourceMap : public VectorMap<String, ManagedReference<ResourceSpawn*
 public:
 	ZoneResourceMap() {
 		setNoDuplicateInsertPlan();
-		setNullValue(NULL);
+		setNullValue(nullptr);
 	}
 	~ZoneResourceMap() {
 
@@ -113,7 +113,7 @@ public:
 		if(zoneResourceMap.contains(zoneName))
 			return zoneResourceMap.get(zoneName);
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	/**

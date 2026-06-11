@@ -87,9 +87,9 @@ public:
 	/**
 	 * Attempts to load a Structure Footprint file from the TRE, and places it in the map.
 	 * If the structure footprint already exists in the map, then it is simply returned.
-	 * If the structure footprint cannot be found, then a warning is displayed, and NULL is returned
+	 * If the structure footprint cannot be found, then a warning is displayed, and nullptr is returned
 	 * @param filePath The TRE path to the Structure Footprint file from the root directory.
-	 * @return Returns NULL if not found, else returns the StructureFootprint.
+	 * @return Returns nullptr if not found, else returns the StructureFootprint.
 	 */
 	StructureFootprint* loadStructureFootprint(const String& filePath);
 
@@ -144,7 +144,7 @@ public:
 				return cat.get();
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	/**
@@ -152,7 +152,7 @@ public:
 	 * It attempts to return the StructureFootprint that resides at the specified filepath, but requires
 	 * that it has been loaded previously.
 	 * @param filePath The TRE path of the desired Structure Footprint file.
-	 * @return Returns the StructureFootprint object, or NULL if it does not exist.
+	 * @return Returns the StructureFootprint object, or nullptr if it does not exist.
 	 */
 	StructureFootprint* getStructureFootprint(const String& filePath) {
 		return structureFootprints.get(filePath);

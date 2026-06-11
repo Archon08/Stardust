@@ -114,7 +114,7 @@ public:
 		if (!file->exists()) {
 			error("Tree File does not exist: " + treeFilePath);
 			delete file;
-			return NULL;
+			return nullptr;
 		}
 
 		fileStream.skip(fileOffset);

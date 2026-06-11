@@ -24,7 +24,7 @@ void CompositeBehavior::start() {
 	for (int i = 0; i < children.size(); i++) {
 		Behavior* currentChild = children.get(i);
 
-		if (currentChild == NULL) {
+		if (currentChild == nullptr) {
 			Reference<AiAgent*> agent = this->agent.get();
 
 			agent->error("NULL child in CompositeBehavior");
@@ -40,8 +40,8 @@ void CompositeBehavior::start() {
 void CompositeBehavior::doAction(bool directlyExecuted) {
 	AiAgent* agent = this->agent.getReferenceUnsafeStaticCast();
 
-	if (agent->isDead() || agent->isIncapacitated() || (agent->getZone() == NULL)) {
-		agent->setFollowObject(NULL);
+	if (agent->isDead() || agent->isIncapacitated() || (agent->getZone() == nullptr)) {
+		agent->setFollowObject(nullptr);
 		return;
 	}
 
@@ -60,7 +60,7 @@ void CompositeBehavior::doAction(bool directlyExecuted) {
 	do {
 		currentChild = children.get(currentPos);
 
-		if (currentChild == NULL) {
+		if (currentChild == nullptr) {
 			agent->error("NULL child or empty children list in CompositeBehavior");
 			endWithError();
 			Behavior::doAction(directlyExecuted);
@@ -83,7 +83,7 @@ void CompositeBehavior::doAction(bool directlyExecuted) {
 
 			currentChild->end();
 		}
-	} while (currentChild != NULL && currentChild->finished() && !this->finished() && currentPos < children.size());
+	} while (currentChild != nullptr && currentChild->finished() && !this->finished() && currentPos < children.size());
 
 	if (currentChild->finished())
 		Behavior::doAction(directlyExecuted);

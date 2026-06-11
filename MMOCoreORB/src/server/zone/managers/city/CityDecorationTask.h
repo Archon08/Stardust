@@ -48,7 +48,7 @@ public:
 
 		ManagedReference<CityRegion*> city = mayor->getCityRegion().get();
 
-		if(city == NULL) {
+		if(city == nullptr) {
 			mayor->sendSystemMessage("@player_structure:cant_place_civic"); //This structure must be placed within the borders of the city in which you are mayor.
 			return;
 		}
@@ -61,7 +61,7 @@ public:
 		}
 
 		PlayerObject* mayorGhost = mayor->getPlayerObject().get();
-		if (mayorGhost == NULL) {
+		if (mayorGhost == nullptr) {
 			return;
 		}
 
@@ -78,7 +78,7 @@ public:
 
 		Zone* zone = mayor->getZone();
 
-		if (zone == NULL || obj->getObjectTemplate() == NULL)
+		if (zone == nullptr || obj->getObjectTemplate() == nullptr)
 			return;
 
 		ManagedReference<PlanetManager*> planetManager = zone->getPlanetManager();

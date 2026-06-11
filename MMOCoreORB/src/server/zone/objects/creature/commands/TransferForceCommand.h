@@ -29,12 +29,12 @@ public:
 		ManagedReference<SceneObject*> object = server->getZoneServer()->getObject(target);
 
 		// Fail if target is not a player...
-		if (object == NULL || !object->isPlayerCreature())
+		if (object == nullptr || !object->isPlayerCreature())
 			return INVALIDTARGET;
 
 		CreatureObject* targetCreature = cast<CreatureObject*>( object.get());
 
-		if (targetCreature == NULL || targetCreature->isDead() || targetCreature->isIncapacitated())
+		if (targetCreature == nullptr || targetCreature->isDead() || targetCreature->isIncapacitated())
 			return INVALIDTARGET;
 
 		Locker clocker(targetCreature, creature);
@@ -42,7 +42,7 @@ public:
 		ManagedReference<PlayerObject*> targetGhost = targetCreature->getPlayerObject();
 		ManagedReference<PlayerObject*> playerGhost = creature->getPlayerObject();
 
-		if (targetGhost == NULL || playerGhost == NULL)
+		if (targetGhost == nullptr || playerGhost == nullptr)
 			return GENERALERROR;
 
 		if (!CollisionManager::checkLineOfSight(creature, targetCreature)) {
@@ -72,7 +72,7 @@ public:
 
 			uint32 animCRC = getAnimationString().hashCode();
 			creature->doCombatAnimation(targetCreature, animCRC, 0x1, 0xFF);
-			CombatManager::instance()->broadcastCombatSpam(creature, targetCreature, NULL, forceTransfer, "cbt_spam", combatSpam, 0);
+			CombatManager::instance()->broadcastCombatSpam(creature, targetCreature, nullptr, forceTransfer, "cbt_spam", combatSpam, 0);
 
 			return SUCCESS;
 		}

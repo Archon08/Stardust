@@ -38,7 +38,7 @@
 void TangibleObjectImplementation::initializeTransientMembers() {
 	SceneObjectImplementation::initializeTransientMembers();
 
-	threatMap = NULL;
+	threatMap = nullptr;
 
 	setLoggingName("TangibleObject");
 
@@ -52,7 +52,7 @@ void TangibleObjectImplementation::loadTemplateData(SharedObjectTemplate* templa
 
 	SharedTangibleObjectTemplate* tanoData = dynamic_cast<SharedTangibleObjectTemplate*>(templateData);
 
-	if (tanoData == NULL)
+	if (tanoData == nullptr)
 		return;
 
 	targetable = tanoData->getTargetable();
@@ -73,7 +73,7 @@ void TangibleObjectImplementation::loadTemplateData(SharedObjectTemplate* templa
 	junkDealerNeeded = tanoData->getJunkDealerNeeded();
 	junkValue = tanoData->getJunkValue();
 
-	threatMap = NULL;
+	threatMap = nullptr;
 }
 
 void TangibleObjectImplementation::notifyLoadFromDatabase() {
@@ -95,7 +95,7 @@ void TangibleObjectImplementation::notifyLoadFromDatabase() {
 	if (hasAntiDecayKit()) {
 		AntiDecayKit* adk = antiDecayKitObject.castTo<AntiDecayKit*>();
 
-		if (adk != NULL && !adk->isUsed()) {
+		if (adk != nullptr && !adk->isUsed()) {
 			Locker locker(adk);
 
 			adk->setUsed(true);
@@ -125,12 +125,12 @@ void TangibleObjectImplementation::setFactionStatus(int status) {
 	if (isPlayerCreature()) {
 		CreatureObject* creature = asCreatureObject();
 
-		if (creature == NULL)
+		if (creature == nullptr)
 			return;
 
 		PlayerObject* ghost = creature->getPlayerObject();
 
-		if (ghost == NULL)
+		if (ghost == nullptr)
 			return;
 
 		uint32 pvpStatusBitmask = creature->getPvpStatusBitmask();
@@ -147,10 +147,10 @@ void TangibleObjectImplementation::setFactionStatus(int status) {
 
 				Zone* creoZone = creature->getZone();
 
-				if (creoZone != NULL) {
+				if (creoZone != nullptr) {
 					GCWManager* gcwMan = creoZone->getGCWManager();
 
-					if (gcwMan != NULL)
+					if (gcwMan != nullptr)
 						cooldown = gcwMan->getOvertCooldown();
 				}
 
@@ -177,12 +177,12 @@ void TangibleObjectImplementation::setFactionStatus(int status) {
 		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
 			Reference<AiAgent*> pet = ghost->getActivePet(i);
 
-			if (pet == NULL)
+			if (pet == nullptr)
 				continue;
 
 			CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
 
-			if (creatureTemplate != NULL) {
+			if (creatureTemplate != nullptr) {
 				String templateFaction = creatureTemplate->getFaction();
 
 				if (!templateFaction.isEmpty() && factionStatus == FactionStatus::ONLEAVE) {
@@ -233,10 +233,10 @@ void TangibleObjectImplementation::sendPvpStatusTo(CreatureObject* player) {
 }
 
 void TangibleObjectImplementation::broadcastPvpStatusBitmask() {
-	if (getZoneUnsafe() == NULL)
+	if (getZoneUnsafe() == nullptr)
 			return;
 
-	if (closeobjects != NULL) {
+	if (closeobjects != nullptr) {
 		Zone* zone = getZoneUnsafe();
 
 		CreatureObject* thisCreo = asCreatureObject();
@@ -248,13 +248,13 @@ void TangibleObjectImplementation::broadcastPvpStatusBitmask() {
 		for (int i = 0; i < closeObjects.size(); ++i) {
 			SceneObject* obj = cast<SceneObject*>(closeObjects.get(i));
 
-			if (obj != NULL && obj->isCreatureObject()) {
+			if (obj != nullptr && obj->isCreatureObject()) {
 				CreatureObject* creo = obj->asCreatureObject();
 
 				if (creo->isPlayerCreature())
 					sendPvpStatusTo(creo);
 
-				if (thisCreo != NULL && thisCreo->isPlayerCreature())
+				if (thisCreo != nullptr && thisCreo->isPlayerCreature())
 					creo->sendPvpStatusTo(thisCreo);
 			}
 		}
@@ -275,7 +275,7 @@ void TangibleObjectImplementation::setPvpStatusBitmask(uint32 bitmask, bool noti
 	if (isPlayerCreature()) {
 		PlayerObject* ghost = asCreatureObject()->getPlayerObject();
 
-		if (ghost == NULL)
+		if (ghost == nullptr)
 			return;
 
 		if (bitmask & CreatureFlag::PLAYER)
@@ -284,7 +284,7 @@ void TangibleObjectImplementation::setPvpStatusBitmask(uint32 bitmask, bool noti
 		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
 			Reference<AiAgent*> pet = ghost->getActivePet(i);
 
-			if (pet == NULL)
+			if (pet == nullptr)
 				continue;
 
 			Locker clocker(pet, asTangibleObject());
@@ -389,7 +389,7 @@ void TangibleObjectImplementation::setDefender(SceneObject* defender) {
 		return;
 	}
 
-	ManagedReference<SceneObject*> temp = NULL;
+	ManagedReference<SceneObject*> temp = nullptr;
 
 	int i = 0;
 	for (; i < defenderList.size(); i++) {
@@ -689,7 +689,7 @@ int TangibleObjectImplementation::inflictDamage(TangibleObject* attacker, int da
 int TangibleObjectImplementation::notifyObjectDestructionObservers(TangibleObject* attacker, int condition, bool isCombatAction) {
 	notifyObservers(ObserverEventType::OBJECTDESTRUCTION, attacker, condition);
 
-	if (threatMap != NULL)
+	if (threatMap != nullptr)
 		threatMap->removeAll();
 
 	dropFromDefenderLists();
@@ -824,8 +824,8 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(int ma
 
 	Reference<FactoryCrate*> crate = (getZoneServer()->createObject(file.hashCode(), 2)).castTo<FactoryCrate*>();
 
-	if (crate == NULL)
-		return NULL;
+	if (crate == nullptr)
+		return nullptr;
 
 	Locker locker(crate);
 
@@ -835,14 +835,14 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(int ma
 	if (insertSelf) {
 		if (!crate->transferObject(asTangibleObject(), -1, false)) {
 			crate->destroyObjectFromDatabase(true);
-			return NULL;
+			return nullptr;
 		}
 	} else {
 		ManagedReference<TangibleObject*> protoclone = cast<TangibleObject*>( objectManager->cloneObject(asTangibleObject()));
 
-		if (protoclone == NULL) {
+		if (protoclone == nullptr) {
 			crate->destroyObjectFromDatabase(true);
-			return NULL;
+			return nullptr;
 		}
 
 		/*
@@ -959,18 +959,18 @@ void TangibleObjectImplementation::repair(CreatureObject* player) {
 	}
 
 	SceneObject* inventory = player->getSlottedObject("inventory");
-	if(inventory == NULL)
+	if(inventory == nullptr)
 		return;
 
-	ManagedReference<RepairTool*> repairTool = NULL;
-	Reference<RepairToolTemplate*> repairTemplate = NULL;
+	ManagedReference<RepairTool*> repairTool = nullptr;
+	Reference<RepairToolTemplate*> repairTemplate = nullptr;
 
 	for(int i = 0; i < inventory->getContainerObjectsSize(); ++i) {
 		ManagedReference<SceneObject*> item = inventory->getContainerObject(i);
 		if(item->isRepairTool()) {
 			repairTemplate = cast<RepairToolTemplate*>(item->getObjectTemplate());
 
-			if (repairTemplate == NULL) {
+			if (repairTemplate == nullptr) {
 				error("No RepairToolTemplate for: " + String::valueOf(item->getServerObjectCRC()));
 				return;
 			}
@@ -979,11 +979,11 @@ void TangibleObjectImplementation::repair(CreatureObject* player) {
 				repairTool = cast<RepairTool*>(item.get());
 				break;
 			}
-			repairTemplate = NULL;
+			repairTemplate = nullptr;
 		}
 	}
 
-	if(repairTool == NULL)
+	if(repairTool == nullptr)
 		return;
 
 	/// Luck Roll + Profession Mod(25) + Luck Tapes
@@ -1009,7 +1009,7 @@ void TangibleObjectImplementation::repair(CreatureObject* player) {
 	ManagedReference<PlayerManager*> playerMan = player->getZoneServer()->getPlayerManager();
 
 	/// Increase if near station
-	if(playerMan->getNearbyCraftingStation(player, repairTemplate->getStationType()) != NULL) {
+	if(playerMan->getNearbyCraftingStation(player, repairTemplate->getStationType()) != nullptr) {
 		repairChance += 15;
 	}
 
@@ -1037,10 +1037,10 @@ void TangibleObjectImplementation::repair(CreatureObject* player) {
 }
 
 ThreatMap* TangibleObjectImplementation::getThreatMap() {
-	if (threatMap == NULL) {
+	if (threatMap == nullptr) {
 		Reference<ThreatMap*> newMap = new ThreatMap(asTangibleObject());
 
-		threatMap.compareAndSet(NULL, newMap.get());
+		threatMap.compareAndSet(nullptr, newMap.get());
 	}
 
 	return threatMap;
@@ -1075,13 +1075,13 @@ bool TangibleObjectImplementation::isAttackableBy(CreatureObject* object) {
 
 		if (ai->isPet()) {
 			ManagedReference<PetControlDevice*> pcd = ai->getControlDevice().get().castTo<PetControlDevice*>();
-			if (pcd != NULL && pcd->getPetType() == PetManager::FACTIONPET && isNeutral()) {
+			if (pcd != nullptr && pcd->getPetType() == PetManager::FACTIONPET && isNeutral()) {
 				return false;
 			}
 
 			ManagedReference<CreatureObject*> owner = ai->getLinkedCreature().get();
 
-			if (owner == NULL)
+			if (owner == nullptr)
 				return false;
 
 			return isAttackableBy(owner);
@@ -1108,15 +1108,15 @@ void TangibleObjectImplementation::sendTo(SceneObject* player, bool doClose, boo
 }
 
 bool TangibleObjectImplementation::isCityStreetLamp(){
-	return (templateObject != NULL && templateObject->getFullTemplateString().contains("object/tangible/furniture/city/streetlamp"));
+	return (templateObject != nullptr && templateObject->getFullTemplateString().contains("object/tangible/furniture/city/streetlamp"));
 }
 
 bool TangibleObjectImplementation::isCityStatue(){
-	return (templateObject != NULL && templateObject->getFullTemplateString().contains("object/tangible/furniture/city/statue"));
+	return (templateObject != nullptr && templateObject->getFullTemplateString().contains("object/tangible/furniture/city/statue"));
 }
 
 bool TangibleObjectImplementation::isCityFountain(){
-	return (templateObject != NULL && templateObject->getFullTemplateString().contains("object/tangible/furniture/city/fountain"));
+	return (templateObject != nullptr && templateObject->getFullTemplateString().contains("object/tangible/furniture/city/fountain"));
 }
 
 bool TangibleObjectImplementation::isRebel() const {

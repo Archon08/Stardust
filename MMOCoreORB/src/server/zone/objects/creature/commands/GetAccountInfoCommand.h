@@ -27,17 +27,17 @@ public:
 
 		Reference<PlayerObject*> admin = creature->getSlottedObject("ghost").castTo<PlayerObject*>();
 
-		if(admin == NULL)
+		if(admin == nullptr)
 			return GENERALERROR;
 
-		ManagedReference<PlayerManagementSession*> session = NULL;
-		ManagedReference<CreatureObject* > targetCreature = NULL;
+		ManagedReference<PlayerManagementSession*> session = nullptr;
+		ManagedReference<CreatureObject* > targetCreature = nullptr;
 		ManagedReference<PlayerManager*> playerManager = server->getPlayerManager();
-		ManagedReference<Account*> account = NULL;
+		ManagedReference<Account*> account = nullptr;
 
 		session = creature->getActiveSession(SessionFacadeType::PLAYERMANAGEMENT).castTo<PlayerManagementSession*>();
 
-		if(session != NULL) {
+		if(session != nullptr) {
 			if(!admin->hasSuiBoxWindowType(SuiWindowType::ADMIN_ACCOUNTINFO))
 				creature->dropActiveSession(SessionFacadeType::PLAYERMANAGEMENT);
 			else {
@@ -64,10 +64,10 @@ public:
 			if(type.toLowerCase() == "-c") {
 				targetCreature = playerManager->getPlayer(name);
 
-				if (targetCreature != NULL)
+				if (targetCreature != nullptr)
 					account = targetCreature->getPlayerObject()->getAccount();
 
-				if (account != NULL) {
+				if (account != nullptr) {
 					Locker accLocker(account);
 					account->updateFromDatabase();
 				} else {
@@ -86,7 +86,7 @@ public:
 
 				account = AccountManager::getAccount(name, true);
 
-				if(account == NULL) {
+				if(account == nullptr) {
 					try {
 						account = AccountManager::getAccount(Long::valueOf(name), true);
 					} catch(Exception& e) {
@@ -107,7 +107,7 @@ public:
 			return GENERALERROR;
 		}
 
-		if(account == NULL) {
+		if(account == nullptr) {
 			creature->sendSystemMessage("Account not found");
 			return SUCCESS;
 		}
@@ -140,7 +140,7 @@ public:
 
 			ManagedReference<Account*> adminAccount = AccountManager::getAccount(account->getBanAdmin());
 
-			if(adminAccount != NULL) {
+			if(adminAccount != nullptr) {
 				Locker writeAdminLock(adminAccount);
 
 				header << "Banned by: " << adminAccount->getUsername() << endl;
@@ -170,7 +170,7 @@ public:
 
 		for(int i = 0; i < characterList->size(); ++i) {
 
-			ManagedReference<PlayerObject* > ghost = NULL;
+			ManagedReference<PlayerObject* > ghost = nullptr;
 			
 			CharacterListEntry* entry = &characterList->get(i);
 			ManagedReference<ZoneClientSession*> charClient;
@@ -178,16 +178,16 @@ public:
 			if(entry->getGalaxyID() == server->getZoneServer()->getGalaxyID()) {
 				targetCreature = playerManager->getPlayer(entry->getFirstName());
 
-				if(targetCreature != NULL && targetCreature->isPlayerCreature()) {
+				if(targetCreature != nullptr && targetCreature->isPlayerCreature()) {
 					ghost = targetCreature->getPlayerObject();
 					charClient = targetCreature->getClient();
 				}
 			}
 			
-			if (charClient != NULL) {
+			if (charClient != nullptr) {
 				BaseClientProxy* session = charClient->getSession();
 				
-				if (session != NULL) {
+				if (session != nullptr) {
 					loggedInIp = session->getIPAddress();
 				}
 			}
@@ -203,7 +203,7 @@ public:
 			StringBuffer line;
 			line << "\t\t" << entry->getFullName();
 
-			if(ghost != NULL) {
+			if(ghost != nullptr) {
 
 				if(ghost->isOnline())
 					line << " \\#00FF00(ONLINE)\\#FFFFFF ";
@@ -233,7 +233,7 @@ public:
 			uint32 galaxyID = tokenizer.getIntToken();
 
 			GalaxyBanEntry* galaxyBan = account->getGalaxyBan(galaxyID);
-			if(galaxyBan != NULL)
+			if(galaxyBan != nullptr)
 				galaxyName += " \\#FF0000(BANNED)\\#FFFFFF" + galaxyBan->getBanReason();
 
 			box->addMenuItem("\t" + galaxyName, 0);
@@ -251,7 +251,7 @@ public:
 			for (int i = 0; i < loggedInAccounts.size(); ++i){
 				ManagedReference<Account*> otherAccount = AccountManager::getAccount(loggedInAccounts.get(i));
 
-				if (otherAccount != NULL) {
+				if (otherAccount != nullptr) {
 					header << "\t" << otherAccount->getUsername() << "|" << loggedInAccounts.get(i) << endl;
 				}
 			}

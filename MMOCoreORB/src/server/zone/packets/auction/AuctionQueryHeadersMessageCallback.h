@@ -44,14 +44,14 @@ public:
 	void run() {
 		ManagedReference<CreatureObject*> player = client->getPlayer();
 
-		if (player == NULL)
+		if (player == nullptr)
 			return;
 			
 		Locker locker(player);
 
 		AuctionManager* auctionManager = server->getZoneServer()->getAuctionManager();
 
-		if (auctionManager != NULL)
+		if (auctionManager != nullptr)
 			auctionManager->getData(player, extent, vendorID, screen, category, counter, offset);
 	}
 };

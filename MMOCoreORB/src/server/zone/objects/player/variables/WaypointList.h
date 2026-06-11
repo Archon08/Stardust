@@ -12,10 +12,10 @@
 class WaypointList : public DeltaVectorMap<uint64, ManagedReference<WaypointObject*> > {
 public:
 
-	int set(uint64 key, WaypointObject* value, DeltaMessage* message = NULL, int updates = 1) {
+	int set(uint64 key, WaypointObject* value, DeltaMessage* message = nullptr, int updates = 1) {
 		int pos = vectorMap.put(key, value);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -28,7 +28,7 @@ public:
 		return pos;
 	}
 
-	bool drop(const uint64& key, DeltaMessage* message = NULL, int updates = 1) {
+	bool drop(const uint64& key, DeltaMessage* message = nullptr, int updates = 1) {
 		if (!vectorMap.contains(key))
 			return false;
 
@@ -36,7 +36,7 @@ public:
 
 		vectorMap.drop(key);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -55,7 +55,7 @@ public:
 
 		ManagedReference<WaypointObject*> value = vectorMap.get(key);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -119,7 +119,7 @@ public:
 				return value;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 };
 

@@ -19,7 +19,7 @@ void HolocronManager::loadBugCategories() {
 
 	String query = "SELECT `category` FROM `" + MantisDatabase::getTablePrefix() + "project_category_table` WHERE project_id = 1;";
 
-	Reference<ResultSet*> result = NULL;
+	Reference<ResultSet*> result = nullptr;
 
 	try {
 		result = MantisDatabase::instance()->executeQuery(query);

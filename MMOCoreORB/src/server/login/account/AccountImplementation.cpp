@@ -33,7 +33,7 @@ Reference<GalaxyAccountInfo*> AccountImplementation::getGalaxyAccountInfo(const 
 
 	Reference<GalaxyAccountInfo*> info = galaxyAccountInfo.get(galaxyName);
 
-	if(info == NULL) {
+	if(info == nullptr) {
 		info = new GalaxyAccountInfo();
 		
 		galaxyAccountInfo.put(galaxyName, info);
@@ -67,7 +67,7 @@ void AccountImplementation::updateAccount() {
 	}
 
 	delete result;
-	result = NULL;
+	result = nullptr;
 }
 
 void AccountImplementation::updateCharacters() {
@@ -110,7 +110,7 @@ GalaxyBanEntry* AccountImplementation::getGalaxyBan(const uint32 galaxy) {
 	if(galaxyBans.contains(galaxy))
 		return galaxyBans.get(galaxy);
 
-	return NULL;
+	return nullptr;
 }
 
 CharacterListEntry* AccountImplementation::getCharacterBan(const uint32 galaxy, const String& name) {
@@ -124,11 +124,11 @@ CharacterListEntry* AccountImplementation::getCharacterBan(const uint32 galaxy, 
 			return entry;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 CharacterList* AccountImplementation::getCharacterList() {
-	if(characterList == NULL)
+	if(characterList == nullptr)
 		updateCharacters();
 	
 	return characterList;

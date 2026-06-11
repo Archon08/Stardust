@@ -26,7 +26,7 @@ public:
 		if (tano->isPlayerCreature()) {
 			Reference<PlayerObject*> ghost = (static_cast<CreatureObject*>(tano))->getPlayerObject();
 
-			if (ghost != NULL && ghost->hasGodMode()) {
+			if (ghost != nullptr && ghost->hasGodMode()) {
 				UnicodeString name = tano->getCustomObjectName();
 				UnicodeString tag = PermissionLevelList::instance()->getPermissionTag(ghost->getAdminLevel());
 				insertUnicode(name + " \\#ffff00[" + tag + "]\\#.");

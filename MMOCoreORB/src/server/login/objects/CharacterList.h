@@ -53,7 +53,7 @@ public:
 			System::out << "unknown exception caught in ChracterList query" << endl;
 		}
 
-		if (characters == NULL)
+		if (characters == nullptr)
 			return;
 
 		while(characters->next()) {

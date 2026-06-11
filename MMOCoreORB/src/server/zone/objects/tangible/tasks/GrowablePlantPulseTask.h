@@ -21,7 +21,7 @@ public:
 	void run() {
 		ManagedReference<PlantObject*> strongRef = plant.get();
 
-		if (strongRef == NULL)
+		if (strongRef == nullptr)
 			return;
 
 		if (strongRef->getZoneServer()->isServerLoading()) {
@@ -48,7 +48,7 @@ public:
 
 		strongRef->updateLastPulse();
 
-		if (parent == NULL || rootParent == NULL || !rootParent->isBuildingObject() || !parent->isCellObject()) {
+		if (parent == nullptr || rootParent == nullptr || !rootParent->isBuildingObject() || !parent->isCellObject()) {
 			this->reschedule(PlantObject::PULSERATE * 1000);
 			return;
 		}

@@ -29,7 +29,7 @@ void SpawnAreaMap::loadMap(Zone* z) {
 	lua->deinit();
 
 	delete lua;
-	lua = NULL;
+	lua = nullptr;
 }
 
 void SpawnAreaMap::loadRegions() {
@@ -113,7 +113,7 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 	static const uint32 crc = STRING_HASHCODE("object/spawn_area.iff");
 
 	ManagedReference<SpawnArea*> area = dynamic_cast<SpawnArea*>(ObjectManager::instance()->createObject(crc, 0, "spawnareas"));
-	if (area == NULL)
+	if (area == nullptr)
 		return;
 
 	Locker objLocker(area);
@@ -200,7 +200,7 @@ void SpawnAreaMap::unloadMap() {
 	for (int i = 0; i < size(); i++) {
 		SpawnArea* area = get(i);
 
-		if (area != NULL) {
+		if (area != nullptr) {
 			Locker locker(area);
 			area->destroyObjectFromWorld(false);
 		}

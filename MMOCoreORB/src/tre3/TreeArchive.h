@@ -19,7 +19,7 @@ public:
 		setLoggingName("TreeArchive");
 		setLogging(true);
 
-		nodeMap.setNullValue(NULL);
+		nodeMap.setNullValue(nullptr);
 
 		//nodeMap.setNoDuplicateInsertPlan();
 	}
@@ -66,7 +66,7 @@ public:
 
 		//Only folders are allowed at the root level of TRE directories.
 		if (pos == -1)
-			return NULL;
+			return nullptr;
 
 		String dir = recordPath.subString(0, pos);
 		String fileName = recordPath.subString(pos+1, recordPath.length());
@@ -75,14 +75,14 @@ public:
 
 		size = 0;
 
-		if (treeDir == NULL)
-			return NULL;
+		if (treeDir == nullptr)
+			return nullptr;
 
 		int idx = treeDir->find(fileName);
 
 		if (idx == -1) {
 			error("Did not find fileName: " + fileName);
-			return NULL;
+			return nullptr;
 		}
 
 		Reference<TreeFileRecord*> record = treeDir->get(idx);
@@ -96,7 +96,7 @@ public:
 
 	Vector<String>* getFilesAndSubDirectoryFiles(const String& directory) {
 		HashTableIterator<String, Reference<TreeDirectory*> > iterator = nodeMap.iterator();
-		Vector<String>* files = NULL;
+		Vector<String>* files = nullptr;
 
 		while (iterator.hasNext()) {
 			//String directoryName = iterator.getNextKey();
@@ -105,7 +105,7 @@ public:
 			iterator.getNextKeyAndValue(directoryName, directoryEntry);
 
 			if (directoryName.contains(directory)) {
-				if (files == NULL)
+				if (files == nullptr)
 					files = new Vector<String>();
 
 				for (int i = 0; i < directoryEntry->size(); ++i) {

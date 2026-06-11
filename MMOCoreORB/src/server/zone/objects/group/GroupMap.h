@@ -17,7 +17,7 @@ class GroupMap : public HashTable<uint64, GroupObject*> {
 
 public:
 	GroupMap(int initsize) : HashTable<uint64, GroupObject*>(initsize) {
-		setNullValue(NULL);
+		setNullValue(nullptr);
 	}
 
 };

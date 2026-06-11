@@ -25,14 +25,14 @@ namespace server {
 		}
 
 		bool add(LoginClient* client) {
-			if (HashTable<uint64, Reference<LoginClient*> >::put(client->getSession()->getNetworkID(), client) == NULL) {
+			if (HashTable<uint64, Reference<LoginClient*> >::put(client->getSession()->getNetworkID(), client) == nullptr) {
 				return true;
 			} else
 				return false;
 		}
 
 		bool remove(LoginClient* client) {
-			if (HashTable<uint64, Reference<LoginClient*> >::remove(client->getSession()->getNetworkID()) != NULL) {
+			if (HashTable<uint64, Reference<LoginClient*> >::remove(client->getSession()->getNetworkID()) != nullptr) {
 				return true;
 			} else
 				return false;
@@ -72,7 +72,7 @@ namespace server {
 		bool deleteConnection(ServiceClient* session) {
 			Reference<LoginClient*> client = getClient(session);
 
-			if (client != NULL) {
+			if (client != nullptr) {
 				client->disconnect();
 
 				clients.remove(client);

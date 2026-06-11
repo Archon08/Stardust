@@ -161,7 +161,7 @@ void StructurePermissionList::sendTo(CreatureObject* creature, const String& lis
 		}  else {
 			Reference<SceneObject*> object = zoneServer->getObject(objectID);
 
-			if (object != NULL && object->isGuildObject()) {
+			if (object != nullptr && object->isGuildObject()) {
 				GuildObject* guild = object.castTo<GuildObject*>();
 				String name = "guild:" + guild->getGuildAbbrev();
 				listMsg->addName(name);
@@ -285,7 +285,7 @@ void StructurePermissionList::migrateLists(ZoneServer* zoneServer, uint64 ownerO
 
 				ManagedReference<GuildObject*> guild = guildManager->getGuildFromAbbrev(abbrev);
 
-				if (guild == NULL) {
+				if (guild == nullptr) {
 					continue;
 				}
 
@@ -298,7 +298,7 @@ void StructurePermissionList::migrateLists(ZoneServer* zoneServer, uint64 ownerO
 
 				ManagedReference<CreatureObject*> player = playerManager->getPlayer(name);
 
-				if (player == NULL || !player->isPlayerCreature()) {
+				if (player == nullptr || !player->isPlayerCreature()) {
 					continue;
 				}
 

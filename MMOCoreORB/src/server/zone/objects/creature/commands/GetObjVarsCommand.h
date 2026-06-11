@@ -49,7 +49,7 @@ public:
 
 		ManagedReference<SceneObject*> object = server->getZoneServer()->getObject(objectID, false);
 
-		if ( object == NULL) {
+		if ( object == nullptr) {
 			creature->sendSystemMessage("ERROR GETTIGN OBJECT - NULL " + String::valueOf(objectID));
 		} else {
 
@@ -75,11 +75,11 @@ public:
 			msg << "Children: " << String::valueOf(object->getChildObjects()->size()) << endl;
 			msg << "PARENT OBJECTID: " << String::valueOf(parentID) << endl;
 
-			if(object->getZone() != NULL)
+			if(object->getZone() != nullptr)
 				msg << "location: " << String::valueOf(object->getPositionX()) << " "  << String::valueOf(object->getPositionY()) << " " << object->getZone()->getZoneName() << endl;
 
 			ManagedReference<CityRegion*> city = object->getCityRegion().get();
-			if (city != NULL)
+			if (city != nullptr)
 				msg << "City Region oid: " << String::valueOf(city->getObjectID()) << ", name: " << city->getRegionDisplayedName() << endl;
 
 			creature->sendSystemMessage(msg.toString());

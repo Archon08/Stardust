@@ -31,7 +31,7 @@
 void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 	ManagedReference<CreatureObject*> creo = entertainer.get();
 
-	if (creo == NULL)
+	if (creo == nullptr)
 		return;
 
 	if (performanceName == "")
@@ -40,12 +40,12 @@ void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 	Locker locker(creo);
 
 	//**DECLARATIONS**
-	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = NULL;
+	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = nullptr;
 
 	SkillManager* skillManager = creo->getZoneServer()->getSkillManager();
 
 	PerformanceManager* performanceManager = skillManager->getPerformanceManager();
-	Performance* performance = NULL;
+	Performance* performance = nullptr;
 
 	ManagedReference<Instrument*> instrument = getInstrument(creo);
 
@@ -316,13 +316,13 @@ Instrument* EntertainingSessionImplementation::getInstrument(CreatureObject* cre
 	if (targetInstrument) {
 		ManagedReference<SceneObject*> target = creature->getZoneServer()->getObject(creature->getTargetID());
 
-		if (target == NULL)
-			return NULL;
+		if (target == nullptr)
+			return nullptr;
 
 		Instrument* instrument = dynamic_cast<Instrument*>(target.get());
 
-		if (externalInstrument != NULL && externalInstrument != instrument)
-			return NULL;
+		if (externalInstrument != nullptr && externalInstrument != instrument)
+			return nullptr;
 		else
 			return instrument;
 	} else {
@@ -351,10 +351,10 @@ void EntertainingSessionImplementation::stopPlayingMusic() {
 	if (entertainer->getPosture() == CreaturePosture::SKILLANIMATING)
 		entertainer->setPosture(CreaturePosture::UPRIGHT);
 
-	if (externalInstrument != NULL && externalInstrument->isBeingUsed())
+	if (externalInstrument != nullptr && externalInstrument->isBeingUsed())
 		externalInstrument->setBeingUsed(false);
 
-	externalInstrument = NULL;
+	externalInstrument = nullptr;
 
 	ManagedReference<PlayerManager*> playerManager = entertainer->getZoneServer()->getPlayerManager();
 
@@ -371,7 +371,7 @@ void EntertainingSessionImplementation::stopPlayingMusic() {
 		listeners.drop(listener);
 	}
 
-	if (tickTask != NULL && tickTask->isScheduled())
+	if (tickTask != nullptr && tickTask->isScheduled())
 		tickTask->cancel();
 
 	targetInstrument = false;
@@ -383,7 +383,7 @@ void EntertainingSessionImplementation::stopPlayingMusic() {
 
 	ManagedReference<GroupObject*> group = entertainer->getGroup();
 
-	if (group != NULL) {
+	if (group != nullptr) {
 		bool otherPlaying = group->isOtherMemberPlayingMusic(entertainer);
 
 		if (!otherPlaying) {
@@ -395,7 +395,7 @@ void EntertainingSessionImplementation::stopPlayingMusic() {
 
 	if (!dancing && !playingMusic) {
 		ManagedReference<PlayerObject*> entPlayer = entertainer->getPlayerObject();
-		if (entPlayer != NULL && entPlayer->getPerformanceBuffTarget() != 0)
+		if (entPlayer != nullptr && entPlayer->getPerformanceBuffTarget() != 0)
 			entPlayer->setPerformanceBuffTarget(0);
 
 		entertainer->dropActiveSession(SessionFacadeType::ENTERTAINING);
@@ -437,7 +437,7 @@ void EntertainingSessionImplementation::startPlayingMusic(const String& song, co
 
 	externalInstrument = getInstrument(entertainer);
 
-	if (externalInstrument != NULL)
+	if (externalInstrument != nullptr)
 		externalInstrument->setBeingUsed(true);
 
 	updateEntertainerMissionStatus(true, MissionTypes::MUSICIAN);
@@ -446,7 +446,7 @@ void EntertainingSessionImplementation::startPlayingMusic(const String& song, co
 
 	startEntertaining();
 
-	if (group != NULL) {
+	if (group != nullptr) {
 		Locker clocker(group, entertainer);
 
 		if (group->getBandSong() != song) {
@@ -464,7 +464,7 @@ void EntertainingSessionImplementation::startEntertaining() {
 
 	startTickTask();
 
-	if (observer == NULL) {
+	if (observer == nullptr) {
 		observer = new EntertainingObserver();
 		observer->deploy();
 	}
@@ -475,7 +475,7 @@ void EntertainingSessionImplementation::startEntertaining() {
 void EntertainingSessionImplementation::stopDancing() {
 	ManagedReference<CreatureObject*> entertainer = this->entertainer.get();
 
-	if (entertainer == NULL)
+	if (entertainer == nullptr)
 		return;
 
 	Locker locker(entertainer);
@@ -510,7 +510,7 @@ void EntertainingSessionImplementation::stopDancing() {
 		watchers.drop(watcher);
 	}
 
-	if (tickTask != NULL && tickTask->isScheduled())
+	if (tickTask != nullptr && tickTask->isScheduled())
 		tickTask->cancel();
 
 	updateEntertainerMissionStatus(false, MissionTypes::DANCER);
@@ -521,7 +521,7 @@ void EntertainingSessionImplementation::stopDancing() {
 
 	if (!dancing && !playingMusic) {
 		ManagedReference<PlayerObject*> entPlayer = entertainer->getPlayerObject();
-		if (entPlayer != NULL && entPlayer->getPerformanceBuffTarget() != 0)
+		if (entPlayer != nullptr && entPlayer->getPerformanceBuffTarget() != 0)
 			entPlayer->setPerformanceBuffTarget(0);
 
 		entertainer->dropActiveSession(SessionFacadeType::ENTERTAINING);
@@ -549,14 +549,14 @@ bool EntertainingSessionImplementation::canGiveEntertainBuff() {
 // TODO: can this be simplified by doing the building check in the ticker?
 void EntertainingSessionImplementation::addEntertainerFlourishBuff() {
 	// Watchers that are in our group for passive buff
-	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = NULL;
+	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = nullptr;
 	if (dancing) {
 		patrons = &watchers;
 	}
 	else if (playingMusic) {
 		patrons = &listeners;
 	}
-	if (patrons != NULL) {
+	if (patrons != nullptr) {
 		for (int i = 0; i < patrons->size(); ++i) {
 			ManagedReference<CreatureObject*> patron = patrons->elementAt(i).getKey();
 			try {
@@ -581,7 +581,7 @@ void EntertainingSessionImplementation::doFlourish(int flourishNumber, bool gran
 	}
 
 	PerformanceManager* performanceManager = SkillManager::instance()->getPerformanceManager();
-	Performance* performance = NULL;
+	Performance* performance = nullptr;
 	ManagedReference<Instrument*> instrument = getInstrument(entertainer);
 
 	if (dancing)
@@ -1044,7 +1044,7 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 	ManagedReference<PlayerManager*> playerManager = player->getZoneServer()->getPlayerManager();
 
 	PerformanceManager* performanceManager = SkillManager::instance()->getPerformanceManager();
-	Performance* performance = NULL;
+	Performance* performance = nullptr;
 	ManagedReference<Instrument*> instrument = getInstrument(player);
 
 	if (dancing)
@@ -1052,7 +1052,7 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 	else if (playingMusic && instrument)
 		performance = performanceManager->getSong(performanceName, instrument->getInstrumentType());
 
-	if (player->isPlayerCreature() && performance != NULL) {
+	if (player->isPlayerCreature() && performance != nullptr) {
 		if (oldFlourishXp > flourishXp && (isDancing() || isPlayingMusic())) {
 			flourishXp = oldFlourishXp;
 
@@ -1077,12 +1077,12 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 
 			ManagedReference<GroupObject*> group = player->getGroup();
 
-			if (group != NULL) {
+			if (group != nullptr) {
 				for (int i = 0; i < group->getGroupSize(); ++i) {
 					try {
 						ManagedReference<CreatureObject *> groupMember = group->getGroupMember(i);
 
-						if (groupMember != NULL && groupMember->isPlayerCreature()) {
+						if (groupMember != nullptr && groupMember->isPlayerCreature()) {
 							Locker clocker(groupMember, player);
 
 							if (groupMember != player && groupMember->isEntertaining() &&
@@ -1109,7 +1109,7 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 
 			xpAmount = ceil(xpAmount * totalBonus);
 
-			if (playerManager != NULL)
+			if (playerManager != nullptr)
 				playerManager->awardExperience(player, xptype, xpAmount, true);
 
 			oldFlourishXp = flourishXp;
@@ -1121,7 +1121,7 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 		if (healingXp > 0) {
 			String healxptype("entertainer_healing");
 
-			if (playerManager != NULL)
+			if (playerManager != nullptr)
 				playerManager->awardExperience(player, healxptype, healingXp, true);
 
 			healingXp = 0;
@@ -1136,20 +1136,20 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 Vector<uint64> EntertainingSessionImplementation::getAudience() {
 	Vector<uint64> audienceList;
 
-	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = NULL;
+	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = nullptr;
 	if (dancing) {
 		patrons = &watchers;
 	} else if (playingMusic) {
 		patrons = &listeners;
 	}
 
-	if (patrons == NULL)
+	if (patrons == nullptr)
 		return audienceList;
 
 	for (int i = 0; i < patrons->size(); i++) {
 		ManagedReference<CreatureObject*> patron = patrons->elementAt(i).getKey();
 
-		if (patron != NULL)
+		if (patron != nullptr)
 			audienceList.add(patron->getObjectID());
 	}
 
@@ -1162,14 +1162,14 @@ int EntertainingSessionImplementation::getBandAudienceSize() {
 
 	ManagedReference<GroupObject *> group = player->getGroup();
 
-	if (group == NULL)
+	if (group == nullptr)
 		return audienceList.size();
 
 	for (int i = 0; i < group->getGroupSize(); ++i) {
 		try {
 			ManagedReference<CreatureObject *> groupMember = group->getGroupMember(i);
 
-			if (groupMember != NULL && groupMember->isPlayerCreature()) {
+			if (groupMember != nullptr && groupMember->isPlayerCreature()) {
 				Locker clocker(groupMember, player);
 
 				if (groupMember != player && groupMember->isEntertaining() &&
@@ -1178,7 +1178,7 @@ int EntertainingSessionImplementation::getBandAudienceSize() {
 					ManagedReference<EntertainingSession *> session = groupMember->getActiveSession(
 							SessionFacadeType::ENTERTAINING).castTo<EntertainingSession *>();
 
-					if (session == NULL)
+					if (session == nullptr)
 						continue;
 
 					Vector<uint64> memberAudienceList = session->getAudience();

@@ -35,7 +35,7 @@ public:
 		if (creature->hasBuff(BuffCRC::FOOD_HEAL_RECOVERY)) {
 			DelayedBuff* buff = cast<DelayedBuff*>( creature->getBuff(BuffCRC::FOOD_HEAL_RECOVERY));
 
-			if (buff != NULL) {
+			if (buff != nullptr) {
 				float percent = buff->getSkillModifierValue("heal_recovery");
 
 				delay = round(delay * (100.0f - percent) / 100.0f);
@@ -55,7 +55,7 @@ public:
 
 		int medicineUse = enhancer->getSkillMod("healing_ability");
 
-		if (inventory != NULL) {
+		if (inventory != nullptr) {
 			for (int i = 0; i < inventory->getContainerObjectsSize(); ++i) {
 				SceneObject* object = inventory->getContainerObject(i);
 
@@ -73,7 +73,7 @@ public:
 			}
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	bool canPerformSkill(CreatureObject* enhancer, CreatureObject* patient, EnhancePack* enhancePack, int mindCostNew) const {
@@ -85,7 +85,7 @@ public:
 			return false;
 		}
 
-		if (enhancePack == NULL) {
+		if (enhancePack == nullptr) {
 			enhancer->sendSystemMessage("@healing_response:healing_response_60"); //No valid medicine found.
 			return false;
 		}
@@ -97,7 +97,7 @@ public:
 		}else {
 			// are we in a cantina? we have a private medical rating so either thats form a droid or camp or hospital
 			ManagedReference<SceneObject*> root = enhancer->getRootParent();
-			if (root != NULL && root->isClientObject()) {
+			if (root != nullptr && root->isClientObject()) {
 				uint32 gameObjectType = root->getGameObjectType();
 				switch (gameObjectType) {
 						case SceneObjectType::RECREATIONBUILDING:

@@ -55,7 +55,7 @@ public:
 			}
 
 			// If the survey task exists, we can't sample
-			if (surveytask != NULL) {
+			if (surveytask != nullptr) {
 				creature->sendSystemMessage("@survey:sample_survey");
 
 				return SUCCESS;
@@ -64,7 +64,7 @@ public:
 
 			ManagedReference<SurveySession*> session = creature->getActiveSession(SessionFacadeType::SURVEY).castTo<SurveySession*>();
 
-			if(session == NULL) {
+			if(session == nullptr) {
 				creature->sendSystemMessage("@ui:survey_notool");
 				return GENERALERROR;
 			}

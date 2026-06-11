@@ -42,7 +42,7 @@ public:
 		CreatureObject* player = cast<CreatureObject*>(creature);
 
 
-		if (player == NULL)
+		if (player == nullptr)
 			return GENERALERROR;
 
 		if (!args.hasMoreTokens()) {
@@ -57,7 +57,7 @@ public:
 
 		ZoneServer* zserv = server->getZoneServer();
 
-		if (creature->getZone() == NULL)
+		if (creature->getZone() == nullptr)
 			return GENERALERROR;
 
 		try {
@@ -70,8 +70,8 @@ public:
 
 				LairTemplate* lair = CreatureTemplateManager::instance()->getLairTemplate(objectTemplate.hashCode());
 
-				if (lair != NULL) {
-					if (creature->getParent() != NULL) {
+				if (lair != nullptr) {
+					if (creature->getParent() != nullptr) {
 						creature->sendSystemMessage("You need to be outside and unmounted to spawn that");
 
 						return GENERALERROR;
@@ -91,7 +91,7 @@ public:
 
 					SceneObject* sceno = creatureManager->spawn(objectTemplate.hashCode(), level, 2, x, z, y, 25);
 
-					if (sceno != NULL) {
+					if (sceno != nullptr) {
 						creature->sendSystemMessage("lair spawned");
 						return SUCCESS;
 					} else {
@@ -121,15 +121,15 @@ public:
 					heading = args.getFloatToken();
 
 				SharedStructureObjectTemplate* serverTemplate = dynamic_cast<SharedStructureObjectTemplate*>(TemplateManager::instance()->getTemplate(objectTemplate.hashCode()));
-				if (serverTemplate != NULL) {
-					if (creature->getParent() != NULL) {
+				if (serverTemplate != nullptr) {
+					if (creature->getParent() != nullptr) {
 						creature->sendSystemMessage("You need to be outside and unmounted to spawn a structure");
 						return GENERALERROR;
 					}
 
 					StructureObject* structure = StructureManager::instance()->placeStructure(creature, objectTemplate, x, y, heading, 0);
 
-					if (structure == NULL)
+					if (structure == nullptr)
 						return GENERALERROR;
 
 					creature->sendSystemMessage("oid: " + String::valueOf(structure->getObjectID()));
@@ -138,7 +138,7 @@ public:
 
 				ManagedReference<SceneObject*> object =  zserv->createObject(objectTemplate.hashCode(), 0);
 
-				if (object == NULL)
+				if (object == nullptr)
 					return GENERALERROR;
 
 				if (object->isIntangibleObject())
@@ -151,7 +151,7 @@ public:
 				object->initializePosition(x, z, y);
 				object->setDirection(creature->getDirectionW(), creature->getDirectionX(), creature->getDirectionY(), creature->getDirectionZ());
 
-				if (parent != NULL && parent->isCellObject())
+				if (parent != nullptr && parent->isCellObject())
 					parent->transferObject(object, -1);
 				else
 					creature->getZone()->transferObject(object, -1, true);
@@ -169,7 +169,7 @@ public:
 
 				ManagedReference<SceneObject*> object = zserv->getObject(oid);
 
-				if (object == NULL) {
+				if (object == nullptr) {
 					creature->sendSystemMessage("Error: Trying to delete invalid oid.");
 					return GENERALERROR;
 				}

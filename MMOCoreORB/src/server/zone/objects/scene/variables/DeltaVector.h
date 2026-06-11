@@ -28,7 +28,7 @@ public:
 	DeltaVector() : Serializable(), vector(1, 1) {
 		updateCounter = 1;
 
-		mutex = NULL;
+		mutex = nullptr;
 
 		addSerializableVariables();
 	}
@@ -36,7 +36,7 @@ public:
 	DeltaVector(int initsize, int incr) : Serializable(), vector(initsize, incr) {
 		updateCounter = 1;
 
-		mutex = NULL;
+		mutex = nullptr;
 
 		addSerializableVariables();
 	}
@@ -45,7 +45,7 @@ public:
 		vector = v.vector;
 		updateCounter = v.updateCounter;
 
-		mutex = NULL;
+		mutex = nullptr;
 
 		addSerializableVariables();
 	}
@@ -53,7 +53,7 @@ public:
 	~DeltaVector() {
 		if (mutex) {
 			delete mutex;
-			mutex = NULL;
+			mutex = nullptr;
 		}
 	}
 
@@ -66,7 +66,7 @@ public:
 
 		if (mutex) {
 			delete mutex;
-			mutex = NULL;
+			mutex = nullptr;
 		}
 
 		return *this;
@@ -77,12 +77,12 @@ public:
 		addSerializableVariable("updateCounter", &updateCounter);
 	}
 
-	virtual E set(int idx, const E& newValue, DeltaMessage* message = NULL, int updates = 1) {
+	virtual E set(int idx, const E& newValue, DeltaMessage* message = nullptr, int updates = 1) {
 		Locker locker(getLock());
 
 		E object = vector.set(idx, newValue);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -96,12 +96,12 @@ public:
 		return object;
 	}
 
-	virtual bool add(const E& element, DeltaMessage* message = NULL, int updates = 1) {
+	virtual bool add(const E& element, DeltaMessage* message = nullptr, int updates = 1) {
 		Locker locker(getLock());
 
 		bool val = vector.add(element);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -127,12 +127,12 @@ public:
 		return obj;
 	}
 
-	E remove(int index, DeltaMessage* message = NULL, int updates = 1) {
+	E remove(int index, DeltaMessage* message = nullptr, int updates = 1) {
 		Locker locker(getLock());
 
 		E object = vector.remove(index);
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			if (updates != 0)
 				message->startList(updates, updateCounter += updates);
 
@@ -143,12 +143,12 @@ public:
 		return object;
 	}
 
-	void removeAll(DeltaMessage* message = NULL) {
+	void removeAll(DeltaMessage* message = nullptr) {
 		Locker locker(getLock());
 
 		vector.removeAll();
 
-		if (message != NULL) {
+		if (message != nullptr) {
 			message->startList(1, ++updateCounter);
 			message->insertByte(4);
 		}
@@ -204,7 +204,7 @@ public:
 	}
 
 	inline ReadWriteLock* getLock() {
-		if (mutex == NULL) {
+		if (mutex == nullptr) {
 			mutex = new ReadWriteLock();
 		}
 

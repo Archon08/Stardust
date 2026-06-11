@@ -67,7 +67,7 @@ class CreatureManager extends ZoneManager {
 	 * @param x position x
 	 * @param y position y
 	 * @param parentID cell object id (optional)
-	 * @return returns creature object that has been spawned, NULL on error
+	 * @return returns creature object that has been spawned, nullptr on error
 	 */
 	public native CreatureObject spawnCreatureWithAi(unsigned int templateCRC, float x, float z, float y, unsigned long parentID = 0, boolean persistent = false);
 	public native CreatureObject spawnCreatureWithLevel(unsigned int mobileTemplateCRC, int level, float x, float z, float y, unsigned long parentID = 0);

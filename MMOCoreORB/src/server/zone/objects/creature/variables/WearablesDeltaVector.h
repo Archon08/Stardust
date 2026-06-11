@@ -39,7 +39,7 @@ public:
 		msg->insertInt(object->getClientObjectCRC()); //CRC of the object
 	}
 
-	bool add(ManagedReference<TangibleObject*> element, DeltaMessage* message = NULL, int updates = 1) {
+	bool add(ManagedReference<TangibleObject*> element, DeltaMessage* message = nullptr, int updates = 1) {
 		if (element->isArmorObject()) {
 			ManagedReference<ArmorObject*> armor = cast<ArmorObject*>(element.get());
 			uint8 hitLocations = armor->getHitLocation();
@@ -60,7 +60,7 @@ public:
 		return DeltaVector<ManagedReference<TangibleObject*> >::add(element, message, updates);
 	}
 
-	bool remove(int index, DeltaMessage* message = NULL, int updates = 1) {
+	bool remove(int index, DeltaMessage* message = nullptr, int updates = 1) {
 		ManagedReference<TangibleObject*> element = get(index);
 
 		if (element->isArmorObject()) {

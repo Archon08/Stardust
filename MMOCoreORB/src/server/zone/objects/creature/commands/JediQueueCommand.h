@@ -80,7 +80,7 @@ public:
 		ManagedReference<Buff*> buff = createJediSelfBuff(creature);
         
 		// Return if buff is NOT valid.
-		if (buff == NULL)
+		if (buff == nullptr)
 			return GENERALERROR;
         
 		Locker locker(buff);

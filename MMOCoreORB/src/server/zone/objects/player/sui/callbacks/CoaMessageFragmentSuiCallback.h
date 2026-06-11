@@ -22,7 +22,7 @@ public:
 
 		TangibleObject* usingObject = suiBox->getUsingObject().get().castTo<TangibleObject*>();
 
-		if (usingObject == NULL || usingObject->getObjectTemplate()->getFullTemplateString() != "object/tangible/encoded_disk/message_fragment_base.iff") {
+		if (usingObject == nullptr || usingObject->getObjectTemplate()->getFullTemplateString() != "object/tangible/encoded_disk/message_fragment_base.iff") {
 			return;
 		}
 
@@ -110,7 +110,7 @@ public:
 		String fullTemplate = "object/tangible/encoded_disk/message_assembled_base.iff";
 		ManagedReference<TangibleObject*> assembledMessage = server->createObject(fullTemplate.hashCode(), 1).castTo<TangibleObject*>();
 
-		if (assembledMessage == NULL) {
+		if (assembledMessage == nullptr) {
 			return;
 		}
 
@@ -118,7 +118,7 @@ public:
 
 		CoaMessageDataComponent* data = assembledMessage->getDataObjectComponent()->castTo<CoaMessageDataComponent*>();
 
-		if (data == NULL) {
+		if (data == nullptr) {
 			assembledMessage->destroyObjectFromDatabase(true);
 			return;
 		}

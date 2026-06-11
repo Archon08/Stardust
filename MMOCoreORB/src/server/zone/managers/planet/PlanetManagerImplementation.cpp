@@ -108,7 +108,7 @@ void PlanetManagerImplementation::initialize() {
 }
 
 void PlanetManagerImplementation::start() {
-	if (gcwManager != NULL)
+	if (gcwManager != nullptr)
 		gcwManager->start();
 }
 
@@ -1188,7 +1188,7 @@ float PlanetManagerImplementation::findClosestWorldFloor(float x, float y, float
 
 	Reference<IntersectionResults*> ref;
 
-    if (intersections == NULL) {
+    if (intersections == nullptr) {
     	ref = intersections = new IntersectionResults();
     	CollisionManager::getWorldFloorCollisions(x, y, zone, intersections, closeObjects);
     }

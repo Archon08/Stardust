@@ -26,7 +26,7 @@ public:
 	int doCombatAction(CreatureObject* creature, const uint64& target, const UnicodeString& arguments = "") const {
 			ManagedReference<SceneObject*> targetObject = server->getZoneServer()->getObject(target);
 
-			if (targetObject == NULL || !targetObject->isTangibleObject() || targetObject == creature)
+			if (targetObject == nullptr || !targetObject->isTangibleObject() || targetObject == creature)
 				return INVALIDTARGET;
 
 			float checkRange = range;
@@ -44,7 +44,7 @@ public:
 
 			ManagedReference<PlayerObject*> playerObject = creature->getPlayerObject();
 
-			if (playerObject != NULL && playerObject->getForcePower() < forceCost) {
+			if (playerObject != nullptr && playerObject->getForcePower() < forceCost) {
 				creature->sendSystemMessage("@jedi_spam:no_force_power"); //"You do not have enough Force Power to peform that action.
 
 				return GENERALERROR;

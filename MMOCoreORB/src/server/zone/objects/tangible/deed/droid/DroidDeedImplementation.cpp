@@ -31,7 +31,7 @@ void DroidDeedImplementation::loadTemplateData(SharedObjectTemplate* templateDat
 
 	DroidDeedTemplate* deedData = dynamic_cast<DroidDeedTemplate*>(templateData);
 
-	if (deedData == NULL)
+	if (deedData == nullptr)
 		return;
 
 	controlDeviceObjectTemplate = deedData->getControlDeviceObjectTemplate();
@@ -43,7 +43,7 @@ void DroidDeedImplementation::onCloneObject(SceneObject* objectToClone) {
 	DeedImplementation::onCloneObject(objectToClone);
 
 	ManagedReference<DroidDeed*> deed = cast<DroidDeed*>(objectToClone);
-	if (deed == NULL) {
+	if (deed == nullptr) {
 		error("Invalid object type used in DroidDeedImplementation::onCloneObject");
 		return;
 	}

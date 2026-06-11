@@ -22,31 +22,31 @@ void MinefieldZoneComponent::notifyPositionUpdate(SceneObject* sceneObject, Quad
 
 	ManagedReference<SceneObject*> target = cast<SceneObject*>(entry);
 
-	if(!sceneObject->isMinefield() || target == NULL){
+	if(!sceneObject->isMinefield() || target == nullptr){
 		return;
 	}
 
 	DataObjectComponentReference* ref = sceneObject->getDataObjectComponent();
-	if(ref == NULL){
+	if(ref == nullptr){
 		info("dataobjectcomponent is null",true);
 		return;
 	}
 
 	MinefieldDataComponent* mineData = cast<MinefieldDataComponent*>(ref->get());
 
-	if(mineData == NULL || !mineData->canExplode())
+	if(mineData == nullptr || !mineData->canExplode())
 		return;
 
 	try {
 		if (target->isPlayerCreature() && sceneObject->isInRange(target,mineData->getMaxRange())){
 			ManagedReference<CreatureObject*> player = cast<CreatureObject*>(entry);
 
-			if(player == NULL)
+			if(player == nullptr)
 				return;
 
 			ManagedReference<TangibleObject*> tano = cast<TangibleObject*>(sceneObject);
 
-			if(tano == NULL)
+			if(tano == nullptr)
 				return;
 
 			if(!player->isAttackableBy(tano))
@@ -63,11 +63,11 @@ void MinefieldZoneComponent::notifyPositionUpdate(SceneObject* sceneObject, Quad
 }
 
 void MinefieldZoneComponent::notifyInsertToZone(SceneObject* sceneObject, Zone* zne) const {
-	if(zne == NULL)
+	if(zne == nullptr)
 		return;
 
 	ManagedReference<InstallationObject*> installation = cast<InstallationObject*>(sceneObject);
-	if(installation == NULL)
+	if(installation == nullptr)
 		return;
 
 	ManagedReference<TurretObserver*> observer = new TurretObserver();
@@ -77,9 +77,9 @@ void MinefieldZoneComponent::notifyInsertToZone(SceneObject* sceneObject, Zone* 
 	uint64 oid = installation->getOwnerObjectID();
 	if(oid != 0) {
 		ManagedReference<SceneObject*> sceno = zne->getZoneServer()->getObject(oid);
-		if(sceno != NULL && sceno->isGCWBase()) {
+		if(sceno != nullptr && sceno->isGCWBase()) {
 			ManagedReference<BuildingObject*> building = cast<BuildingObject*>(sceno.get());
-			if(building != NULL){
+			if(building != nullptr){
 
 				installation->setPvpStatusBitmask(building->getPvpStatusBitmask() | 1);
 			}

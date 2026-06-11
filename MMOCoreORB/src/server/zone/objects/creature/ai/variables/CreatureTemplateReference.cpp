@@ -11,7 +11,7 @@
 bool CreatureTemplateReference::toBinaryStream(ObjectOutputStream* stream) {
 	CreatureTemplate* obj = get();
 
-	if (obj != NULL) {
+	if (obj != nullptr) {
 		obj->getTemplateName().toBinaryStream(stream);
 	} else
 		stream->writeShort(0);
@@ -25,7 +25,7 @@ bool CreatureTemplateReference::parseFromBinaryStream(ObjectInputStream* stream)
 
 	CreatureTemplate* obj = CreatureTemplateManager::instance()->getTemplate(templateName);
 
-	if (obj != NULL) {
+	if (obj != nullptr) {
 		updateObject(obj);
 
 		return true;

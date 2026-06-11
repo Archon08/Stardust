@@ -92,7 +92,7 @@ PathNode* PathGraph::getNode(int globalNumberID) {
 			return pathNode;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 PathNode* PathGraph::findGlobalNode(int globalNodeID) {
@@ -103,12 +103,12 @@ PathNode* PathGraph::findGlobalNode(int globalNodeID) {
 			return pathNode;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 PathNode* PathGraph::findNearestGlobalNode(const Vector3& pointAlfa) {
 	float minDistance = 160000000.f;
-	PathNode* node = NULL;
+	PathNode* node = nullptr;
 
 	for (int i = 0; i < pathNodes.size(); ++i) {
 		PathNode* pathNode = pathNodes.getUnsafe(i);
@@ -141,7 +141,7 @@ Vector<const PathNode*> PathGraph::getEntrances() {
 
 PathNode* PathGraph::findNearestNode(const Vector3& pointAlfa) {
 	float minDistance = 160000000.f;
-	PathNode* node = NULL;
+	PathNode* node = nullptr;
 
 	for (int i = 0; i < pathNodes.size(); ++i) {
 		PathNode* pathNode = pathNodes.getUnsafe(i);
@@ -171,7 +171,7 @@ void PathGraph::connectNodes(Vector<PathEdge>& pathEdges) {
 
 		/*Vector<PathNode*>* path = AStarAlgorithm<PathGraph, PathNode>::search<uint32>(this, fromNode, toNode);
 
-		if (path != NULL) {
+		if (path != nullptr) {
 			System::out << "found path\n";
 			delete path;
 		} else {

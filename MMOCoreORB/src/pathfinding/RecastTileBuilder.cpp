@@ -114,7 +114,7 @@ RecastTileBuilder::RecastTileBuilder(float waterTableHeight, float x, float y, c
 }
 
 RecastTileBuilder::~RecastTileBuilder() {
-	m_geom = NULL;
+	m_geom = nullptr;
 	cleanup();
 	delete m_ctx;
 }
