@@ -70,6 +70,26 @@ jobs:
           echo "swept $COUNT idl files"
           git diff --shortstat
 
+      - name: idl-truthiness sweep (x != nullptr -> x; x == nullptr -> !(x); idlc rejects nullptr identifier)
+        if: ${{ github.event.inputs.mode == 'idl-truthiness' }}
+        run: |
+          T() { echo "$1" | perl -pe 's/s*!=s*nullptr//g; s/([A-Za-z_]w*(?:(?:.[A-Za-z_]w*)?((?:[^()"]|"[^"]*")*)|.[A-Za-z_]w*)*)s*==s*nullptr/!($1)/g'; }
+          [ "$(T 'if (x != nullptr) {')" = 'if (x) {' ] || { echo FAIL1; exit 1; }
+          [ "$(T 'return node != nullptr;')" = 'return node;' ] || { echo FAIL2; exit 1; }
+          [ "$(T 'if (x.method() == nullptr)')" = 'if (!(x.method()))' ] || { echo FAIL3; exit 1; }
+          [ "$(T 'if (x.field == nullptr || y())')" = 'if (!(x.field) || y())' ] || { echo FAIL4; exit 1; }
+          [ "$(T 'bool b = m.check("s") == nullptr;')" = 'bool b = !(m.check("s"));' ] || { echo FAIL5; exit 1; }
+          echo self-test OK
+          COUNT=0
+          while IFS= read -r -d '' f; do
+            if grep -q 'nullptr' "$f"; then
+              perl -i -pe 's/s*!=s*nullptr//g; s/([A-Za-z_]w*(?:(?:.[A-Za-z_]w*)?((?:[^()"]|"[^"]*")*)|.[A-Za-z_]w*)*)s*==s*nullptr/!($1)/g' "$f"
+              COUNT=$((COUNT+1))
+            fi
+          done < <(find MMOCoreORB/src -type f -name '*.idl' -print0)
+          echo "swept $COUNT idl files"
+          git diff --shortstat
+
       - name: Commit and push
         run: |
           git config user.name "space-port-sweep"
