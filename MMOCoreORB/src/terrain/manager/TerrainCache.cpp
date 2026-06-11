@@ -42,7 +42,7 @@ public:
 
 	}
 
-	int compareTo(QuadTreeEntryInterfaceBase<BasicQuadTreeNode>* obj) {
+	int compareTo(const QuadTreeEntryInterfaceBase<BasicQuadTreeNode>* obj) const override {
 		if (getObjectID() < obj->getObjectID())
 			return 1;
 		else if (getObjectID() > obj->getObjectID())
@@ -51,15 +51,15 @@ public:
 			return 0;
 	}
 
-	uint64 getObjectID() {
+	uint64 getObjectID() const override {
 		return hashPosition(x, y);
 	}
 
-	float getPositionX() {
+	float getPositionX() const override {
 		return x;
 	}
 
-	float getPositionY() {
+	float getPositionY() const override {
 		return y;
 	}
 };
@@ -72,13 +72,13 @@ public:
 
 	}
 
-	TerrainCache::lru_value_t run(const float& k, const float& k2) {
+	TerrainCache::lru_value_t run(const float& k, const float& k2) override {
 		float height = terrainData->getUnCachedHeight(k , k2);
 
 		return std::make_pair(new HeightQuadTreeEntry(k, k2), height);
 	}
 
-	uint64 hash(const float& k, const float& k2) {
+	uint64 hash(const float& k, const float& k2) const override {
 		return hashPosition(k, k2);
 	}
 };
