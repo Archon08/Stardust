@@ -1,0 +1,55 @@
+name: mechanical-sweep
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to sweep and push to'
+        required: true
+        default: 'space-port/phase-1'
+
+permissions:
+  contents: write
+
+jobs:
+  null-to-nullptr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Quote-aware NULL -> nullptr sweep over MMOCoreORB/src
+        run: |
+          cat > /tmp/sweep.pl << 'PERL'
+          #!/usr/bin/perl
+          # Replace token NULL with nullptr outside of string literals.
+          use strict; use warnings;
+          local $/;
+          my $src = <>;
+          my @out;
+          # split on double-quoted strings and char literals, preserving them
+          for my $part (split /("(?:[^"\]|\.)*"|'(?:[^'\]|\.)*')/s, $src) {
+            if ($part =~ /^["']/) { push @out, $part; next; }
+            $part =~ s/\bNULL\b/nullptr/g;
+            push @out, $part;
+          }
+          print join('', @out);
+          PERL
+          COUNT=0
+          while IFS= read -r -d '' f; do
+            if grep -ql '\bNULL\b' "$f" 2>/dev/null || grep -q 'NULL' "$f"; then
+              perl /tmp/sweep.pl "$f" > "$f.swept" && mv "$f.swept" "$f"
+              COUNT=$((COUNT+1))
+            fi
+          done < <(find MMOCoreORB/src -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.idl' \) -print0)
+          echo "swept $COUNT files"
+          git diff --stat | tail -3
+
+      - name: Commit and push
+        run: |
+          git config user.name "space-port-sweep"
+          git config user.email "noreply@anthropic.com"
+          git add -A MMOCoreORB/src
+          git commit -m "P1.4: mechanical NULL -> nullptr sweep over MMOCoreORB/src (quote-aware; modern engine3 Reference<T> requires nullptr comparisons)" || echo "nothing to commit"
+          git push origin HEAD:${{ github.event.inputs.branch }}
