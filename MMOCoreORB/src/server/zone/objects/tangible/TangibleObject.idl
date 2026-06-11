@@ -822,7 +822,7 @@ class TangibleObject extends SceneObject {
 
 			SceneObject adkParent = adk.getParent();
 
-			if (adkParent != null)
+			if (adkParent)
 				adk.destroyObjectFromWorld(true);
 
 			sendAttributeListTo(player);
