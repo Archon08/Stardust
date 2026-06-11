@@ -37,6 +37,8 @@
 #include "server/zone/objects/creature/commands/effect/DotEffect.h"
 #include "server/zone/objects/creature/commands/effect/CommandEffect.h"
 
+#include "server/zone/objects/creature/commands/CommCommand.h"
+
 #include "server/zone/objects/creature/commands/pet/PetAttackCommand.h"
 #include "server/zone/objects/creature/commands/pet/PetEmoteCommand.h"
 #include "server/zone/objects/creature/commands/pet/PetFeedCommand.h"
@@ -339,6 +341,9 @@ void CommandConfigManager::registerSpecialCommands(CommandList* sCommands) {
 	createCommand(String("minefieldAttack").toLowerCase())->setCommandGroup(0xe1c9a54a);
 	createCommand(String("creatureRangedAttack").toLowerCase())->setCommandGroup(0xe1c9a54a);
 	createCommand(String("defaultDroidAttack").toLowerCase())->setCommandGroup(0xe1c9a54a);
+
+	// Space Special Commands
+	createCommand(String("comm").toLowerCase())->setCommandGroup(0xD8D3D9F2);
 
 	//Pet commands
 	createCommand(String("petAttack").toLowerCase())->setCommandGroup(0xe1c9a54a);
@@ -798,6 +803,9 @@ void CommandConfigManager::registerCommands() {
 	registerCommands2();
 	registerCommands3();
 	registerCommands4();
+
+	//Space Commands
+	commandFactory.registerCommand<CommCommand>(String("comm").toLowerCase());
 
 	//pet commands
 	commandFactory.registerCommand<PetAttackCommand>(String("petAttack").toLowerCase());
