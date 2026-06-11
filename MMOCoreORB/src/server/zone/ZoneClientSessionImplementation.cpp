@@ -179,7 +179,7 @@ void ZoneClientSessionImplementation::error(const String& msg) {
 }
 
 String ZoneClientSessionImplementation::getAddress() {
-	return session->getAddress();
+	return session->getFullIPAddress();
 }
 
 BaseClientProxy* ZoneClientSessionImplementation::getSession() {
