@@ -21,19 +21,19 @@ namespace zone {
 	namespace object {
 
 	class ObjectManager : public DOBObjectManager, public Singleton<ObjectManager>, public Object {
-		ManagedReference<ZoneProcessServer*> server;
+		Reference<ZoneProcessServer*> server;
 
-		TemplateManager* templateManager;
+		TemplateManager* templateManager = nullptr;
 
-		int galaxyId;
+		int galaxyId = 0;
 		Reference<ResultSet*> charactersSaved;
 
 		AtomicInteger saveCounter;
 
 		Reference<DeleteCharactersTask*> deleteCharactersTask;
-		
-		static uint32 serverObjectCrcHashCode;
-		static uint32 _classNameHashCode;
+
+		static const uint32 serverObjectCrcHashCode;
+		static const uint32 _classNameHashCode;
 
 	public:
 		SceneObjectFactory<SceneObject* (), uint32> objectFactory;
@@ -54,10 +54,10 @@ namespace zone {
 
 
 	public:
-		ObjectManager();
+		ObjectManager(bool initializeTemplates = true);
 		~ObjectManager();
 
-		bool contains(uint32 objectCRC) {
+		bool contains(uint32 objectCRC) const {
 			return objectFactory.containsObject(objectCRC);
 		}
 
@@ -95,7 +95,7 @@ namespace zone {
 
 		uint64 getNextFreeObjectID();
 
-		void onUpdateModifiedObjectsToDatabase();
+		void onUpdateModifiedObjectsToDatabase(int flags);
 
 		void onCommitData();
 
@@ -105,7 +105,7 @@ namespace zone {
 
 		void shutdown();
 
-		bool isObjectUpdateInProcess() {
+		bool isObjectUpdateInProgress() const {
 			return objectUpdateInProgress;
 		}
 
@@ -129,7 +129,7 @@ namespace zone {
 
 			ObjectInputStream objectData(500);
 
-			if (database->getData(objectID, &objectData)) {
+			if (database->getData(objectID, &objectData, berkeley::LockMode::READ_UNCOMMITED, false, true)) {
 				return;
 			}
 
