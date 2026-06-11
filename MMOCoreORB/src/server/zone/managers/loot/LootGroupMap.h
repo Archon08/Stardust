@@ -12,6 +12,7 @@ class LootItemTemplate;
 #include "templates/LootGroupTemplate.h"
 #include "engine/log/Logger.h"
 #include "engine/util/Singleton.h"
+#include "engine/lua/Lua.h"
 
 class LootGroupMap : public Singleton<LootGroupMap>, public Object, public Logger {
 public:
