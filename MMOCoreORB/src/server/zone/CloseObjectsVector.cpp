@@ -2,19 +2,19 @@
 // Created by Victor Popovici on 7/2/17.
 //
 
-#include "engine/core/ManagedReference.h"
-
 #include "CloseObjectsVector.h"
 
-#include "server/zone/QuadTreeEntry.h"
+#include "server/zone/TreeEntry.h"
 
 CloseObjectsVector::CloseObjectsVector() : messageReceivers() {
 	objects.setNoDuplicateInsertPlan();
 
 	messageReceivers.setNoDuplicateInsertPlan();
+
+	count = 0;
 }
 
-void CloseObjectsVector::safeCopyTo(Vector<ManagedReference<QuadTreeEntry*> >& vec) const {
+void CloseObjectsVector::safeCopyTo(Vector<ManagedReference<TreeEntry*> >& vec) const {
 	vec.removeAll(size(), size() / 2);
 
 	ReadLocker locker(&mutex);
@@ -27,10 +27,36 @@ void CloseObjectsVector::safeCopyTo(Vector<ManagedReference<QuadTreeEntry*> >& v
 	}
 }
 
-SortedVector<ManagedReference<QuadTreeEntry*> > CloseObjectsVector::getSafeCopy() const {
+void CloseObjectsVector::safeCopyTo(HashSet<TreeEntry*>& set) const {
+	set.removeAll();
 	ReadLocker locker(&mutex);
 
-	SortedVector<ManagedReference<QuadTreeEntry*> > copy;
+	for (int i = 0; i < objects.size(); ++i) {
+		const auto& obj = objects.getUnsafe(i);
+
+		if (obj != nullptr) {
+			set.add(obj.get());
+		}
+	}
+}
+
+void CloseObjectsVector::safeCopyTo(HashSet<ManagedReference<TreeEntry*>>& set) const {
+	set.removeAll();
+	ReadLocker locker(&mutex);
+
+	for (int i = 0; i < objects.size(); ++i) {
+		const auto& obj = objects.getUnsafe(i);
+
+		if (obj != nullptr) {
+			set.add(obj.get());
+		}
+	}
+}
+
+SortedVector<ManagedReference<TreeEntry*> > CloseObjectsVector::getSafeCopy() const {
+	ReadLocker locker(&mutex);
+
+	SortedVector<ManagedReference<TreeEntry*> > copy;
 
 	for (int i = 0; i < objects.size(); ++i) {
 		const auto& obj = objects.getUnsafe(i);
@@ -41,7 +67,7 @@ SortedVector<ManagedReference<QuadTreeEntry*> > CloseObjectsVector::getSafeCopy(
 	return copy;
 }
 
-void CloseObjectsVector::safeCopyTo(Vector<QuadTreeEntry*>& vec) const {
+void CloseObjectsVector::safeCopyTo(Vector<TreeEntry*>& vec) const {
 	vec.removeAll(size(), size() / 2);
 
 	ReadLocker locker(&mutex);
@@ -51,7 +77,7 @@ void CloseObjectsVector::safeCopyTo(Vector<QuadTreeEntry*>& vec) const {
 	}
 }
 
-bool CloseObjectsVector::contains(const Reference<QuadTreeEntry*>& o) const {
+bool CloseObjectsVector::contains(const Reference<TreeEntry*>& o) const {
 	ReadLocker locker(&mutex);
 
 	bool ret = objects.find(o) != -1;
@@ -65,13 +91,15 @@ void CloseObjectsVector::removeAll(int newSize, int newIncrement) {
 	objects.removeAll(newSize, newIncrement);
 
 	messageReceivers.removeAll(newSize, newIncrement);
+
+	count = 0;
 }
 
-void CloseObjectsVector::dropReceiver(QuadTreeEntry* entry) {
+void CloseObjectsVector::dropReceiver(TreeEntry* entry) {
 	uint32 receiverTypes = entry->registerToCloseObjectsReceivers();
 
 	if (receiverTypes && messageReceivers.size()) {
-		for (int i = 0; i < CloseObjectsVector::MAXTYPES; ++i) {
+		for (int i = 0; i < CloseObjectsVector::Types::SIZE; ++i) {
 			uint32 type = 1 << i;
 
 			if (receiverTypes & type) {
@@ -87,25 +115,33 @@ void CloseObjectsVector::dropReceiver(QuadTreeEntry* entry) {
 	}
 }
 
-Reference<QuadTreeEntry*> CloseObjectsVector::remove(int index) {
+Reference<TreeEntry*> CloseObjectsVector::remove(int index) {
 	Locker locker(&mutex);
 
 	const auto& ref = objects.get(index);
 
 	dropReceiver(ref);
 
-	return objects.remove(index);
+	auto obj = objects.remove(index);
+
+	count = objects.size();
+
+	return obj;
 }
 
-bool CloseObjectsVector::drop(const Reference<QuadTreeEntry*>& o) {
+bool CloseObjectsVector::drop(const Reference<TreeEntry*>& o) {
 	Locker locker(&mutex);
 
 	dropReceiver(o);
 
-	return objects.drop(o);
+	auto res = objects.drop(o);
+
+	count = objects.size();
+
+	return res;
 }
 
-void CloseObjectsVector::safeCopyReceiversTo(Vector<QuadTreeEntry*>& vec, uint32 receiverType) const {
+void CloseObjectsVector::safeCopyReceiversTo(Vector<TreeEntry*>& vec, uint32 receiverType) const {
 	ReadLocker locker(&mutex);
 
 	int i = messageReceivers.find(receiverType);
@@ -119,7 +155,19 @@ void CloseObjectsVector::safeCopyReceiversTo(Vector<QuadTreeEntry*>& vec, uint32
 	}
 }
 
-void CloseObjectsVector::safeCopyReceiversTo(Vector<ManagedReference<QuadTreeEntry*> >& vec, uint32 receiverType) const {
+void CloseObjectsVector::safeRunForEach(const Function<void(TreeEntry* const&)>& lambda, uint32 receiverType) const {
+	ReadLocker locker(&mutex);
+
+	int i = messageReceivers.find(receiverType);
+
+	if (i != -1) {
+		const auto& receivers = messageReceivers.elementAt(i).getValue();
+
+		receivers.forEach(lambda);
+	}
+}
+
+void CloseObjectsVector::safeCopyReceiversTo(Vector<ManagedReference<TreeEntry*> >& vec, uint32 receiverType) const {
 	ReadLocker locker(&mutex);
 
 	int i = messageReceivers.find(receiverType);
@@ -134,7 +182,7 @@ void CloseObjectsVector::safeCopyReceiversTo(Vector<ManagedReference<QuadTreeEnt
 	}
 }
 
-void CloseObjectsVector::safeAppendReceiversTo(Vector<QuadTreeEntry*>& vec, uint32 receiverType) const {
+void CloseObjectsVector::safeAppendReceiversTo(Vector<TreeEntry*>& vec, uint32 receiverType) const {
 	ReadLocker locker(&mutex);
 
 	int i = messageReceivers.find(receiverType);
@@ -145,7 +193,7 @@ void CloseObjectsVector::safeAppendReceiversTo(Vector<QuadTreeEntry*>& vec, uint
 	}
 }
 
-void CloseObjectsVector::safeAppendReceiversTo(Vector<ManagedReference<QuadTreeEntry*> >& vec, uint32 receiverType) const {
+void CloseObjectsVector::safeAppendReceiversTo(Vector<ManagedReference<TreeEntry*> >& vec, uint32 receiverType) const {
 	ReadLocker locker(&mutex);
 
 	int i = messageReceivers.find(receiverType);
@@ -157,13 +205,13 @@ void CloseObjectsVector::safeAppendReceiversTo(Vector<ManagedReference<QuadTreeE
 	}
 }
 
-Reference<QuadTreeEntry*> CloseObjectsVector::get(int idx) const {
+const Reference<TreeEntry*>& CloseObjectsVector::get(int idx) const {
 	return objects.get(idx);
 }
 
-void CloseObjectsVector::putReceiver(QuadTreeEntry* entry, uint32 receiverTypes) {
+void CloseObjectsVector::putReceiver(TreeEntry* entry, uint32 receiverTypes) {
 	if (receiverTypes) {
-		for (int i = 0; i < CloseObjectsVector::MAXTYPES; ++i) {
+		for (int i = 0; i < CloseObjectsVector::Types::SIZE; ++i) {
 			uint32 type = 1 << i;
 
 			if (receiverTypes & type) {
@@ -174,7 +222,7 @@ void CloseObjectsVector::putReceiver(QuadTreeEntry* entry, uint32 receiverTypes)
 
 					receivers.put(entry);
 				} else {
-					SortedVector<QuadTreeEntry*> vec;
+					SortedVector<TreeEntry*> vec;
 					vec.setNoDuplicateInsertPlan();
 
 					vec.put(entry);
@@ -186,20 +234,29 @@ void CloseObjectsVector::putReceiver(QuadTreeEntry* entry, uint32 receiverTypes)
 	}
 }
 
-int CloseObjectsVector::put(const Reference<QuadTreeEntry*>& o) {
-
+int CloseObjectsVector::put(const Reference<TreeEntry*>& o) {
 	uint32 receiverTypes = o->registerToCloseObjectsReceivers();
+
 	Locker locker(&mutex);
 
 	putReceiver(o.get(), receiverTypes);
 
-	return objects.put(o);
+	auto res = objects.put(o);
+
+	count = objects.size();
+
+	return res;
 }
 
-int CloseObjectsVector::put(Reference<QuadTreeEntry*>&& o) {
+int CloseObjectsVector::put(Reference<TreeEntry*>&& o) {
 	uint32 receiverTypes = o->registerToCloseObjectsReceivers();
+
 	Locker locker(&mutex);
 	putReceiver(o.get(), receiverTypes);
 
-	return objects.put(std::move(o));
+	auto res = objects.put(std::move(o));
+
+	count = objects.size();
+
+	return res;
 }
