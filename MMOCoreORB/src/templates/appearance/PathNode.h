@@ -111,7 +111,7 @@ public:
 		return type;
 	}
 
-	Vector<PathNode*>* getNeighbors() {
+	const Vector<PathNode*>* getNeighbors() const {
 		return &children;
 	}
 
@@ -119,7 +119,7 @@ public:
 		return globalGraphNodeID;
 	}
 
-	inline PathGraph* getPathGraph() {
+	inline const PathGraph* getPathGraph() const {
 		return pathGraph;
 	}
 
