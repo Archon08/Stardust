@@ -551,11 +551,11 @@ bool CollisionManager::checkLineOfSight(SceneObject* object1, SceneObject* objec
 }
 
 
-TriangleNode* CollisionManager::getTriangle(const Vector3& point, FloorMesh* floor) {
+const TriangleNode* CollisionManager::getTriangle(const Vector3& point, const FloorMesh* floor) {
 	/*PathGraph* graph = node->getPathGraph();
 	FloorMesh* floor = graph->getFloorMesh();*/
 
-	AABBTree* aabbTree = floor->getAABBTree();
+	const AABBTree* aabbTree = floor->getAABBTree();
 
 	//Vector3 nodePosition = node->getPosition();
 
@@ -726,14 +726,14 @@ bool CollisionManager::checkShipCollision(ShipObject* ship, const Vector3& targe
 	return false;
 }
 
-PathNode* CollisionManager::findNearestPathNode(TriangleNode* triangle, FloorMesh* floor, const Vector3& finalTarget) {
+const PathNode* CollisionManager::findNearestPathNode(const TriangleNode* triangle, const FloorMesh* floor, const Vector3& finalTarget) {
 	// this is overkill TODO: find something faster
-	PathGraph* graph = floor->getPathGraph();
+	const PathGraph* graph = floor->getPathGraph();
 
 	if (graph == nullptr)
 		return nullptr;
 
-	Vector<PathNode*>* pathNodes = graph->getPathNodes();
+	const Vector<PathNode*>* pathNodes = graph->getPathNodes();
 
 	PathNode* returnNode = nullptr;
 	float distance = 16000;
@@ -743,9 +743,9 @@ PathNode* CollisionManager::findNearestPathNode(TriangleNode* triangle, FloorMes
 	for (int i = 0; i < pathNodes->size(); ++i) {
 		PathNode* node = pathNodes->get(i);
 
-		TriangleNode* triangleOfPathNode = getTriangle(node->getPosition(), floor);
+		const TriangleNode* triangleOfPathNode = getTriangle(node->getPosition(), floor);
 
-		Vector<Triangle*>* path = TriangulationAStarAlgorithm::search(trianglePos, triangleOfPathNode->getBarycenter(), triangle, triangleOfPathNode);
+		Vector<const Triangle*>* path = TriangulationAStarAlgorithm::search(trianglePos, triangleOfPathNode->getBarycenter(), triangle, triangleOfPathNode);
 
 		if (path == nullptr)
 			continue;
