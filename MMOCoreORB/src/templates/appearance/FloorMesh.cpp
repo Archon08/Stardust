@@ -140,7 +140,7 @@ void FloorMesh::readObject(IffStream* iffStream) {
 	iffStream->closeForm('FLOR');
 }
 
-Vector<TriangleNode*>* FloorMesh::getNeighbors(uint32 triangleID) {
+const Vector<TriangleNode*>* FloorMesh::getNeighbors(uint32 triangleID) const {
 	TriangleNode* triangle = tris.get(triangleID);
 
 	return triangle->getNeighbors();
