@@ -84,9 +84,9 @@ void PathGraph::readObject(IffStream* iffStream) {
 	connectNodes(pathEdges);
 }
 
-PathNode* PathGraph::getNode(int globalNumberID) {
+const PathNode* PathGraph::getNode(int globalNumberID) const {
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.getUnsafe(i);
+		const PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		if (pathNode->getGlobalGraphNodeID() == globalNumberID)
 			return pathNode;
@@ -95,9 +95,9 @@ PathNode* PathGraph::getNode(int globalNumberID) {
 	return nullptr;
 }
 
-PathNode* PathGraph::findGlobalNode(int globalNodeID) {
+const PathNode* PathGraph::findGlobalNode(int globalNodeID) const {
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.getUnsafe(i);
+		const PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		if (pathNode->getGlobalGraphNodeID() == globalNodeID)
 			return pathNode;
@@ -106,12 +106,12 @@ PathNode* PathGraph::findGlobalNode(int globalNodeID) {
 	return nullptr;
 }
 
-PathNode* PathGraph::findNearestGlobalNode(const Vector3& pointAlfa) {
+const PathNode* PathGraph::findNearestGlobalNode(const Vector3& pointAlfa) const {
 	float minDistance = 160000000.f;
-	PathNode* node = nullptr;
+	const PathNode* node = nullptr;
 
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.getUnsafe(i);
+		const PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		if (pathNode->getGlobalGraphNodeID() == -1)
 			continue;
@@ -129,7 +129,7 @@ PathNode* PathGraph::findNearestGlobalNode(const Vector3& pointAlfa) {
 	return node;
 }
 
-Vector<const PathNode*> PathGraph::getEntrances() {
+Vector<const PathNode*> PathGraph::getEntrances() const {
 	Vector<const PathNode*> vec;
 	for (const PathNode *node : pathNodes) {
 		if(node->getType() == PathNode::BuildingEntrance) {
@@ -139,7 +139,7 @@ Vector<const PathNode*> PathGraph::getEntrances() {
 	return vec;
 }
 
-PathNode* PathGraph::findNearestNode(const Vector3& pointAlfa) {
+const PathNode* PathGraph::findNearestNode(const Vector3& pointAlfa) const {
 	float minDistance = 160000000.f;
 	PathNode* node = nullptr;
 
