@@ -8,6 +8,7 @@
 
 #include "db/ServerDatabase.h"
 #include "db/MantisDatabase.h"
+#include "db/MySqlDatabase.h"
 
 #include "server/chat/ChatManager.h"
 #include "server/login/LoginServer.h"
@@ -366,8 +367,8 @@ void ServerCore::shutdown() {
 		features = nullptr;
 	}
 
-	mysql_thread_end();
-	engine::db::mysql::MySqlDatabase::finalizeLibrary();
+	server::db::mysql::MySqlDatabase::onThreadEnd();
+	server::db::mysql::MySqlDatabase::finalizeLibrary();
 
 	NetworkInterface::finalize();
 
