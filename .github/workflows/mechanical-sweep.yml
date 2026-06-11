@@ -8,9 +8,9 @@ on:
         required: true
         default: 'space-port/phase-1'
       mode:
-        description: 'Sweep mode: null-cpp (NULL->nullptr in cpp/h/idl) or null-idl (==/!= null -> nullptr in idl)'
+        description: 'Sweep mode: null-cpp | null-idl | idl-truthiness'
         required: true
-        default: 'null-idl'
+        default: 'idl-truthiness'
 
 permissions:
   contents: write
@@ -49,17 +49,9 @@ jobs:
           echo "swept $COUNT files"
           git diff --shortstat
 
-      - name: null-idl sweep (==/!= null -> nullptr comparisons only; idlc passes nullptr through, NULL it emits is ambiguous vs modern Reference)
+      - name: null-idl sweep (==/!= null -> nullptr comparisons; superseded by idl-truthiness)
         if: ${{ github.event.inputs.mode == 'null-idl' }}
         run: |
-          # self-test
-          printf 'if (x != null) { y = a == null; } void f(TreeNode n = null);\n' > /tmp/st.idl
-          perl -pe 's/!=\s*null\b/!= nullptr/g; s/==\s*null\b/== nullptr/g' /tmp/st.idl
-          RES=$(perl -pe 's/!=\s*null\b/!= nullptr/g; s/==\s*null\b/== nullptr/g' /tmp/st.idl)
-          echo "$RES" | grep -q 'x != nullptr' || { echo 'SELF-TEST FAIL: neq'; exit 1; }
-          echo "$RES" | grep -q 'a == nullptr' || { echo 'SELF-TEST FAIL: eq'; exit 1; }
-          echo "$RES" | grep -q 'n = null)' || { echo 'SELF-TEST FAIL: default arg must stay null'; exit 1; }
-          echo "self-test OK"
           COUNT=0
           while IFS= read -r -d '' f; do
             if grep -qE '(==|!=)[[:space:]]*null\b' "$f"; then
@@ -70,20 +62,29 @@ jobs:
           echo "swept $COUNT idl files"
           git diff --shortstat
 
-      - name: idl-truthiness sweep (x != nullptr -> x; x == nullptr -> !(x); idlc rejects nullptr identifier)
+      - name: idl-truthiness sweep (x != nullptr -> x, x == nullptr -> !(x); idlc rejects the nullptr identifier)
         if: ${{ github.event.inputs.mode == 'idl-truthiness' }}
         run: |
-          T() { echo "$1" | perl -pe 's/s*!=s*nullptr//g; s/([A-Za-z_]w*(?:(?:.[A-Za-z_]w*)?((?:[^()"]|"[^"]*")*)|.[A-Za-z_]w*)*)s*==s*nullptr/!($1)/g'; }
-          [ "$(T 'if (x != nullptr) {')" = 'if (x) {' ] || { echo FAIL1; exit 1; }
+          cat > /tmp/truthy.pl << 'PERL'
+          #!/usr/bin/perl
+          use strict; use warnings;
+          while (<>) {
+            s/\s*!=\s*nullptr\b//g;
+            s/([A-Za-z_]\w*(?:(?:\.[A-Za-z_]\w*)?\((?:[^()"]|"[^"]*")*\)|\.[A-Za-z_]\w*)*)\s*==\s*nullptr\b/!($1)/g;
+            print;
+          }
+          PERL
+          T() { echo "$1" | perl /tmp/truthy.pl; }
+          [ "$(T 'if (x != nullptr) {')" = 'if (x) {' ] || { echo FAIL1; T 'if (x != nullptr) {'; exit 1; }
           [ "$(T 'return node != nullptr;')" = 'return node;' ] || { echo FAIL2; exit 1; }
-          [ "$(T 'if (x.method() == nullptr)')" = 'if (!(x.method()))' ] || { echo FAIL3; exit 1; }
+          [ "$(T 'if (x.method() == nullptr)')" = 'if (!(x.method()))' ] || { echo FAIL3; T 'if (x.method() == nullptr)'; exit 1; }
           [ "$(T 'if (x.field == nullptr || y())')" = 'if (!(x.field) || y())' ] || { echo FAIL4; exit 1; }
           [ "$(T 'bool b = m.check("s") == nullptr;')" = 'bool b = !(m.check("s"));' ] || { echo FAIL5; exit 1; }
-          echo self-test OK
+          echo "self-test OK"
           COUNT=0
           while IFS= read -r -d '' f; do
             if grep -q 'nullptr' "$f"; then
-              perl -i -pe 's/s*!=s*nullptr//g; s/([A-Za-z_]w*(?:(?:.[A-Za-z_]w*)?((?:[^()"]|"[^"]*")*)|.[A-Za-z_]w*)*)s*==s*nullptr/!($1)/g' "$f"
+              perl -i /tmp/truthy.pl "$f"
               COUNT=$((COUNT+1))
             fi
           done < <(find MMOCoreORB/src -type f -name '*.idl' -print0)
