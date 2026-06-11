@@ -1,0 +1,71 @@
+name: space-port-build
+
+on:
+  push:
+    branches: ['space-port/**']
+    paths-ignore: ['docs/**']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    timeout-minutes: 350
+    steps:
+      - name: Install toolchain & deps
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates cmake ninja-build g++ gcc make ccache \
+            default-jre-headless \
+            liblua5.3-dev lua5.3 \
+            libdb5.3-dev db5.3-util \
+            libmariadb-dev libmariadb-dev-compat \
+            libssl-dev zlib1g-dev libpcre3-dev libreadline-dev \
+            libboost-dev libjemalloc-dev
+
+      - name: Checkout (with engine3 submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ github.ref_name }}-
+            ccache-
+
+      - name: Configure
+        working-directory: MMOCoreORB
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCOMPILE_TESTS=OFF \
+            -DENABLE_NATIVE=OFF \
+            2>&1 | tee ../configure.log
+
+      - name: Build
+        working-directory: MMOCoreORB
+        run: |
+          set -o pipefail
+          ninja -C build -k 50 2>&1 | tee ../build.log
+
+      - name: Error digest (always)
+        if: always()
+        run: |
+          echo '== FIRST 80 ERRORS =='
+          grep -nE 'error:|Error|FAILED:' build.log configure.log 2>/dev/null | head -80 || echo 'no errors found'
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ github.run_number }}
+          path: |
+            configure.log
+            build.log
+          retention-days: 14
