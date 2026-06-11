@@ -143,6 +143,27 @@ ZonesEnabled = {
 	"hutta"
 }
 
+-------- SPACE ZONES -------
+SpaceZonesEnabled = {
+	"space_corellia",
+	"space_dantooine",
+	"space_dathomir",
+	"space_endor",
+	"space_heavy1",
+	"space_light1",
+	"space_lok",
+	"space_naboo",
+	"space_tatooine",
+	"space_yavin4"
+	---- TEST ZONES ----
+	--"space_09",
+	--"space_corellia_2",
+	--"space_env",
+	--"space_halos",
+	--"space_naboo_2",
+	--"space_tatooine_2",
+}
+
 
 -- directory of tres with live.cfg
 TrePath = "/home/swgemu/Desktop/SWGEmu"
