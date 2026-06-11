@@ -42,6 +42,7 @@
 #include "server/zone/objects/creature/commands/effect/CommandEffect.h"
 #include "server/zone/objects/creature/events/CommandQueueActionEvent.h"
 #include "server/zone/Zone.h"
+#include "server/zone/SpaceZone.h"
 #include "server/zone/ZoneServer.h"
 #include "server/chat/ChatManager.h"
 #include "server/chat/StringIdChatParameter.h"
@@ -3653,3 +3654,129 @@ void CreatureObjectImplementation::schedulePersonalEnemyFlagTasks() {
 		}
 	}
 }
+
+void CreatureObjectImplementation::clearSpaceStates() {
+	if (hasState(CreatureState::PILOTINGSHIP))
+		clearState(CreatureState::PILOTINGSHIP);
+	if (hasState(CreatureState::SHIPOPERATIONS))
+		clearState(CreatureState::SHIPOPERATIONS);
+	if (hasState(CreatureState::SHIPOPERATIONS))
+		clearState(CreatureState::SHIPOPERATIONS);
+	if (hasState(CreatureState::SHIPGUNNER))
+		clearState(CreatureState::SHIPGUNNER);
+	if (hasState(CreatureState::SHIPINTERIOR))
+		clearState(CreatureState::SHIPINTERIOR);
+	if (hasState(CreatureState::PILOTINGPOBSHIP))
+		clearState(CreatureState::PILOTINGPOBSHIP);
+}
+
+void CreatureObjectImplementation::addSpaceMissionObject(uint64 missionOwnerID, uint64 missionObjectID, bool notifyClient, bool notifyGroup) {
+	if (missionObjectID <= 0) {
+		return;
+	}
+
+	// Add Mission object to DeltaSet
+	spaceMissionObjects.addWithKey(missionOwnerID, missionObjectID);
+
+	if (notifyClient) {
+		CreatureObjectDeltaMessage4* delta4 = new CreatureObjectDeltaMessage4(asCreatureObject());
+
+		if (delta4 != nullptr) {
+			delta4->startUpdate(0x0D);
+
+			spaceMissionObjects.insertKeyAndValuesToMessage(delta4);
+
+			delta4->close();
+
+			// info(true) << "addSpaceMissionObject - Delta4 Packet: " << delta4->toStringData();
+
+			sendMessage(delta4);
+		}
+	}
+
+	Locker locker(&missionRangeObjectsMutex);
+
+	missionRangeObjects.add(missionObjectID);
+
+	locker.release();
+
+	if (!isGrouped() || !notifyGroup) {
+		return;
+	}
+
+	auto group = getGroup();
+
+	if (group == nullptr) {
+		return;
+	}
+
+	Locker groupLock(group, asCreatureObject());
+
+	// Update Group Members
+	group->addSpaceMissionObject(missionOwnerID, missionObjectID, notifyClient);
+}
+
+void CreatureObjectImplementation::removeSpaceMissionObject(uint64 missionOwnerID, uint64 missionObjectID, bool notifyClient, bool notifyGroup) {
+	if (missionObjectID <= 0 || !spaceMissionObjects.containsValue(missionObjectID)) {
+		return;
+	}
+
+	// info(true) << "removeSpaceMissionObject - called missionOwnerID: " << missionOwnerID << " missionObjectID: " << missionObjectID;
+
+	// Remove Mission object from DeltaSet
+	spaceMissionObjects.dropByValue(missionOwnerID, missionObjectID);
+
+	if (notifyClient) {
+		CreatureObjectDeltaMessage4* delta4 = new CreatureObjectDeltaMessage4(asCreatureObject());
+
+		if (delta4 != nullptr) {
+			delta4->startUpdate(0x0D);
+
+			spaceMissionObjects.insertKeyAndValuesToMessage(delta4);
+
+			delta4->close();
+
+			// info(true) << "removeSpaceMissionObject - Vector Size: " << spaceMissionObjects.size() << " Delta4 Packet: " << delta4->toStringData();
+
+			sendMessage(delta4);
+		}
+	}
+
+	Locker locker(&missionRangeObjectsMutex);
+
+	missionRangeObjects.drop(missionObjectID);
+
+	locker.release();
+
+	if (!isGrouped() || !notifyGroup) {
+		return;
+	}
+
+	auto group = getGroup();
+
+	if (group == nullptr) {
+		return;
+	}
+
+	Locker groupLock(group, asCreatureObject());
+
+	// Update Group Members
+	group->removeSpaceMissionObject(getObjectID(), missionObjectID, notifyClient);
+}
+
+void CreatureObjectImplementation::removeAllSpaceMissionObjects(bool notifyClient) {
+	if (notifyClient) {
+		CreatureObjectDeltaMessage4* delta4 = new CreatureObjectDeltaMessage4(asCreatureObject());
+
+		if (delta4 != nullptr) {
+			delta4->startUpdate(0x0D);
+
+			spaceMissionObjects.removeAll(delta4);
+
+			delta4->close();
+		}
+	} else {
+		spaceMissionObjects.removeAll(nullptr);
+	}
+}
+
