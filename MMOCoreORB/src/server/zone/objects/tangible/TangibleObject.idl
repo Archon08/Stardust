@@ -820,7 +820,9 @@ class TangibleObject extends SceneObject {
 		if(!hasAntiDecayKit()) {
 			antiDecayKitObject = adk;
 
-			if(adk.getParent())
+			SceneObject adkParent = adk.getParent();
+
+			if (adkParent != null)
 				adk.destroyObjectFromWorld(true);
 
 			sendAttributeListTo(player);
