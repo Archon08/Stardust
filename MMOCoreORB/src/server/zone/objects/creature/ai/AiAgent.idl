@@ -1075,7 +1075,7 @@ class AiAgent extends CreatureObject {
 	}
 
 	@local
-	public final CreatureAttackMap getAttackMap() {
+	public CreatureAttackMap getAttackMap() {
 		if (getWeapon() == readyWeapon) {
 			return attackMap;
 		} else {
@@ -1085,7 +1085,7 @@ class AiAgent extends CreatureObject {
 
 	@local
 	@dirty
-	public final LootGroupCollection getLootGroups() {
+	public LootGroupCollection getLootGroups() {
 		if (!(npcTemplate.get()) || isEventMob())
 			return null;
 
@@ -1133,7 +1133,7 @@ class AiAgent extends CreatureObject {
 
 	@local
 	@dirty
-	public final CreatureTemplate getCreatureTemplate() {
+	public CreatureTemplate getCreatureTemplate() {
 		return npcTemplate.get();
 	}
 
