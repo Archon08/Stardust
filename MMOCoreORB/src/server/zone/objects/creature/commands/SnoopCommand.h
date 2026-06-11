@@ -230,7 +230,7 @@ public:
 			if (args != "")
 				buffer += " (Args: " + args + ")";
 
-			Time nextExecutionTime;
+			AtomicTime nextExecutionTime;
 			Core::getTaskManager()->getNextExecutionTime(task, nextExecutionTime);
 			uint64 miliDiff = nextExecutionTime.miliDifference();
 
