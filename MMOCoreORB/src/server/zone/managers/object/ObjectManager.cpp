@@ -20,6 +20,7 @@
 #include "engine/orb/db/UpdateModifiedObjectsThread.h"
 #include "engine/orb/db/CommitMasterTransactionThread.h"
 
+
 using namespace engine::db;
 
 //databaseManager->truncateDatabases();
@@ -28,19 +29,16 @@ using namespace engine::db;
 
 #define SLOW_QUEUES_COUNT 4
 
-uint32 ObjectManager::serverObjectCrcHashCode = STRING_HASHCODE("SceneObject.serverObjectCRC");
-uint32 ObjectManager::_classNameHashCode = STRING_HASHCODE("_className");
+const uint32 ObjectManager::serverObjectCrcHashCode = STRING_HASHCODE("SceneObject.serverObjectCRC");
+const uint32 ObjectManager::_classNameHashCode = STRING_HASHCODE("_className");
 
-ObjectManager::ObjectManager() : DOBObjectManager() {
+ObjectManager::ObjectManager(bool initializeTemplates) : DOBObjectManager() {
 	server = nullptr;
 
 	deleteCharactersTask = new DeleteCharactersTask();
 
 	databaseManager = ObjectDatabaseManager::instance();
 	databaseManager->loadDatabases(ServerCore::truncateDatabases());
-
-	templateManager = TemplateManager::instance();
-	templateManager->loadLuaTemplates();
 
 	registerObjectTypes();
 
@@ -59,20 +57,30 @@ ObjectManager::ObjectManager() : DOBObjectManager() {
 	databaseManager->loadObjectDatabase("questdata", true);
 	databaseManager->loadObjectDatabase("surveys", true);
 	databaseManager->loadObjectDatabase("accounts", true);
-    databaseManager->loadObjectDatabase("pendingmail", true);
+	databaseManager->loadObjectDatabase("pendingmail", true);
 	databaseManager->loadObjectDatabase("credits", true);
 	databaseManager->loadObjectDatabase("navareas", true, 0xFFFF, false);
 	databaseManager->loadObjectDatabase("frsdata", true);
 	databaseManager->loadObjectDatabase("frsmanager", true);
+	databaseManager->loadObjectDatabase("resourcespawns", true);
+	databaseManager->loadObjectDatabase("playerbounties", true);
+	databaseManager->loadObjectDatabase("mail", true);
+	databaseManager->loadObjectDatabase("chatrooms", true);
 
 	ObjectDatabaseManager::instance()->commitLocalTransaction();
 
+	Core::getTaskManager()->initalizeDatabaseHandles();
 	Core::getTaskManager()->initializeCustomQueue("slowQueue", SLOW_QUEUES_COUNT, true);
 
 	loadLastUsedObjectID();
 
 	setLogging(false);
 	setGlobalLogging(true);
+
+	if (initializeTemplates) {
+		templateManager = TemplateManager::instance();
+		templateManager->loadLuaTemplates();
+	}
 }
 
 ObjectManager::~ObjectManager() {
@@ -80,12 +88,11 @@ ObjectManager::~ObjectManager() {
 }
 
 void ObjectManager::registerObjectTypes() {
-	info("registering object types");
+	debug("registering object types");
 	//objectFactory.registerObject<SceneObject>(0);
 	objectFactory.registerObject<TangibleObject>(6);
 	objectFactory.registerObject<LairObject>(SceneObjectType::LAIR);
 	objectFactory.registerObject<StaticObject>(SceneObjectType::FLORA);
-
 	objectFactory.registerObject<SarlaccArea>(SceneObjectType::SARLACCAREA);
 	objectFactory.registerObject<FsVillageArea>(SceneObjectType::FSVILLAGEAREA);
 	objectFactory.registerObject<ActiveArea>(SceneObjectType::ACTIVEAREA);
@@ -101,37 +108,29 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<NonPlayerCreatureObject>(SceneObjectType::NPCCREATURE);
 	objectFactory.registerObject<NonPlayerCreatureObject>(SceneObjectType::PROBOTCREATURE);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::VENDOR);
-
 	objectFactory.registerObject<CreatureObject>(SceneObjectType::PLAYERCREATURE);
-
 	objectFactory.registerObject<IntangibleObject>(SceneObjectType::INTANGIBLE);
 	objectFactory.registerObject<IntangibleObject>(SceneObjectType::DATA2);
 	objectFactory.registerObject<TheaterObject>(SceneObjectType::THEATEROBJECT);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::EVENTPERK);
-
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::ARMOR);
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::BODYARMOR); //chest plates
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::HEADARMOR);
-	objectFactory.registerObject<ClothingObject>(SceneObjectType::MISCARMOR); // Some Belts Bando's'
+	objectFactory.registerObject<ArmorObject>(SceneObjectType::MISCARMOR); // Some Belts Bando's'
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::LEGARMOR);
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::ARMARMOR);
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::HANDARMOR);
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::FOOTARMOR);
 	objectFactory.registerObject<ArmorObject>(SceneObjectType::SHIELDGENERATOR);
-
 	objectFactory.registerObject<ToolTangibleObject>(SceneObjectType::TOOL);
 	objectFactory.registerObject<RepairTool>(SceneObjectType::REPAIRTOOL);
 	objectFactory.registerObject<CraftingTool>(SceneObjectType::CRAFTINGTOOL);
 	objectFactory.registerObject<SurveyTool>(SceneObjectType::SURVEYTOOL);
 	objectFactory.registerObject<RecycleTool>(SceneObjectType::RECYCLETOOL);
 	objectFactory.registerObject<AntiDecayKit>(SceneObjectType::ANTIDECAYKIT);
-
+	objectFactory.registerObject<ComponentAnalysisTool>(SceneObjectType::COMPONENTANALYSISTOOL);
 	objectFactory.registerObject<CraftingStation>(SceneObjectType::CRAFTINGSTATION);
-
-	objectFactory.registerObject<TangibleObject>(SceneObjectType::FURNITURE);
-
 	objectFactory.registerObject<SignObject>(SceneObjectType::SIGN);
-
 	objectFactory.registerObject<Instrument>(SceneObjectType::INSTRUMENT);
 	objectFactory.registerObject<Food>(SceneObjectType::FOOD);
 	objectFactory.registerObject<Drink>(SceneObjectType::DRINK);
@@ -147,29 +146,27 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<PlantObject>(SceneObjectType::GROWABLEPLANT);
 	objectFactory.registerObject<FsCsObject>(SceneObjectType::FSCSOBJECT);
 	objectFactory.registerObject<FsBuffItem>(SceneObjectType::FSBUFFITEM);
+	objectFactory.registerObject<DeadEyePrototype>(SceneObjectType::DEADEYEPROTOTYPE);
+	objectFactory.registerObject<FurnitureObject>(SceneObjectType::FURNITURE);
+	objectFactory.registerObject<LightObject>(SceneObjectType::LIGHTOBJECT);
 	objectFactory.registerObject<ContractCrate>(SceneObjectType::CONTRACTCRATE);
-
+	objectFactory.registerObject<SchematicFragment>(SceneObjectType::SCHEMATICFRAGMENT);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::SLICINGTOOL);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::FLOWANALYZER);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::MOLECULARCLAMP);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::WEAPONUPGRADEKIT);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::ARMORUPGRADEKIT);
 	objectFactory.registerObject<PrecisionLaserKnife>(SceneObjectType::LASERKNIFE);
-
 	objectFactory.registerObject<CellObject>(SceneObjectType::CELLOBJECT);
 	objectFactory.registerObject<PlayerObject>(SceneObjectType::PLAYEROBJECT);
-
 	objectFactory.registerObject<WaypointObject>(SceneObjectType::WAYPOINT);
-
 	objectFactory.registerObject<WearableObject>(SceneObjectType::JEWELRY);
 	objectFactory.registerObject<WearableObject>(SceneObjectType::RING);
 	objectFactory.registerObject<WearableObject>(SceneObjectType::BRACELET);
 	objectFactory.registerObject<WearableObject>(SceneObjectType::NECKLACE);
 	objectFactory.registerObject<WearableObject>(SceneObjectType::EARRING);
-
 	objectFactory.registerObject<Attachment>(SceneObjectType::ARMORATTACHMENT);
 	objectFactory.registerObject<Attachment>(SceneObjectType::CLOTHINGATTACHMENT);
-
 	objectFactory.registerObject<BuildingObject>(SceneObjectType::BUILDING);
 	objectFactory.registerObject<BuildingObject>(SceneObjectType::CAPITOLBUILDING);
 	objectFactory.registerObject<HospitalBuildingObject>(SceneObjectType::HOSPITALBUILDING);
@@ -186,8 +183,6 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<BuildingObject>(SceneObjectType::SALONBUILDING);
 	objectFactory.registerObject<PoiBuilding>(SceneObjectType::POIBUILDING);
 	objectFactory.registerObject<TutorialBuildingObject>(SceneObjectType::TUTORIALBUILDING);
-
-
 	objectFactory.registerObject<InstallationObject>(SceneObjectType::INSTALLATION);
 	objectFactory.registerObject<GarageInstallation>(SceneObjectType::GARAGEINSTALLATION);
 	objectFactory.registerObject<ShuttleInstallation>(SceneObjectType::SHUTTLEINSTALLATION);
@@ -195,8 +190,9 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<FactoryObject>(SceneObjectType::FACTORY);
 	objectFactory.registerObject<GeneratorObject>(SceneObjectType::GENERATOR);
 	objectFactory.registerObject<InstallationObject>(SceneObjectType::DESTRUCTIBLE);
+	objectFactory.registerObject<TurretObject>(SceneObjectType::TURRET);
 	objectFactory.registerObject<InstallationObject>(SceneObjectType::MINEFIELD);
-
+	objectFactory.registerObject<InstallationObject>(SceneObjectType::COVERTSCANNER);
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::WEAPON);
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::MELEEWEAPON);
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::PISTOL);
@@ -210,15 +206,13 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::TWOHANDMELEEWEAPON);
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::MINE);
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::THROWNWEAPON);
-
 	objectFactory.registerObject<MissionObject>(SceneObjectType::MISSIONOBJECT);
-
 	objectFactory.registerObject<Terminal>(SceneObjectType::TERMINAL);
 	objectFactory.registerObject<Terminal>(SceneObjectType::INSURANCE);
-	objectFactory.registerObject<SpaceshipTerminal>(SceneObjectType::SPACETERMINAL);
 	objectFactory.registerObject<Terminal>(SceneObjectType::SHIPPINGTERMINAL);
 	objectFactory.registerObject<Terminal>(SceneObjectType::INTERACTIVETERMINAL);
 	objectFactory.registerObject<MissionTerminal>(SceneObjectType::MISSIONTERMINAL);
+	objectFactory.registerObject<Terminal>(SceneObjectType::SHIPPERMISSIONS);
 	objectFactory.registerObject<Terminal>(SceneObjectType::BAZAAR);
 	objectFactory.registerObject<Terminal>(SceneObjectType::BANK);
 	objectFactory.registerObject<StartingLocationTerminal>(SceneObjectType::NEWBIETUTORIALTERMINAL);
@@ -236,7 +230,6 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<ScavengerDroid>(SceneObjectType::SCAVENGERDROID);
 	objectFactory.registerObject<GamblingTerminal>(SceneObjectType::GAMBLINGTERMINAL);
 	objectFactory.registerObject<Terminal>(SceneObjectType::CLONING);
-
 	objectFactory.registerObject<Deed>(SceneObjectType::DEED);
 	objectFactory.registerObject<VehicleDeed>(SceneObjectType::VEHICLEDEED);
 	objectFactory.registerObject<PetDeed>(SceneObjectType::PETDEED);
@@ -246,10 +239,10 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<ResourceDeed>(SceneObjectType::RESOURCEDEED);
 	objectFactory.registerObject<EventPerkDeed>(SceneObjectType::EVENTPERKDEED);
 	objectFactory.registerObject<VetHarvesterDeed>(SceneObjectType::VETHARVESTERDEED);
-
+	objectFactory.registerObject<NavicomputerDeed>(SceneObjectType::NAVICOMPUTERDEED);
+	objectFactory.registerObject<ShipDeed>(SceneObjectType::SHIPDEED);
 	objectFactory.registerObject<GroupObject>(SceneObjectType::GROUPOBJECT);
 	objectFactory.registerObject<GuildObject>(SceneObjectType::GUILDOBJECT);
-
 	objectFactory.registerObject<StimPack>(SceneObjectType::STIMPACK);
 	objectFactory.registerObject<RangedStimPack>(SceneObjectType::RANGEDSTIMPACK);
 	objectFactory.registerObject<EnhancePack>(SceneObjectType::ENHANCEPACK);
@@ -277,7 +270,7 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<ClothingObject>(SceneObjectType::ROBE);
 	objectFactory.registerObject<ClothingObject>(SceneObjectType::SHIRT);
 	objectFactory.registerObject<ClothingObject>(SceneObjectType::VEST);
-	objectFactory.registerObject<ClothingObject>(SceneObjectType::WOOKIEGARB);
+	objectFactory.registerObject<ClothingObject>(SceneObjectType::WOOKIEEGARB);
 	objectFactory.registerObject<ClothingObject>(SceneObjectType::MISCCLOTHING);
 	objectFactory.registerObject<ClothingObject>(SceneObjectType::SKIRT);
 	//objectFactory.registerObject<ClothingObject>(SceneObjectType::ITHOGARB);
@@ -286,23 +279,19 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<FishObject>(SceneObjectType::FISH);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::TANGIBLE);
 	objectFactory.registerObject<RobeObject>(SceneObjectType::CLOAK);
-
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::TRAP);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::CAMOKIT);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::LIVESAMPLE);
-
-
 	objectFactory.registerObject<VehicleControlDevice>(SceneObjectType::VEHICLECONTROLDEVICE);
 	objectFactory.registerObject<PetControlDevice>(SceneObjectType::PETCONTROLDEVICE);
 	objectFactory.registerObject<PetControlDevice>(SceneObjectType::DROIDCONTROLDEVICE);
 	objectFactory.registerObject<ShipControlDevice>(SceneObjectType::SHIPCONTROLDEVICE);
-
 	objectFactory.registerObject<VehicleObject>(SceneObjectType::VEHICLE);
 	objectFactory.registerObject<VehicleObject>(SceneObjectType::HOVERVEHICLE);
-
 	objectFactory.registerObject<DroidObject>(SceneObjectType::DROIDCREATURE);
-
+	objectFactory.registerObject<HelperDroidObject>(SceneObjectType::HELPERDROIDCREATURE);
 	objectFactory.registerObject<ResourceSpawn>(SceneObjectType::RESOURCESPAWN);
+	objectFactory.registerObject<SpawnEggObject>(SceneObjectType::CREATURESPAWNER);
 	objectFactory.registerObject<ResourceContainer>(SceneObjectType::RESOURCECONTAINER);
 	objectFactory.registerObject<ResourceContainer>(SceneObjectType::ENERGYGAS);
 	objectFactory.registerObject<ResourceContainer>(SceneObjectType::ENERGYLIQUID);
@@ -315,10 +304,8 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<ResourceContainer>(SceneObjectType::ORGANICFOOD);
 	objectFactory.registerObject<ResourceContainer>(SceneObjectType::ORGANICHIDE);
 	objectFactory.registerObject<ResourceContainer>(SceneObjectType::ORGANICSTRUCTURAL);
-
 	objectFactory.registerObject<CustomIngredient>(SceneObjectType::QUESTRESOURCE);
 	objectFactory.registerObject<FsCraftingComponentObject>(SceneObjectType::FSCRAFTINGCOMPONENT);
-
 	objectFactory.registerObject<DraftSchematic>(SceneObjectType::DRAFTSCHEMATIC);
 	objectFactory.registerObject<ManufactureSchematic>(SceneObjectType::MANUFACTURINGSCHEMATIC);
 	objectFactory.registerObject<Component>(SceneObjectType::COMPONENT);
@@ -336,7 +323,7 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<Component>(SceneObjectType::RANGEDWEAPONCOMPONENT);
 	objectFactory.registerObject<Component>(SceneObjectType::STRUCTURECOMPONENT);
 	objectFactory.registerObject<Component>(SceneObjectType::TISSUECOMPONENT);
-
+	objectFactory.registerObject<De10BarrelComponent>(SceneObjectType::DE10BARRELCOMPONENT);
 	objectFactory.registerObject<PowerupObject>(SceneObjectType::WEAPONPOWERUP);
 	objectFactory.registerObject<PowerupObject>(SceneObjectType::MELEEWEAPONPOWERUP);
 	objectFactory.registerObject<PowerupObject>(SceneObjectType::RANGEDWEAPONPOWERUP);
@@ -345,27 +332,60 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<PowerupObject>(SceneObjectType::MINEPOWERUP);
 	objectFactory.registerObject<PowerupObject>(SceneObjectType::SPECIALHEAVYWEAPONPOWERUP);
 
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPATTACHMENT);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPREACTOR);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPENGINE);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPSHIELDGENERATOR);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPARMOR);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPWEAPON);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPWEAPONCAPACITOR);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPBOOSTER);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPDRIODINTERFACE);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPCHASSIS);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPMISSILE);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPCOUNTERMEASURE);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPWEAPONLAUNCHER);
-	objectFactory.registerObject<Component>(SceneObjectType::SHIPCOUNTERMEASURELAUNCHER);
-
+	// JTL Related
+	objectFactory.registerObject<ShipComponent>(SceneObjectType::SHIPATTACHMENT);
+	objectFactory.registerObject<ShipReactorComponent>(SceneObjectType::SHIPREACTOR);
+	objectFactory.registerObject<ShipEngineComponent>(SceneObjectType::SHIPENGINE);
+	objectFactory.registerObject<ShipShieldComponent>(SceneObjectType::SHIPSHIELDGENERATOR);
+	objectFactory.registerObject<ShipArmorComponent>(SceneObjectType::SHIPARMOR);
+	objectFactory.registerObject<ShipWeaponComponent>(SceneObjectType::SHIPWEAPON);
+	objectFactory.registerObject<ShipCapacitorComponent>(SceneObjectType::SHIPWEAPONCAPACITOR);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPCAPACITORSUBCOMPONENT);
+	objectFactory.registerObject<ShipBoosterComponent>(SceneObjectType::SHIPBOOSTER);
+	objectFactory.registerObject<ShipDroidInterfaceComponent>(SceneObjectType::SHIPDROIDINTERFACE);
+	objectFactory.registerObject<ShipChassisComponent>(SceneObjectType::SHIPCHASSIS);
+	objectFactory.registerObject<ShipMissileComponent>(SceneObjectType::SHIPMISSILE);
+	objectFactory.registerObject<ShipCounterMeasureComponent>(SceneObjectType::SHIPCOUNTERMEASURE);
+	objectFactory.registerObject<ShipWeaponComponent>(SceneObjectType::SHIPWEAPONLAUNCHER);
+	objectFactory.registerObject<ShipWeaponComponent>(SceneObjectType::SHIPCOUNTERMEASURELAUNCHER);
+	objectFactory.registerObject<DroidProgrammingChip>(SceneObjectType::DROIDPROGRAMMINGCHIP);
+	objectFactory.registerObject<AsteroidObject>(SceneObjectType::ASTEROID);
+	objectFactory.registerObject<TangibleObject>(SceneObjectType::PILOTCHAIR);
+	objectFactory.registerObject<TangibleObject>(SceneObjectType::OPERATIONSCHAIR);
+	objectFactory.registerObject<TangibleObject>(SceneObjectType::TURRETACCESSLADDER);
+	objectFactory.registerObject<TangibleObject>(SceneObjectType::SHIPCONTAINER);
 	objectFactory.registerObject<FactoryCrate>(SceneObjectType::FACTORYCRATE);
-
-	objectFactory.registerObject<FighterShipObject>(SceneObjectType::SHIPFIGHTER);
-	objectFactory.registerObject<SpaceStationObject>(SceneObjectType::SHIPSTATION);
-
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::CRYSTAL);
+	objectFactory.registerObject<ShipComponentRepairKit>(SceneObjectType::SHIPCOMPONENTREPAIRITEM);
+	objectFactory.registerObject<ShipInteriorComponent>(SceneObjectType::SHIPINTERIORCOMPONENT);
+	objectFactory.registerObject<ShipPlasmaConduit>(SceneObjectType::SHIPPLASMACONDUIT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPREACTORSUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPENGINESUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPSHIELDSUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPARMORSUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPWEAPONSUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPCAPACITORSUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPBOOSTERSUBCOMPONENT);
+	objectFactory.registerObject<ShipSubComponent>(SceneObjectType::SHIPDROIDINTERFACESUBCOMPONENT);
+
+	objectFactory.registerObject<SpaceActiveArea>(SceneObjectType::SPACEACTIVEAREA);
+	objectFactory.registerObject<NebulaArea>(SceneObjectType::NEBULAAREA);
+	objectFactory.registerObject<SpaceRegion>(SceneObjectType::SPACEREGIONAREA);
+	objectFactory.registerObject<SpaceSpawnArea>(SceneObjectType::SPACESPAWNAREA);
+	objectFactory.registerObject<SpaceSpawner>(SceneObjectType::SPACESPAWNER);
+	objectFactory.registerObject<CreditChipObject>(SceneObjectType::CREDITCHIP);
+	objectFactory.registerObject<ShipPaintKit>(SceneObjectType::SHIPPAINTKIT);
+
+	objectFactory.registerObject<SpaceshipTerminal>(SceneObjectType::SPACETERMINAL);
+	objectFactory.registerObject<ShipObject>(SceneObjectType::SHIP);
+	objectFactory.registerObject<FighterShipObject>(SceneObjectType::SHIPFIGHTER);
+	objectFactory.registerObject<CapitalShipObject>(SceneObjectType::SHIPCAPITAL);
+	objectFactory.registerObject<SpaceObject>(SceneObjectType::SPACEOBJECT);
+	objectFactory.registerObject<ShipObject>(SceneObjectType::SHIPTRANSPORT);
+	objectFactory.registerObject<PobShipObject>(SceneObjectType::SHIPPOB);
+	objectFactory.registerObject<MultiPassengerShipObject>(SceneObjectType::SHIPMULTIPASSENGER);
+	objectFactory.registerObject<ShipAiAgent>(SceneObjectType::SHIPAGENT);
+	objectFactory.registerObject<SpaceStationObject>(SceneObjectType::SPACESTATION);
 }
 
 void ObjectManager::updateObjectVersion() {
@@ -382,14 +402,13 @@ void ObjectManager::loadLastUsedObjectID() {
 	uint64 storedID = databaseManager->getLastUsedObjectID();
 
 	if (!ServerCore::truncateDatabases() && storedID != 0) {
-		info("loading stored id..");
 		nextObjectID = storedID + 1;
 
-		info("done loading last used object id 0x" + String::hexvalueOf((int64)nextObjectID).toUpperCase());
+		info() << "done loading stored id as last used object id 0x" << hex << uppercase << nextObjectID;
 		return;
 	}
 
-	info("loading bruteforce id..");
+	info("loading bruteforce last used id..");
 
 	uint64 maxObjectID = 0;
 	uint64 objectID;
@@ -405,8 +424,7 @@ void ObjectManager::loadLastUsedObjectID() {
 
 		ObjectDatabase* db = cast<ObjectDatabase*>(database);
 
-		String dbName;
-		db->getDatabaseName(dbName);
+		String dbName =	db->getDatabaseName();
 
 		ObjectDatabaseIterator iterator(db);
 
@@ -421,7 +439,7 @@ void ObjectManager::loadLastUsedObjectID() {
 	if (nextObjectID < maxObjectID + 1)
 		nextObjectID = maxObjectID + 1;
 
-	info("done loading last used object id 0x" + String::hexvalueOf((int64)nextObjectID).toUpperCase());
+	info() << "done loading last used object id 0x" << hex << uppercase << nextObjectID;
 }
 
 void ObjectManager::loadStaticObjects() {
@@ -439,7 +457,7 @@ void ObjectManager::loadStaticObjects() {
 	ObjectInputStream objectData(2000);
 
 	while (iterator.getNextKeyAndValue(objectID, &objectData)) {
-		Reference<SceneObject*> object = getObject(objectID).castTo<SceneObject*>();
+		Reference<SceneObject*> object = getObject(objectID).castMoveTo<SceneObject*>();
 
 		if (object != nullptr)
 			continue;
@@ -472,7 +490,6 @@ void ObjectManager::loadStaticObjects() {
 }
 
 int ObjectManager::updatePersistentObject(DistributedObject* object) {
-	//use a linked list
 	object->_setUpdated(true);
 
 	return 0;
@@ -487,7 +504,8 @@ SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC) {
 		SharedObjectTemplate* templateData = templateManager->getTemplate(objectCRC);
 
 		if (templateData == nullptr) {
-			error("trying to create object with unknown objectcrc 0x" + String::hexvalueOf((int)objectCRC));
+			error() << "Failed to create object with unknown CRC: 0x" << hex << (int)objectCRC;
+
 			return nullptr;
 		}
 
@@ -496,7 +514,8 @@ SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC) {
 		object = objectFactory.createObject(gameObjectType);
 
 		if (object == nullptr) {
-			error("creating object unknown gameObjectType " + String::valueOf(gameObjectType));
+			error() << "creating object unknown gameObjectType " << gameObjectType;
+
 			return nullptr;
 		}
 
@@ -506,7 +525,7 @@ SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC) {
 		object->initializeContainerObjectsMap();
 		object->loadTemplateData(templateData);
 
-	} catch (Exception& e) {
+	} catch (const Exception& e) {
 		error("exception caught in SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC)");
 		error(e.getMessage());
 
@@ -555,7 +574,6 @@ SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC) {
 }*/
 
 SceneObject* ObjectManager::cloneObject(SceneObject* object, bool makeTransient) {
-	
 	ObjectOutputStream objectData(500);
 
 	(cast<ManagedObject*>(object))->writeObject(&objectData);
@@ -596,7 +614,7 @@ SceneObject* ObjectManager::cloneObject(SceneObject* object, bool makeTransient)
 	clonedObject->readObject(&objectInput);
 	clonedObject->createComponents();
 	clonedObject->setParent(nullptr);
-    
+
 	VectorMap<String, ManagedReference<SceneObject*> > slottedObjects;
 	clonedObject->getSlottedObjects(slottedObjects);
 
@@ -627,7 +645,7 @@ SceneObject* ObjectManager::cloneObject(SceneObject* object, bool makeTransient)
 
 		clonedObject->transferObject(clonedChild, -1, false);
 	}
-	
+
 	clonedObject->onCloneObject(object);
 
 	if (clonedObject->isPersistent())
@@ -688,7 +706,7 @@ void ObjectManager::persistSceneObjectsRecursively(SceneObject* object, int pers
 			persistSceneObjectsRecursively(slottedObject, persistenceLevel);
 	}
 
-	VectorMap<unsigned long long, ManagedReference<SceneObject* > >* containerObjects = object->getContainerObjects();
+	const VectorMap<unsigned long long, ManagedReference<SceneObject* > >* containerObjects = object->getContainerObjects();
 
 	for (int i = 0; i < containerObjects->size(); i++) {
 		SceneObject* containerObject = containerObjects->get(i).get();
@@ -703,9 +721,7 @@ Reference<DistributedObjectStub*> ObjectManager::loadPersistentObject(uint64 obj
 
 	uint16 tableID = (uint16)(objectID >> 48);
 
-	/*StringBuffer infoMsg;
-	infoMsg << "trying to get database with table id 0x" << hex << tableID << " with obejct id 0x" << hex << objectID;
-	info(infoMsg.toString(), true);*/
+	debug() << "trying to get database with table id 0x" << hex << tableID << " with obejct id 0x" << hex << objectID;
 
 	LocalDatabase* db = databaseManager->getDatabase(tableID);
 
@@ -715,10 +731,9 @@ Reference<DistributedObjectStub*> ObjectManager::loadPersistentObject(uint64 obj
 	ObjectDatabase* database = cast<ObjectDatabase*>( db);
 
 	// only for debugging proposes
-
 	ObjectInputStream objectData(500);
 
-	if (database->getData(objectID, &objectData)) {
+	if (database->getData(objectID, &objectData, berkeley::LockMode::READ_UNCOMMITED, false, true)) {
 		return nullptr;
 	}
 
@@ -731,7 +746,7 @@ Reference<DistributedObjectStub*> ObjectManager::loadPersistentObject(uint64 obj
 
 	if (dobject != nullptr) {
 		//error("different object already in database");
-		return cast<DistributedObjectStub*>( dobject);
+		return cast<DistributedObjectStub*>(dobject);
 	}
 
 	try {
@@ -756,8 +771,7 @@ Reference<DistributedObjectStub*> ObjectManager::loadPersistentObject(uint64 obj
 
 			scene->setLoggingName(loggingName);
 
-			//(cast<SceneObject*>(object))->info("loaded from db");
-
+			scene->debug("loaded from db");
 		} else if (Serializable::getVariable<String>(_classNameHashCode, &className, &objectData)) {
 			object = createObject(className, false, "", objectID, false);
 
@@ -767,8 +781,8 @@ Reference<DistributedObjectStub*> ObjectManager::loadPersistentObject(uint64 obj
 			}
 
 			_locker.release();
-			deSerializeObject(object.castTo<ManagedObject*>(), &objectData);
 
+			deSerializeObject(object.castTo<ManagedObject*>(), &objectData);
 		} else {
 			error("could not load object from database, unknown template crc or class name");
 		}
@@ -807,7 +821,7 @@ void ObjectManager::deSerializeObject(ManagedObject* object, ObjectInputStream* 
 			uint16 tableID = (uint16)(sceno->getObjectID() >> 48);
 			ObjectDatabaseManager::instance()->getDatabaseName(tableID, dbName);
 
-			error("could not deserialize scene object of type: " + String::valueOf(sceno->getGameObjectType()) + " from DB: " + dbName);
+			error() << "could not deserialize scene object of type: " << sceno->getGameObjectType() << " from DB: " << dbName << " Object: " << sceno->getObjectNameStringIdName();
 		} else {
 			error("could not deserialize managed object from DB");
 		}
@@ -838,12 +852,13 @@ SceneObject* ObjectManager::instantiateSceneObject(uint32 objectCRC, uint64 oid,
 	String logName = object->getLoggingName();
 
 	StringBuffer newLogName;
-	newLogName << logName << " 0x" << hex << oid;
+	newLogName << logName << " 0x" << hex << uppercase << oid;
 
 	object->setLoggingName(newLogName.toString());
 
 	object->deploy(newLogName.toString());
-	debug("deployed.." + newLogName.toString());
+
+	debug() << "deployed.." << newLogName;
 
 	return object;
 }
@@ -860,9 +875,7 @@ SceneObject* ObjectManager::createObject(uint32 objectCRC, int persistenceLevel,
 	object = instantiateSceneObject(objectCRC, oid, true);
 
 	if (object == nullptr) {
-		StringBuffer msg;
-		msg << "could not create object CRC = 0x" << hex << objectCRC << " template:" << templateManager->getTemplateFile(objectCRC);
-		error(msg.toString());
+		error() << "could not create object CRC = 0x" << hex << objectCRC << " template:" << templateManager->getTemplateFile(objectCRC);
 		return nullptr;
 	}
 
@@ -985,10 +998,9 @@ int ObjectManager::destroyObjectFromDatabase(uint64 objectID) {
 	Reference<DistributedObject*> obj = getObject(objectID);
 
 	if (obj == nullptr)
-		loadPersistentObject(objectID);
+		obj = loadPersistentObject(objectID);
 
-	if (obj != nullptr)
-	{
+	if (obj != nullptr) {
 		//setLogging(true);
 		//info("Marking " + String::valueOf(objectID) + " for deletion deletion", true);
 	//	setLogging(false);
@@ -1000,9 +1012,7 @@ int ObjectManager::destroyObjectFromDatabase(uint64 objectID) {
 }
 
 void ObjectManager::printInfo() {
-	StringBuffer msg;
-	msg << "total objects in map " << localObjectDirectory.getSize();
-	info(msg.toString(), true);
+	info(true) << "total objects in map " << localObjectDirectory.getSize();
 }
 
 String ObjectManager::getInfo() {
@@ -1011,22 +1021,35 @@ String ObjectManager::getInfo() {
 	return msg.toString();
 }
 
-void ObjectManager::onUpdateModifiedObjectsToDatabase() {
+void ObjectManager::onUpdateModifiedObjectsToDatabase(int flags) {
 	galaxyId = -1;
 
 	if (server != nullptr && server->getZoneServer() != nullptr) {
 		galaxyId = server->getZoneServer()->getGalaxyID();
 
+#ifndef WITH_SWGREALMS_API
 		//characters_dirty chars
 		try {
-			charactersSaved = ServerDatabase::instance()->executeQuery("SELECT * FROM characters_dirty WHERE galaxy_id = " + String::valueOf(galaxyId));
-		} catch (Exception& e) {
+			const static auto query = "SELECT * FROM characters_dirty WHERE galaxy_id = " + String::valueOf(galaxyId);
+
+			charactersSaved = ServerDatabase::instance()->executeQuery(query);
+		} catch (const Exception& e) {
 			error(e.getMessage());
 		}
+#else // WITH_SWGREALMS_API
+		auto swgRealmsAPI = SWGRealmsAPI::instance();
+		if (swgRealmsAPI != nullptr) {
+			String errorMessage;
+			if (!swgRealmsAPI->beginCharactersCommitBlocking(galaxyId, errorMessage)) {
+				error("Failed to begin character commit: " + errorMessage);
+			}
+		}
+#endif // WITH_SWGREALMS_API
 	}
 }
 
 void ObjectManager::onCommitData() {
+#ifndef WITH_SWGREALMS_API
 	if (charactersSaved != nullptr) {
 		try {
 			StringBuffer query;
@@ -1064,6 +1087,15 @@ void ObjectManager::onCommitData() {
 			System::out << e.getMessage();
 		}
 	}
+#else // WITH_SWGREALMS_API
+	auto swgRealmsAPI = SWGRealmsAPI::instance();
+	if (swgRealmsAPI != nullptr && galaxyId != -1) {
+		String errorMessage;
+		if (!swgRealmsAPI->commitCharactersBlocking(galaxyId, errorMessage)) {
+			error("Failed to commit characters: " + errorMessage);
+		}
+	}
+#endif // WITH_SWGREALMS_API
 
 	//Spawn the delete characters task.
 	if (deleteCharactersTask != nullptr && !deleteCharactersTask->isScheduled()) {
@@ -1071,6 +1103,17 @@ void ObjectManager::onCommitData() {
 		int mins = ConfigManager::instance()->getPurgeDeletedCharacters();
 		deleteCharactersTask->schedule(mins * 60 * 1000);
 	}
+#ifdef WITH_DEV_MODE
+	// Enable rapid create/delete of characters for test harness
+	if (deleteCharactersTask != nullptr) {
+		info(true) << "DEV_MODE: Forcing deleteCharactersTask->updateDeletedCharacters();";
+		deleteCharactersTask->updateDeletedCharacters();
+		info(true) << "DEV_MODE: Forcing deleteCharactersTask->executeInThread();";
+		deleteCharactersTask->executeInThread();
+		info(true) << "DEV_MODE: Forcing deleteCharactersTask->updateDeletedCharacters();";
+		deleteCharactersTask->updateDeletedCharacters();
+	}
+#endif // WITH_DEV_MODE
 }
 
 void ObjectManager::cancelDeleteCharactersTask() {
