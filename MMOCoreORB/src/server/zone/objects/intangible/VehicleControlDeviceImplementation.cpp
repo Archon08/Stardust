@@ -51,7 +51,7 @@ void VehicleControlDeviceImplementation::generateObject(CreatureObject* player) 
 
 	if(player->getPendingTask("call_mount") != nullptr) {
 		StringIdChatParameter waitTime("pet/pet_menu", "call_delay_finish_vehicle");
-		Time nextExecution;
+		AtomicTime nextExecution;
 		Core::getTaskManager()->getNextExecutionTime(player->getPendingTask("call_mount"), nextExecution);
 		int timeLeft = (nextExecution.getMiliTime() / 1000) - System::getTime();
 		waitTime.setDI(timeLeft);
