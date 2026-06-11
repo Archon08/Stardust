@@ -24,6 +24,14 @@ jobs:
             libmariadb-dev libmariadb-dev-compat \
             libssl-dev zlib1g-dev libpcre3-dev libreadline-dev \
             libboost-dev libboost-thread-dev libboost-system-dev libjemalloc-dev
+          apt-get install -y wget gnupg lsb-release software-properties-common
+          wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x /tmp/llvm.sh
+          /tmp/llvm.sh 17 || /tmp/llvm.sh 17
+          ln -sf /usr/bin/clang-17 /usr/local/bin/clang
+          ln -sf /usr/bin/clang++-17 /usr/local/bin/clang++
+          ln -sf /usr/bin/ld.lld-17 /usr/local/bin/ld.lld
+          clang++ --version
 
       - name: Checkout (with engine3 submodule)
         uses: actions/checkout@v4
