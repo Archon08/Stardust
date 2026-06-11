@@ -1,0 +1,137 @@
+name: space-import
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to import into'
+        required: true
+        default: 'space-port/phase-2'
+
+permissions:
+  contents: write
+
+env:
+  CORE3_PIN: 6856f315a80b5250635b2272695caec1d64204ed
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Fetch pinned Core3 snapshot
+        run: |
+          wget -qO /tmp/core3.tar.gz "https://github.com/swgemu/Core3/archive/${CORE3_PIN}.tar.gz"
+          mkdir -p /tmp/core3
+          tar -xzf /tmp/core3.tar.gz -C /tmp/core3 --strip-components=1
+          ls /tmp/core3/MMOCoreORB/src/server/zone/ | head -5
+
+      - name: "Wave 1: Zone split + octree + zone server (P2)"
+        run: |
+          SRC=/tmp/core3/MMOCoreORB/src
+          DST=MMOCoreORB/src
+          copy() { # path under src
+            if [ -e "$SRC/$1" ]; then
+              mkdir -p "$DST/$(dirname "$1")"
+              cp -r "$SRC/$1" "$DST/$1"
+              echo "copied: $1"
+            else
+              echo "MISSING UPSTREAM: $1"
+            fi
+          }
+          # zone core: remove stale 2019 counterparts that modern set replaces
+          rm -f $DST/server/zone/QuadTree.cpp $DST/server/zone/QuadTree.h $DST/server/zone/QuadTreeNode.h \
+                $DST/server/zone/QuadTreeReference.cpp $DST/server/zone/QuadTreeReference.h \
+                $DST/server/zone/QuadTreeEntry.idl $DST/server/zone/QuadTreeEntryImplementation.cpp \
+                $DST/server/zone/Zone.idl $DST/server/zone/ZoneImplementation.cpp \
+                $DST/server/zone/ZoneContainerComponent.cpp $DST/server/zone/ZoneContainerComponent.h \
+                $DST/server/zone/ZoneServer.idl $DST/server/zone/ZoneServerImplementation.cpp \
+                $DST/server/zone/ZoneReference.cpp $DST/server/zone/ZoneReference.h \
+                $DST/server/zone/CloseObjectsVector.cpp $DST/server/zone/CloseObjectsVector.h \
+                $DST/server/zone/InRangeObjectsVector.h $DST/server/zone/ActiveAreasVector.h \
+                $DST/server/zone/ZoneLoadManagersTask.h
+          for f in TreeEntry.idl TreeEntryImplementation.cpp QuadTreeEntry.idl QuadTreeEntryImplementation.cpp \
+                   QuadTree.cpp QuadTree.h QuadTreeNode.h QuadTreeReference.cpp QuadTreeReference.h \
+                   Zone.idl ZoneImplementation.cpp ZoneReference.cpp ZoneReference.h \
+                   GroundZone.idl GroundZoneImplementation.cpp GroundZoneContainerComponent.cpp GroundZoneContainerComponent.h \
+                   SpaceZone.idl SpaceZoneImplementation.cpp SpaceZoneContainerComponent.cpp SpaceZoneContainerComponent.h \
+                   SpaceZoneLoadManagersTask.h ZoneLoadManagersTask.h \
+                   Octree.cpp Octree.h OctreeReference.cpp OctreeReference.h ActiveAreaOctree.cpp ActiveAreaOctree.h \
+                   ZoneServer.idl ZoneServerImplementation.cpp \
+                   CloseObjectsVector.cpp CloseObjectsVector.h InRangeObjectsVector.h ActiveAreasVector.h \
+                   ZoneComponent.cpp ZoneComponent.h; do
+            copy "server/zone/$f"
+          done
+          # scene zone components (modern split)
+          for f in ZoneComponent.cpp ZoneComponent.h GroundZoneComponent.cpp GroundZoneComponent.h \
+                   SpaceZoneComponent.cpp SpaceZoneComponent.h; do
+            copy "server/zone/objects/scene/components/$f"
+          done
+
+      - name: "Wave 2: space managers + ship objects (P3)"
+        run: |
+          SRC=/tmp/core3/MMOCoreORB/src
+          DST=MMOCoreORB/src
+          # whole-dir transplants (no Stardust customization per P0.2 delta)
+          rm -rf $DST/server/zone/objects/ship
+          for d in server/zone/managers/ship server/zone/managers/space server/zone/managers/spacecollision \
+                   server/zone/managers/spacecombat server/zone/objects/ship \
+                   server/zone/objects/area/space server/zone/objects/region/space \
+                   server/zone/packets/jtl server/zone/packets/ship \
+                   templates/tangible/ship; do
+            rm -rf "$DST/$d"
+            mkdir -p "$DST/$(dirname $d)"
+            if [ -e "$SRC/$d" ]; then cp -r "$SRC/$d" "$DST/$d"; echo "dir copied: $d"; else echo "MISSING DIR UPSTREAM: $d"; fi
+          done
+
+      - name: "Wave 3: scattered space objects, commands, packets, templates (P3)"
+        run: |
+          SRC=/tmp/core3/MMOCoreORB/src
+          DST=MMOCoreORB/src
+          copy() {
+            if [ -e "$SRC/$1" ]; then mkdir -p "$DST/$(dirname "$1")"; cp -r "$SRC/$1" "$DST/$1"; echo "copied: $1"; else echo "MISSING UPSTREAM: $1"; fi
+          }
+          # intangible / staticobject / tangible space items
+          for f in server/zone/objects/staticobject/SpaceObject.idl server/zone/objects/staticobject/SpaceObjectImplementation.cpp \
+                   server/zone/objects/intangible/ShipControlDevice.idl server/zone/objects/intangible/ShipControlDeviceImplementation.cpp \
+                   server/zone/objects/intangible/tasks/LaunchShipTask.h server/zone/objects/intangible/tasks/StoreShipTask.h \
+                   server/zone/objects/tangible/deed/ship server/zone/objects/tangible/ship \
+                   server/zone/objects/tangible/space server/zone/objects/tangible/terminal/spaceship \
+                   server/zone/objects/tangible/tool/ShipPaintKit.idl \
+                   server/zone/objects/player/components/PlayerSpaceZoneComponent.cpp server/zone/objects/player/components/PlayerSpaceZoneComponent.h \
+                   server/zone/objects/player/variables/SpaceLaunchPoint.h \
+                   server/zone/managers/player/creation/SendJtlRecruitment.h \
+                   templates/params/ship terrain/SpaceTerrainAppearance.cpp terrain/SpaceTerrainAppearance.h; do
+            copy "$f"
+          done
+          # ship commands (creature/commands)
+          for c in HyperspaceCommand.h AborthyperspaceCommand.h LaunchIntoSpaceCommand.h PilotShipCommand.h \
+                   UnpilotShipCommand.h InstallShipComponentCommand.h UninstallShipComponentCommand.h \
+                   RepairShipComponentCommand.h InsertItemIntoShipComponentSlotCommand.h \
+                   InspacereloadCommand.h InspacerepairCommand.h InspacerrCommand.h \
+                   RequestSpaceTrainerCommand.h SpaceQueueCommand.h \
+                   AssociateDroidControlDeviceWithShipCommand.h DissociateDroidControlDeviceFromShipCommand.h; do
+            copy "server/zone/objects/creature/commands/$c"
+          done
+          # space packets in packets/object
+          for p in BeginHyperspace.h Hyperspace.h OrientForHyperspace.h JtlShipListRequestCallback.h \
+                   JtlShipListResponse.h UpdateShipTargetSlot.h GroupMemberSpaceInvite.h GroupMemberSpaceInviteCallback.h; do
+            copy "server/zone/packets/object/$p"
+          done
+          # jtl sui callbacks
+          for s in NameShipSuiCallback.h PobShipStatusSuiCallback.h; do
+            copy "server/zone/objects/player/sui/callbacks/$s"
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "space-import"
+          git config user.email "noreply@anthropic.com"
+          git add -A MMOCoreORB/src
+          git commit -m "P2+P3: transplant Zone split + space subsystem from Core3@${CORE3_PIN:0:7} (zone core, octree, managers/{ship,space,spacecollision,spacecombat}, objects/ship, packets, commands, templates)" || echo "nothing to commit"
+          git push origin HEAD:${{ github.event.inputs.branch }}
+          git log --oneline -1
+          git diff HEAD~1 --shortstat 2>/dev/null || true
