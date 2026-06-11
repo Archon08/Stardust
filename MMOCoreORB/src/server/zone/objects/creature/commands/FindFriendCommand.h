@@ -42,7 +42,7 @@ public:
 		ManagedReference<CreatureObject*> targetPlayer = chatManager->getPlayer(name);
 
 		if (targetPlayer == nullptr) {
-			ManagedReference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location_failed"); // Unable to locate %TU
+			Reference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location_failed"); // Unable to locate %TU
 			message->setTU(name);
 
 			player->sendSystemMessage(*message);
@@ -53,7 +53,7 @@ public:
 		String myFirstName = player->getFirstName().toLowerCase();
 
 		if (!targetGhost->hasFriend(myFirstName)) {
-			ManagedReference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location_failed"); // Unable to locate %TU
+			Reference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location_failed"); // Unable to locate %TU
 			message->setTU(name);
 
 			player->sendSystemMessage(*message);
@@ -63,7 +63,7 @@ public:
 		Zone* zone = targetPlayer->getZone();
 
 		if (zone == nullptr) {
-			ManagedReference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location_failed"); // Unable to locate %TU
+			Reference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location_failed"); // Unable to locate %TU
 			message->setTU(name);
 
 			player->sendSystemMessage(*message);
@@ -98,7 +98,7 @@ public:
 
 		ghost->addWaypoint(obj, true, true);
 
-		ManagedReference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location"); // The friend waypoint has been updated to the location of %TU.
+		Reference<StringIdChatParameter*> message = new StringIdChatParameter("@ui_cmnty:friend_location"); // The friend waypoint has been updated to the location of %TU.
 		message->setTU(name);
 
 		player->sendSystemMessage(*message);
