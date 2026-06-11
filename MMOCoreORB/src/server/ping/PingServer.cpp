@@ -26,24 +26,12 @@ void PingServer::run() {
 }
 
 void PingServer::shutdown() {
-	HashTable<uint64, ServiceClient*> clientsCopy;
-	clientsCopy.copyFrom(clients);
-
-	HashTableIterator<uint64, ServiceClient*> itr = clientsCopy.iterator();
-
-	while (itr.hasNext()) {
-		PingClient* ping = cast<PingClient*>(itr.getNextValue());
-
-		if (ping != nullptr) {
-			ping->disconnect();
-		}
-	}
 }
 
 PingClient* PingServer::createConnection(Socket* sock, SocketAddress& addr) {
 	PingClient* client = new PingClient(this, sock, addr);
 
-	info("client connected from \'" + client->getAddress() + "\'");
+	info("client connected from \'" + client->getFullIPAddress() + "\'");
 
 	return client;
 }
@@ -54,7 +42,7 @@ void PingServer::handleMessage(ServiceClient* client, Packet* message) {
 	try {
 
 		if (lclient->isAvailable() && (message->size() == 4)) {
-			lclient->updateNetStatus();
+			lclient->resetNetStatusTimeout();
 
 			Packet* mess = message->clone();
 
