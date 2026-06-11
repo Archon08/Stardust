@@ -8,7 +8,7 @@
 #include "PathGraph.h"
 #include "templates/appearance/FloorMesh.h"
 
-uint32 PathNode::getID() {
+uint32 PathNode::getID() const {
 	int cellID = pathGraph->getFloorMesh()->getCellID();
 
 	return (cellID << 16) + id;
