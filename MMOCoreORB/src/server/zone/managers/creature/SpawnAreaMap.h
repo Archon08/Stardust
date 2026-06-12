@@ -61,6 +61,13 @@ public:
 		return &worldSpawnAreas;
 	}
 
+	SpawnArea* getWorldSpawnArea() {
+		if (worldSpawnAreas.size() > 0)
+			return worldSpawnAreas.get(0);
+
+		return nullptr;
+	}
+
 };
 
 
