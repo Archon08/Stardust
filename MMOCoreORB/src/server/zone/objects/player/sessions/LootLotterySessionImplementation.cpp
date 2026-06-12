@@ -59,7 +59,7 @@ void LootLotterySessionImplementation::doLotteryDraw() {
 	if (lootContainer == nullptr)
 		return;
 
-	const ContainerPermissions* contPerms = lootContainer->getContainerPermissions();
+	ContainerPermissions* contPerms = lootContainer->getContainerPermissionsForUpdate();
 
 	//Check if the group that owns the corpse is still active or not.
 	ManagedReference<GroupObject*> group = corpse->getZoneServer()->getObject(groupID).castTo<GroupObject*>();
@@ -93,7 +93,7 @@ void LootLotterySessionImplementation::doLotteryDraw() {
 				noTakers.setTO(objectID);
 				group->sendSystemMessage(noTakers);
 			}
-			const ContainerPermissions* itemPerms = object->getContainerPermissions();
+			ContainerPermissions* itemPerms = object->getContainerPermissionsForUpdate();
 			if (itemPerms == nullptr)
 				continue;
 
