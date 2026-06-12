@@ -67,7 +67,7 @@ namespace server {
     		return ownerID;
     	}
 
-    	bool hasInheritPermissionsFromParent() {
+    	bool hasInheritPermissionsFromParent() const {
     		return inheritPermissionsFromParent;
     	}
 
