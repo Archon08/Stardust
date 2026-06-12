@@ -1060,9 +1060,9 @@ void CraftingSessionImplementation::customization(const String& name, byte templ
 	prototype->setCustomObjectName(customName, false);
 
 	/// Set Name
-	manufactureSchematic->getObjectName()->setStringId(
-			prototype->getObjectNameStringIdFile(),
-			prototype->getObjectNameStringIdName());
+	StringId schematicName;
+	schematicName.setStringId(prototype->getObjectNameStringIdFile(), prototype->getObjectNameStringIdName());
+	manufactureSchematic->setObjectName(schematicName, false);
 
 	/// Set Manufacture Schematic Custom name
 	if (!newName.isEmpty())

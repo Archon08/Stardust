@@ -32,8 +32,8 @@ public:
 	void parseFromIffStream(engine::util::IffStream* iffStream) override;
 	void parseFromIffStream(engine::util::IffStream* iffStream, Version<'0000'>);
 
-	float getSize() const override {
-		return 16384 * 16384;
+	float getSize() override {
+		return 16384.f * 16384.f;
 	}
 
 };

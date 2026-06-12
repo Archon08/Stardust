@@ -4,6 +4,7 @@
 
 #include "engine/engine.h"
 #include "server/zone/managers/resource/ResourceManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/objects/resource/ResourceContainer.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/tangible/TangibleObject.h"
@@ -111,7 +112,8 @@ public:
 
 		ResourceSpawn* recycledVersion = manager->getRecycledVersion(resource);
 
-		manager->harvestResourceToPlayer(player, recycledVersion, resCon->getQuantity());
+		TransactionLog trx(TrxCode::RECYCLED, player);
+		manager->harvestResourceToPlayer(trx, player, recycledVersion, resCon->getQuantity());
 
 		Locker clocker(insertedItem, player);
 

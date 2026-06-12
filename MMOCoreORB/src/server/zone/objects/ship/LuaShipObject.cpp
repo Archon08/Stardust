@@ -1,6 +1,7 @@
 #include "LuaShipObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/ship/ShipObject.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/objects/intangible/ShipControlDevice.h"
 #include "server/zone/objects/intangible/tasks/StoreShipTask.h"

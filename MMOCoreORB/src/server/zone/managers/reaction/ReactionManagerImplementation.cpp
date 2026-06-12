@@ -438,3 +438,62 @@ void ReactionManagerImplementation::doReactionFineMailCheck(CreatureObject* play
 
 	playerObject->updateReactionFineMailTimestamp();
 }
+
+// P2: apply an imperial-presence reaction fine (ported from upstream)
+void ReactionManagerImplementation::reactionFine(CreatureObject* emoteUser, AiAgent* emoteTarget, int reactionLevel) {
+	if (emoteUser == nullptr || emoteTarget == nullptr)
+		return;
+
+	ZoneServer* zoneServer = emoteUser->getZoneServer();
+
+	if (zoneServer == nullptr)
+		return;
+
+	PlayerObject* ghost = emoteUser->getPlayerObject();
+	ChatManager* chatManager = zoneServer->getChatManager();
+
+	if (ghost == nullptr)
+		return;
+
+	EmoteReactionFine* reactionFine = getEmoteReactionFine(emoteUser, emoteTarget, reactionLevel);
+
+	// No reaction if there is no fine data
+	if (reactionFine == nullptr)
+		return;
+
+	int randomQuip = reactionFine->getRandomQuip();
+
+	if (randomQuip != -1) {
+		StringIdChatParameter param(getReactionQuip(randomQuip));
+		param.setTT(emoteUser->getObjectID());
+		chatManager->broadcastChatMessage(emoteTarget, param, 0, 0, emoteTarget->getMoodID());
+	}
+
+	if (reactionFine->getFactionFine() != 0)
+		ghost->decreaseFactionStanding("imperial", reactionFine->getFactionFine());
+
+	if (reactionFine->shouldKnockdown()) {
+		doKnockdown(emoteUser, emoteTarget);
+	}
+
+	if (reactionFine->getCreditFine() != 0) {
+		StringBuffer suiFineMsg;
+		suiFineMsg << "@stormtrooper_attitude/st_response:imperial_fine_" << String::valueOf(reactionFine->getCreditFine());
+		if (ghost->getReactionFines() != 0) {
+			suiFineMsg << " @stormtrooper_attitude/st_response:imperial_fine_outstanding " << String::valueOf(ghost->getReactionFines() + reactionFine->getCreditFine()) << " @stormtrooper_attitude/st_response:imperial_fine_credits";
+		} else {
+			ghost->updateReactionFineTimestamp();
+		}
+		ManagedReference<SuiMessageBox*> box = new SuiMessageBox(emoteUser, SuiWindowType::REACTION_FINE);
+		box->setPromptTitle("@stormtrooper_attitude/st_response:imperial_fine_t"); // Imperial Fine
+		box->setPromptText(suiFineMsg.toString());
+		box->setCallback(new ReactionFinePaymentSuiCallback(zoneServer));
+		box->setUsingObject(emoteTarget);
+		box->setForceCloseDistance(16.f);
+
+		ghost->addSuiBox(box);
+		emoteUser->sendMessage(box->generateMessage());
+
+		ghost->addToReactionFines(reactionFine->getCreditFine());
+	}
+}

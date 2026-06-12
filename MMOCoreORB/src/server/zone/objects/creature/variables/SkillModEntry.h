@@ -6,6 +6,7 @@
 #define SKILLMODENTRY_H_
 
 #include "engine/engine.h"
+#include "engine/util/json_utils.h"
 
 class SkillModEntry : public virtual Object {
 private:
@@ -72,6 +73,12 @@ public:
 		TypeInfo<int >::parseFromBinaryStream(&skillBonus, stream);
 
 		return true;
+	}
+
+	// P2: JSON serialization so VectorMap<String, SkillModEntry> can be serialized by the engine.
+	friend void to_json(nlohmann::json& j, const SkillModEntry& e) {
+		j["skillMod"] = e.skillMod;
+		j["skillBonus"] = e.skillBonus;
 	}
 };
 
