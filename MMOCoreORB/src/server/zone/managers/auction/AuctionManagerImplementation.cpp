@@ -1297,7 +1297,7 @@ void AuctionManagerImplementation::getData(CreatureObject* player, int extent, u
 		break;
 	}
 
-	getAuctionData(player, vendorInUse, planet, region, vendor, screen, category, clientcounter, offset);
+	getAuctionData(player, vendorInUse, planet, region, vendor, screen, category, UnicodeString(""), 0, 0, true, clientcounter, offset);
 
 }
 
