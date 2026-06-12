@@ -41,8 +41,8 @@ void ScavengerDroidImplementation::updatePlayerScore(CreatureObject* player) {
 }
 
 void ScavengerDroidImplementation::announceToPlayers(const String& message) {
-	SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
-	zone->getInRangeObjects(getPositionX(), getPositionY(), 256, &closeObjects,	true);
+	SortedVector<ManagedReference<TreeEntry*> > closeObjects;
+	zone->getInRangeObjects(getPositionX(), 0, getPositionY(), 256, &closeObjects,	true);
 
 	for (int i = 0; i < closeObjects.size(); i++) {
 		SceneObject* targetObject = cast<SceneObject*>(closeObjects.get(i).get());
@@ -124,7 +124,7 @@ int ScavengerDroidImplementation::handleObjectMenuSelect(CreatureObject* player,
 		EventPerkDeed* deed = data->getDeed();
 
 		if (deed == nullptr) {
-			player->sendSystemMessage("Error: deed is NULL.");
+			player->sendSystemMessage("Error: deed is nullptr.");
 			return 1;
 		}
 
