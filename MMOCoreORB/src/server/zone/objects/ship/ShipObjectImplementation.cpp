@@ -43,6 +43,7 @@
 #include "server/zone/objects/ship/transform/ShipObjectTransform.h"
 #include "server/zone/objects/ship/transform/SpaceTransform.h"
 #include "server/zone/managers/ship/tasks/ShipObjectTimerTask.h"
+#include "server/zone/managers/ship/tasks/SpaceCommTimerTask.h"
 
 // #define DEBUG_COV
 
