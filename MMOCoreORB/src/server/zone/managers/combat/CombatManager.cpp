@@ -322,14 +322,14 @@ int CombatManager::doTargetCombatAction(CreatureObject* attacker, WeaponObject* 
 		}
 
 		if (help)
-			aiAgent->sendReactionChat(ReactionManager::HELP);
+			aiAgent->sendReactionChat(attacker, ReactionManager::HELP);
 		else
-			aiAgent->sendReactionChat(ReactionManager::HIT);
+			aiAgent->sendReactionChat(attacker, ReactionManager::HIT);
 	}
 
 	if (damage > 0 && attacker->isAiAgent()) {
 		AiAgent* aiAgent = cast<AiAgent*>(attacker);
-		aiAgent->sendReactionChat(ReactionManager::HITTARGET);
+		aiAgent->sendReactionChat(tano, ReactionManager::HITTARGET);
 	}
 
 	return damage;
