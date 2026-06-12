@@ -2252,6 +2252,16 @@ void PlayerObjectImplementation::setTrainerCoordinates(const Vector3& trainer) {
 	trainerCoordinates = trainer;
 }
 
+// P2: native so the @dereferenced Vector3 is received as a reference (avoids ORB pointer-arg mismatch).
+void PlayerObjectImplementation::setSpaceLaunchLocation(const Vector3& location) {
+	launchPoint.setLocation(location);
+}
+
+// P2: native so callers can pass temporary Strings (const String&) without the inline-body ORB pointer issue.
+void PlayerObjectImplementation::setBankLocation(const String& location) {
+	bankLocation = location;
+}
+
 void PlayerObjectImplementation::addPermissionGroup(const String& group, bool updatePermissions) {
 	permissionGroups.put(group);
 

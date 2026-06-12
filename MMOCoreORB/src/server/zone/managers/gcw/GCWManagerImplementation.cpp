@@ -44,6 +44,7 @@
 #include "server/zone/packets/scene/PlayClientEffectLocMessage.h"
 #include "server/zone/managers/gcw/sessions/ContrabandScanSession.h"
 #include "server/zone/managers/gcw/observers/SquadObserver.h"
+#include "server/zone/managers/creature/CreatureManager.h"
 
 void GCWManagerImplementation::initialize() {
 	loadLuaConfig();

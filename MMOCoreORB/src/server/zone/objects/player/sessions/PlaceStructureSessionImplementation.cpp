@@ -52,7 +52,7 @@ int PlaceStructureSessionImplementation::constructStructure(float x, float y, in
 		if (barricade != nullptr) {
 			barricade->initializePosition(x, 0, y); //The construction barricades are always at the terrain height.
 
-			StructureFootprint* structureFootprint = serverTemplate->getStructureFootprint();
+			const StructureFootprint* structureFootprint = serverTemplate->getStructureFootprint();
 
 			if (structureFootprint != nullptr && (structureFootprint->getRowSize() > structureFootprint->getColSize())) {
 				angle = angle + 180;
@@ -82,7 +82,7 @@ void PlaceStructureSessionImplementation::placeTemporaryNoBuildZone(SharedStruct
 	if (thisZone == nullptr)
 		return;
 
-	Reference<StructureFootprint*> structureFootprint =	serverTemplate->getStructureFootprint();
+	Reference<const StructureFootprint*> structureFootprint =	serverTemplate->getStructureFootprint();
 
 	//float temporaryNoBuildZoneWidth = structureFootprint->getLength() + structureFootprint->getWidth();
 
