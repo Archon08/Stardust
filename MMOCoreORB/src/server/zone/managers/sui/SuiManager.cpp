@@ -27,6 +27,7 @@
 #include "server/zone/objects/tangible/eventperk/ShuttleBeacon.h"
 #include "server/zone/objects/player/sui/SuiBoxPage.h"
 #include "server/zone/managers/loot/LootManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 
 SuiManager::SuiManager() : Logger("SuiManager") {
 	server = nullptr;
@@ -537,7 +538,8 @@ void SuiManager::handleCharacterBuilderSelectItem(CreatureObject* player, SuiBox
 					return;
 
 				LootManager* lootManager = zserv->getLootManager();
-				lootManager->createLoot(inventory, templatePath, 300, true);
+				TransactionLog trx(TrxCode::CHARACTERBUILDER, player);
+				lootManager->createLoot(trx, inventory, templatePath, 300, true);
 
 			} else if (templatePath == "max_xp") {
 				ghost->maximizeExperience();

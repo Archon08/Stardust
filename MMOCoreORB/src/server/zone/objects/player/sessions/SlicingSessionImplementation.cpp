@@ -6,6 +6,7 @@
  */
 
 #include "server/zone/objects/player/sessions/SlicingSession.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/objects/player/sui/SuiWindowType.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/tangible/tool/smuggler/SlicingTool.h"
@@ -721,8 +722,10 @@ void SlicingSessionImplementation::handleContainerSlice() {
 			return;
 		}
 
-		if (System::random(10) != 4)
-			lootManager->createLoot(container, "looted_container");
+		if (System::random(10) != 4) {
+			TransactionLog trx(TrxCode::SLICECONTAINER, player, container);
+			lootManager->createLoot(trx, container, "looted_container");
+		}
 
 		inventory->transferObject(container, -1);
 		container->sendTo(player, true);

@@ -9,6 +9,7 @@
 #include "ArtCrateMenuComponent.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/managers/loot/LootManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
 
@@ -35,7 +36,8 @@ int ArtCrateMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject, Crea
 
 		ManagedReference<SceneObject*> inventory = player->getSlottedObject("inventory");
 
-		lootManager->createLoot(inventory, "death_watch_bunker_art", 1);
+		TransactionLog trx(TrxCode::NPCLOOTCLAIM, player);
+		lootManager->createLoot(trx, inventory, "death_watch_bunker_art", 1);
 
 		sceneObject->destroyObjectFromWorld(true);
 		sceneObject->destroyObjectFromDatabase(true);

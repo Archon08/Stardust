@@ -17,6 +17,7 @@
 #include "server/zone/managers/faction/FactionManager.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/managers/loot/LootManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/managers/crafting/labratories/DroidMechanics.h"
 #include "server/zone/objects/creature/ai/Creature.h"
 #include "server/zone/objects/creature/CreatureObject.h"
@@ -601,7 +602,8 @@ int CreatureManagerImplementation::notifyDestruction(TangibleObject* destructor,
 
 			creatureInventory->setContainerOwnerID(ownerID);
 
-			lootManager->createLoot(creatureInventory, destructedObject);
+			TransactionLog trx(TrxCode::NPCLOOT, destructedObject);
+			lootManager->createLoot(trx, creatureInventory, destructedObject);
 		}
 
 		Reference<AiAgent*> strongReferenceDestructedObject = destructedObject;

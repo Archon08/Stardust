@@ -7,6 +7,7 @@
 
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/managers/loot/LootManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
 #include "server/zone/managers/crafting/ComponentMap.h"
 
@@ -126,7 +127,8 @@ public:
 				if (lootManager == nullptr)
 					return INVALIDPARAMETERS;
 
-				lootManager->createLoot(inventory, lootGroup, level);
+				TransactionLog trx(TrxCode::ADMINCOMMAND, creature);
+				lootManager->createLoot(trx, inventory, lootGroup, level);
 			} else if (commandType.beginsWith("createresource")) {
 				String resourceName;
 				args.getStringToken(resourceName);
@@ -184,7 +186,8 @@ public:
 
 						ManagedReference<SceneObject*> inventory = targetPlayer->getSlottedObject("inventory");
 						if (inventory != nullptr) {
-							if( lootManager->createLoot(inventory, lootGroup, level) )
+							TransactionLog trx(creature, targetPlayer, nullptr, TrxCode::ADMINCOMMAND);
+							if( lootManager->createLoot(trx, inventory, lootGroup, level) )
 								targetPlayer->sendSystemMessage( "You have received a loot item!");
 						}
 

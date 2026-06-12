@@ -7,6 +7,7 @@
 
 #include "server/zone/managers/minigames/ForageManager.h"
 #include "server/zone/managers/loot/LootManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/managers/resource/ResourceManager.h"
 #include "server/zone/managers/minigames/events/ForagingEvent.h"
 #include "server/zone/objects/area/ForageAreaCollection.h"
@@ -247,6 +248,8 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 	String lootGroup = "";
 	String resName = "";
 
+	TransactionLog trx(TrxCode::FORAGED, player);
+
 	if (forageType == ForageManager::SHELLFISH){
 		bool mullosks = false;
 		if (System::random(100) > 50) {
@@ -285,7 +288,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 				lootGroup = "forage_rare";
 			}
 
-			lootManager->createLoot(inventory, lootGroup, level);
+			lootManager->createLoot(trx, inventory, lootGroup, level);
 		}
 
 	} else if (forageType == ForageManager::MEDICAL) { //Medical Forage
@@ -314,7 +317,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 			level = 200;
 		}
 
-		lootManager->createLoot(inventory, lootGroup, level);
+		lootManager->createLoot(trx, inventory, lootGroup, level);
 
 	} else if (forageType == ForageManager::LAIR) { //Lair Search
 		dice = System::random(109);
@@ -334,7 +337,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 			}
 		}
 
-		if(!lootManager->createLoot(inventory, lootGroup, level)) {
+		if(!lootManager->createLoot(trx, inventory, lootGroup, level)) {
 			player->sendSystemMessage("Unable to create loot for lootgroup " + lootGroup);
 			return false;
 		}
