@@ -177,7 +177,7 @@ void DnaManager::generateSample(Creature* creature, CreatureObject* player,int q
 		return;
 	}
 	Locker lock(creature,player);
-	CreatureTemplate* creatureTemplate = dynamic_cast<CreatureTemplate*>(creature->getCreatureTemplate());
+	const CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
 
 	int ferocity = creatureTemplate->getFerocity();
 	int cl = creature->getLevel();
