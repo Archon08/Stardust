@@ -931,11 +931,11 @@ bool PlanetManagerImplementation::isInRangeWithPoi(float x, float y, float range
 }
 
 bool PlanetManagerImplementation::isInObjectsNoBuildZone(float x, float y, float extraMargin, bool checkFootprint) {
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<TreeEntry*> closeObjects;
 
 	Vector3 targetPos(x, y, zone->getHeight(x, y));
 
-	zone->getInRangeObjects(x, y, 512, &closeObjects, true, false);
+	zone->getInRangeObjects(x, 0, y, 512, &closeObjects, true, false);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 		SceneObject* obj = static_cast<SceneObject*>(closeObjects.get(i));
@@ -979,8 +979,8 @@ bool PlanetManagerImplementation::isSpawningPermittedAt(float x, float y, float 
 
 	targetPos.setZ(zone->getHeight(x, y));
 
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
-	zone->getInRangeActiveAreas(x, y, margin + 64.f, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, 0, y, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, 0, y, margin + 64.f, &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
@@ -1017,7 +1017,7 @@ bool PlanetManagerImplementation::isBuildingPermittedAt(float x, float y, SceneO
 
 	//targetPos.setZ(zone->getHeight(x, y)); not needed
 
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, 0, y, &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
@@ -1046,7 +1046,7 @@ bool PlanetManagerImplementation::isCampingPermittedAt(float x, float y, float m
 
 	Vector3 targetPos(x, y, zone->getHeight(x, y));
 
-	zone->getInRangeActiveAreas(x, y, &activeAreas, true);
+	zone->getInRangeActiveAreas(x, 0, y, &activeAreas, true);
 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
@@ -1073,11 +1073,11 @@ bool PlanetManagerImplementation::isCampingPermittedAt(float x, float y, float m
 }
 
 Reference<SceneObject*> PlanetManagerImplementation::findObjectTooCloseToDecoration(float x, float y, float margin) {
-	SortedVector<ManagedReference<QuadTreeEntry* > > closeObjects;
+	SortedVector<ManagedReference<TreeEntry* > > closeObjects;
 
 	Vector3 targetPos(x, y,0);
 
-	zone->getInRangeObjects(x, y, 256, &closeObjects, true, false);
+	zone->getInRangeObjects(x, 0, y, 256, &closeObjects, true, false);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 
