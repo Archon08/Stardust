@@ -267,7 +267,7 @@ void SkillModManager::verifyBuffSkillMods(CreatureObject* creature) {
 	mods.setAllowOverwriteInsertPlan();
 	mods.setNullValue(0);
 
-	BuffList* buffList = creature->getBuffList();
+	const BuffList* buffList = creature->getBuffList();
 	for(int i = 0; i < buffList->getBuffListSize(); ++i) {
 		ManagedReference<Buff*> buff = buffList->getBuffByIndex(i);
 		VectorMap<String, int>* skillMods = buff->getSkillModifiers();
