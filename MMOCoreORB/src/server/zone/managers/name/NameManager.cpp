@@ -307,7 +307,7 @@ NameData* NameManager::getSpeciesData(int species) {
 	case CreatureObject::RODIAN: return rodianData;
 	case CreatureObject::TRANDOSHAN: return trandoshanData;
 	case CreatureObject::MONCAL: return monCalData;
-	case CreatureObject::WOOKIE: return wookieeData;
+	case CreatureObject::WOOKIEE: return wookieeData;
 	case CreatureObject::BOTHAN: return bothanData;
 	case CreatureObject::TWILEK: return twilekData;
 	case CreatureObject::ZABRAK: return zabrakData;
