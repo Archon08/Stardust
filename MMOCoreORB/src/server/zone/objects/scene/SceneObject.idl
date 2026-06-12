@@ -1453,6 +1453,14 @@ class SceneObject extends TreeEntry implements Logger, Metrics {
 		dataObjectComponent.get().isScannerData();
 	}
 
+	// Stardust GCW detector installation; BuildingObjectImplementation uses isDetector().
+	@local
+	@read
+	public boolean isDetector() {
+		return dataObjectComponent.get() != null &&
+		dataObjectComponent.get().isDetectorData();
+	}
+
 	@local
 	@read
 	public boolean isSecurityTerminal(){
