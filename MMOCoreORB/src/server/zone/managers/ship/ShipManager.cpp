@@ -6,6 +6,7 @@
  */
 
 #include "ShipManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 
 #include "server/ServerCore.h"
 #include "server/zone/ZoneServer.h"
