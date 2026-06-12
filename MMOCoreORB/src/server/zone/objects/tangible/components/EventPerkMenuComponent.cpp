@@ -14,7 +14,7 @@ void EventPerkMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, Ob
 	EventPerkDataComponent* data = cast<EventPerkDataComponent*>(sceneObject->getDataObjectComponent()->get());
 
 	if (sceneObject->getGameObjectType() == SceneObjectType::EVENTPERK || data == nullptr) {
-		ContainerPermissions* permissions = sceneObject->getContainerPermissions();
+		const ContainerPermissions* permissions = sceneObject->getContainerPermissions();
 		uint64 objectID = permissions->getOwnerID();
 
 		Reference<SceneObject*> owner = Core::getObjectBroker()->lookUp(objectID).castTo<SceneObject*>();
@@ -58,7 +58,7 @@ int EventPerkMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject, Cre
 	EventPerkDataComponent* data = cast<EventPerkDataComponent*>(sceneObject->getDataObjectComponent()->get());
 
 	if (sceneObject->getGameObjectType() == SceneObjectType::EVENTPERK || data == nullptr) {
-		ContainerPermissions* permissions = sceneObject->getContainerPermissions();
+		const ContainerPermissions* permissions = sceneObject->getContainerPermissions();
 		uint64 objectID = permissions->getOwnerID();
 
 		Reference<SceneObject*> owner = Core::getObjectBroker()->lookUp(objectID).castTo<SceneObject*>();
