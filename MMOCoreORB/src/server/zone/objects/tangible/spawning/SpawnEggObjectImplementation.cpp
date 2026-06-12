@@ -7,6 +7,7 @@
  */
 
 #include "server/zone/objects/tangible/spawning/SpawnEggObject.h"
+#include "server/zone/managers/radial/RadialOptions.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
