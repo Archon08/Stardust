@@ -266,6 +266,10 @@ namespace conf {
 			return getBool("Core3.MakeStatus", true);
 		}
 
+		inline bool getMakeWeb() {
+			return getBool("Core3.MakeWeb", false);
+		}
+
 		inline bool getDumpObjFiles() {
 			return getBool("Core3.DumpObjFiles", true);
 		}
