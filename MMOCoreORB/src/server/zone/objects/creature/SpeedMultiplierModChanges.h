@@ -8,6 +8,8 @@
 #ifndef SPEEDMULTIPLIERMODCHANGES_H_
 #define SPEEDMULTIPLIERMODCHANGES_H_
 
+#include "engine/util/json_utils.h"
+
 class SpeedModChange : public Object {
 	float newSpeed;
 	Time timeStamp;
@@ -45,6 +47,12 @@ public:
 
 	inline Time& getTimeStamp() {
 		return timeStamp;
+	}
+
+	// P2: JSON serialization so Vector<SpeedModChange> can be serialized by the engine.
+	friend void to_json(nlohmann::json& j, const SpeedModChange& v) {
+		j["newSpeed"] = v.newSpeed;
+		j["timeStamp"] = v.timeStamp;
 	}
 };
 

@@ -2253,7 +2253,7 @@ void PlayerObjectImplementation::setTrainerCoordinates(const Vector3& trainer) {
 }
 
 // P2: native so the @dereferenced Vector3 is received as a reference (avoids ORB pointer-arg mismatch).
-void PlayerObjectImplementation::setSpaceLaunchLocation(const Vector3& location) {
+void PlayerObjectImplementation::setSpaceLaunchLocation(Vector3& location) {
 	launchPoint.setLocation(location);
 }
 
