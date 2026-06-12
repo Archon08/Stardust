@@ -1301,7 +1301,7 @@ void AuctionManagerImplementation::getData(CreatureObject* player, int extent, u
 
 }
 
-void AuctionManagerImplementation::getAuctionData(CreatureObject* player, SceneObject* usedVendor, const String& planet, const String& region, SceneObject* vendor, int screen, uint32 category, int clientcounter, int offset) {
+void AuctionManagerImplementation::getAuctionData(CreatureObject* player, SceneObject* usedVendor, const String& planet, const String& region, SceneObject* vendor, int screen, uint32 category, const UnicodeString& filterText, int minPrice, int maxPrice, bool includeEntranceFee, int clientcounter, int offset) {
 
 	TerminalListVector terminalList;
 
