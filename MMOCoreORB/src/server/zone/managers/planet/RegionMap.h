@@ -61,6 +61,10 @@ public:
 		return nullptr;
 	}
 
+	inline CityRegion* getCityRegionAt(float x, float y) {
+		return getRegionAt(x, y);
+	}
+
 	inline bool containsRegion(const String& name) {
 		return regions.contains(name);
 	}
