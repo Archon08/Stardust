@@ -9,11 +9,12 @@
 #define DETECTORZONECOMPONENT_H_
 
 #include "engine/engine.h"
+#include "server/zone/objects/scene/components/GroundZoneComponent.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/TreeEntry.h"
 
 
-class DetectorZoneComponent : public ZoneComponent {
+class DetectorZoneComponent : public GroundZoneComponent {
 
 public:
 	void notifyPositionUpdate(SceneObject* sceneObject, TreeEntry* entry) const;
