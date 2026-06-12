@@ -65,7 +65,7 @@ public:
 		smodLocker.release();
 
 		promptText << "Skills:" << endl;
-		SkillList* list = targetObject->getSkillList();
+		const SkillList* list = targetObject->getSkillList();
 
 		int totalSkillPointsWasted = 0;
 
