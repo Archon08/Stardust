@@ -126,6 +126,10 @@ public:
 		return experimentalValuesMap.getExperimentalPropertyTitle(attribute);
 	}
 
+	bool hasExperimentalAttribute(const String& attribute) {
+		return experimentalValuesMap.hasProperty(attribute);
+	}
+
 	bool hasProperty(const String& attribute) {
 		return experimentalValuesMap.hasProperty(attribute);
 	}
