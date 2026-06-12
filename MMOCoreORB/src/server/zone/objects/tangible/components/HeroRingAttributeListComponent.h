@@ -30,7 +30,7 @@ public:
 		alm->insertAttribute("charges", charges);
 
 		if (!creature->checkCooldownRecovery("mark_of_hero")) {
-			Time* timeRemaining = creature->getCooldownTime("mark_of_hero");
+			const Time* timeRemaining = creature->getCooldownTime("mark_of_hero");
 			alm->insertAttribute("time_remaining", getCooldownString(timeRemaining->miliDifference() * -1));
 		}
 	}

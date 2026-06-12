@@ -240,6 +240,7 @@ class PlayerObject extends IntangibleObject {
 	protected Time lastGcwPvpCombatActionTimestamp;
 
 	// P2: crackdown GCW TEF backing members (additive; mirror upstream)
+	@dereferenced
 	protected Time lastCrackdownGcwCombatActionTimestamp;
 	protected unsigned int crackdownFactionTefCrc;
 
@@ -1398,6 +1399,7 @@ class PlayerObject extends IntangibleObject {
 		launchPoint.setCityName(cityName);
 	}
 
+	@local
 	public void setSpaceLaunchLocation(@dereferenced Vector3 location) {
 		launchPoint.setLocation(location);
 	}
@@ -1549,6 +1551,7 @@ class PlayerObject extends IntangibleObject {
 
 	public native int getOwnedChatRoomCount();
 
+	@local
 	public void setBankLocation(final string location) {
 		bankLocation = location;
 	}
