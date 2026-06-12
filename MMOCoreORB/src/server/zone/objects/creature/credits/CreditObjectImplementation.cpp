@@ -27,6 +27,12 @@ WeakReference<CreatureObject*> CreditObjectImplementation::getOwner() {
 	return owner;
 }
 
+uint64 CreditObjectImplementation::getOwnerObjectID() {
+	Reference<CreatureObject*> ownerRef = owner.get();
+
+	return ownerRef != nullptr ? ownerRef->getObjectID() : 0;
+}
+
 void CreditObjectImplementation::setOwner(CreatureObject* obj) {
 	owner = obj;
 }
