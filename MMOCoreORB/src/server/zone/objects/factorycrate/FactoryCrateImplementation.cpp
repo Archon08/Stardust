@@ -103,6 +103,20 @@ Reference<TangibleObject*> FactoryCrateImplementation::getPrototype() {
 	return prototype;
 }
 
+bool FactoryCrateImplementation::isValidFactoryCrate() {
+	auto prototype = getContainerObject(0).castTo<TangibleObject*>();
+
+	if (prototype == nullptr) {
+		return false;
+	}
+
+	if (prototype->getContainerObjectsSize() > 0) {
+		return false;
+	}
+
+	return true;
+}
+
 String FactoryCrateImplementation::getCraftersName() {
 
 	Reference<TangibleObject*> prototype = getPrototype();
