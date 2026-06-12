@@ -34,9 +34,11 @@ bool ActiveAreaImplementation::containsPoint(float px, float pz, float py, uint6
 
 bool ActiveAreaImplementation::containsPoint(float px, float pz, float py) {
 	if (areaShape == nullptr) {
-		Vector3 position(px, pz, py);
+		float dx = getPositionX() - px;
+		float dy = getPositionY() - py;
+		float dz = getPositionZ() - pz;
 
-		return getPosition().squaredDistanceTo(position) < (radius * radius);
+		return (dx * dx + dy * dy + dz * dz) <= getRadius2();
 	}
 
 	return areaShape->containsPoint(Vector3(px, pz, py));
