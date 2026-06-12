@@ -10,7 +10,7 @@
 #include "server/zone/objects/player/components/PlayerContainerComponent.h"
 #include "server/zone/objects/scene/components/ContainerComponent.h"
 #include "server/zone/objects/tangible/components/LootContainerComponent.h"
-#include "server/zone/objects/scene/components/ZoneComponent.h"
+#include "server/zone/objects/scene/components/GroundZoneComponent.h"
 #include "server/zone/objects/scene/components/ObjectMenuComponent.h"
 #include "server/zone/objects/scene/components/AttributeListComponent.h"
 #include "server/zone/objects/tangible/components/vendor/VendorContainerComponent.h"
@@ -157,7 +157,9 @@ ComponentManager::ComponentManager() {
 	components.put("LootContainerComponent", new LootContainerComponent());
 	components.put("RecycleToolContainerComponent", new RecycleToolContainerComponent());
 
-	components.put("ZoneComponent", new ZoneComponent());
+	components.put("GroundZoneComponent", new GroundZoneComponent());
+	// Backward-compat: object templates/scripts that still name the pre-rename "ZoneComponent".
+	components.put("ZoneComponent", new GroundZoneComponent());
 	components.put("PlayerZoneComponent", new PlayerZoneComponent());
 	components.put("StructureZoneComponent", new StructureZoneComponent());
 	components.put("ShuttleZoneComponent", new ShuttleZoneComponent());
