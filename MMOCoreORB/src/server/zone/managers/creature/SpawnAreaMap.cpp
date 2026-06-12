@@ -7,6 +7,7 @@
 
 #include "SpawnAreaMap.h"
 #include "server/zone/Zone.h"
+#include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/managers/object/ObjectManager.h"
 #include "server/zone/objects/area/areashapes/CircularAreaShape.h"
 #include "server/zone/objects/area/areashapes/RectangularAreaShape.h"
@@ -183,12 +184,12 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 	put(nameID.getStringID().hashCode(), area);
 
 	if (tier & NOSPAWNAREA) {
-		area->setNoSpawnArea(true);
+		area->addAreaFlag(ActiveArea::NOSPAWNAREA);
 		noSpawnAreas.add(area);
 	}
 
 	if (tier & NOBUILDZONEAREA) {
-		area->setNoBuildArea(true);
+		area->addAreaFlag(ActiveArea::NOBUILDZONEAREA);
 	}
 
 }
