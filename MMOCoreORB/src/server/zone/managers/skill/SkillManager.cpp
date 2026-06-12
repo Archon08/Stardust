@@ -237,6 +237,17 @@ void SkillManager::addDroidCommands(PlayerObject* ghost, const Vector<String>& a
 	ghost->addDroidCommands(droidCommands, notifyClient);
 }
 
+// P2: collect the droid-program command abilities the given player currently knows.
+void SkillManager::getPlayerDroidCommands(PlayerObject* ghost, Vector<String>& playerDroidCommands) {
+	if (ghost == nullptr)
+		return;
+
+	for (int i = 0; i < droidCommands.size(); ++i) {
+		if (ghost->hasAbility(droidCommands.get(i)))
+			playerDroidCommands.add(droidCommands.get(i));
+	}
+}
+
 void SkillManager::removeAbilities(PlayerObject* ghost, const Vector<String>& abilityNames, bool notifyClient) {
 	Vector<Ability*> abilities;
 

@@ -50,11 +50,21 @@ class SkillManager : public Singleton<SkillManager>, public Logger, public Objec
 
 	VectorMap<String, int> defaultXpLimits;
 
+	// P2: droid-programming command support
+	VectorMap<uint32, int> droidProgramSizes;
+	SortedVector<String> droidCommands;
+
 	bool apprenticeshipEnabled;
 
 public:
 	SkillManager();
 	~SkillManager();
+
+	int getDroidProgramSize(uint32 programHash) {
+		return droidProgramSizes.get(programHash);
+	}
+
+	void getPlayerDroidCommands(PlayerObject* ghost, Vector<String>& playerDroidCommands);
 
 	static int includeFile(lua_State* L);
 	static int addSkill(lua_State* L);

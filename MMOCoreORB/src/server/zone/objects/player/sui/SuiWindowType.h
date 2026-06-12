@@ -273,7 +273,9 @@ public:
 		SHUTTLE_BEACON					   = 1039,
 		FIELD_FACTION_CHANGE			   = 1040,
 		GOTO_LIST						   = 1041,
-		FS_EXP_CONVERT 					   = 1042
+		FS_EXP_CONVERT 					   = 1042,
+		REVERSE_ENGINEER				   = 1101,
+		DROID_CHIP_PROGRAMMING			   = 1102
 	};
 };
 

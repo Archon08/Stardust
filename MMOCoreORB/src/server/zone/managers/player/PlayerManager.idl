@@ -90,6 +90,7 @@ class PlayerManager extends Observer implements Logger {
 	@dereferenced
 	protected transient Vector<Reference<QuestInfo> > questInfo;
 
+	@dereferenced
 	protected transient VectorMap<unsigned int, string> questCrcTable;
 
 	@dereferenced

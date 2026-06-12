@@ -131,5 +131,6 @@ void DroidProgrammingChipImplementation::programChip(String& commandName, int pr
 	setItemIdentifier(commandName);
 	setDatapadSize(programSize);
 	setCustomObjectName("", true);
-	setObjectName("@space/droid_commands:" + commandName + "_chipname", true);
+	StringId chipName("@space/droid_commands:" + commandName + "_chipname");
+	setObjectName(chipName, true);
 }

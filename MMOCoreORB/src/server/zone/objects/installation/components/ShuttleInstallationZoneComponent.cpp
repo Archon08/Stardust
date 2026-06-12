@@ -58,7 +58,7 @@ void ShuttleInstallationZoneComponent::destroyObjectFromWorld(SceneObject* scene
 
 				if (cityRegion != nullptr) {
 
-					planetManager->removePlayerCityTravelPoint(cityRegion->getCityRegionName());
+					planetManager->removePlayerCityTravelPoint(cityRegion->getRegionName());
 
 					Locker clocker(cityRegion, sceneObject);
 

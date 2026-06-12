@@ -237,7 +237,8 @@ void PobShipObjectImplementation::createChildObjects() {
 										break;
 								}
 
-								interiorComponent->setObjectName(newName.toString(), false);
+								StringId interiorName(newName.toString());
+								interiorComponent->setObjectName(interiorName, false);
 
 								interiorComponent->setPlasmaConduitType(componentType);
 								conduitCount++;

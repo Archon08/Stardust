@@ -1055,7 +1055,9 @@ void ResourceSpawner::sendSampleResults(CreatureObject* player, const float dens
 	if (playerManager != nullptr)
 		playerManager->awardExperience(player, "resource_harvesting_inorganic", xp, true);
 
-	addResourceToPlayerInventory(player, resourceSpawn, unitsExtracted);
+	TransactionLog trx(TrxCode::HARVESTED, player, resourceSpawn);
+	addResourceToPlayerInventory(trx, player, resourceSpawn, unitsExtracted);
+	trx.commit();
 	player->notifyObservers(ObserverEventType::SAMPLE, resourceSpawn, density * 100);
 
 	if (resourceSpawn->isType("radioactive")) {

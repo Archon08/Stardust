@@ -295,6 +295,10 @@ class PlanetManager extends ManagedService implements Logger {
 	@dereferenced
 	public native Vector3 getJtlLaunchLocations();
 
+	// P2: GCW reinforcement landing-point selection (ported from upstream)
+	public native Vector3 getInSightSpawnPoint(CreatureObject creature, float minDistance, float maxDistance, float angle);
+	private native boolean noInterferingObjects(CreatureObject creature, @dereferenced final Vector3 position);
+
 	/**
 	 * Checks to see if the point is an existing planet travel point.
 	 * @param pointName The name of the point to check for.

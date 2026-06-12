@@ -48,8 +48,8 @@ public:
 		if (nameManager == nullptr)
 			return;
 
-		// Player Entered a name, validate with nane manager
-		if (nameManager->checkNamingFilter(componentName) != NameManagerResult::ACCEPTED) {
+		// Player Entered a name, validate with name manager
+		if (nameManager->validateName(componentName) != NameManagerResult::ACCEPTED) {
 			player->sendSystemMessage("@reverse_engineering_tool:reserved");
 
 			//re-send SUI

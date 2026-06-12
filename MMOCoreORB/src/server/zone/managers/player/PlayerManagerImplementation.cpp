@@ -1387,7 +1387,10 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 
 	for (int i = 0; i < threatMap->size(); ++i) {
 		ThreatMapEntry* entry = &threatMap->elementAt(i).getValue();
-		CreatureObject* attacker = threatMap->elementAt(i).getKey();
+		TangibleObject* attackerTano = threatMap->elementAt(i).getKey();
+
+		// ThreatMap keys are TangibleObjects (ships included); experience here only applies to creatures.
+		CreatureObject* attacker = attackerTano != nullptr ? attackerTano->asCreatureObject() : nullptr;
 
 		if (entry == nullptr || attacker == nullptr) {
 			continue;
@@ -5430,7 +5433,8 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 
 	for (int i = 0; i < threatMap->size(); ++i) {
 		ThreatMapEntry* entry = &threatMap->elementAt(i).getValue();
-		CreatureObject* attacker = threatMap->elementAt(i).getKey();
+		TangibleObject* attackerTano = threatMap->elementAt(i).getKey();
+		CreatureObject* attacker = attackerTano != nullptr ? attackerTano->asCreatureObject() : nullptr;
 
 		if (entry == nullptr || attacker == nullptr || attacker == player || !attacker->isPlayerCreature())
 			continue;
