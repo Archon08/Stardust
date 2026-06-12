@@ -227,6 +227,10 @@ void CreatureImplementation::addAlreadyHarvested(CreatureObject* player) {
 void CreatureImplementation::setMilkState(short milk) {
 	milkState = milk;
 }
+
+bool CreatureImplementation::hasBeenMilked() const {
+	return milkState == CreatureManager::ALREADYMILKED;
+}
 void CreatureImplementation::setDnaState(short dna){
 	dnaState = dna;
 }
