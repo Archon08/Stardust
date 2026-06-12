@@ -64,7 +64,7 @@ public:
 		Reference<CellObject*> targetCell = targetObject->getParent().get().castTo<CellObject*>();
 
 		if (targetCell != nullptr) {
-			ContainerPermissions* perms = targetCell->getContainerPermissions();
+			const ContainerPermissions* perms = targetCell->getContainerPermissions();
 
 			if (!perms->hasInheritPermissionsFromParent()) {
 				if (!targetCell->checkContainerPermission(player, ContainerPermissions::WALKIN)) {
