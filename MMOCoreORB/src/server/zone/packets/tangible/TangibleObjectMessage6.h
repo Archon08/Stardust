@@ -11,7 +11,7 @@
 
 class TangibleObjectMessage6 : public BaseLineMessage {
 public:
-	TangibleObjectMessage6(TangibleObject* tano, uint32 objType = 0x54414E4F, uint16 opcnt = 0x02)
+	TangibleObjectMessage6(const TangibleObject* tano, uint32 objType = 0x54414E4F, uint16 opcnt = 0x02)
 			: BaseLineMessage(tano->getObjectID(), objType, 6, opcnt) {
 		insertInt(0x76); // 0x3D in creos
 
@@ -20,8 +20,9 @@ public:
 		setSize();
 	}
 
-	void insertDefenders(TangibleObject* tano) {
-		DeltaVector<ManagedReference<SceneObject*> >* defenderList = tano->getDefenderList();
+	void insertDefenders(const TangibleObject* tano) {
+		// getDefenderList() is non-const on this branch; the defender vector is only read here.
+		DeltaVector<ManagedReference<SceneObject*> >* defenderList = const_cast<TangibleObject*>(tano)->getDefenderList();
 		defenderList->insertToMessage(this);
 	}
 
