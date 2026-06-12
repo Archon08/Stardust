@@ -25,6 +25,23 @@ bool ActiveAreaImplementation::containsPoint(float px, float py) {
 	return areaShape->containsPoint(px, py);
 }
 
+bool ActiveAreaImplementation::containsPoint(float px, float pz, float py, uint64 cellid) {
+	if (cellObjectID != 0 && cellObjectID != cellid)
+		return false;
+
+	return containsPoint(px, pz, py);
+}
+
+bool ActiveAreaImplementation::containsPoint(float px, float pz, float py) {
+	if (areaShape == nullptr) {
+		Vector3 position(px, pz, py);
+
+		return getPosition().squaredDistanceTo(position) < (radius * radius);
+	}
+
+	return areaShape->containsPoint(Vector3(px, pz, py));
+}
+
 void ActiveAreaImplementation::enqueueEnterEvent(SceneObject* obj) {
 #ifdef WITH_STM
 	notifyEnter(obj);
