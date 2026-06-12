@@ -245,3 +245,9 @@ bool ZoneClientSessionImplementation::hasCharacter(uint64 cid, unsigned int gala
 Reference<CreatureObject*> ZoneClientSessionImplementation::getPlayer() {
 	return player.get();
 }
+
+// P2: Stardust has no PendingTasksMap; execute the task directly via the task manager.
+void ZoneClientSessionImplementation::executeOrderedTask(Task* task) {
+	if (task != nullptr)
+		Core::getTaskManager()->executeTask(task);
+}

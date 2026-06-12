@@ -224,7 +224,7 @@ void DroidHarvestModuleDataComponent::onCall(){
 	Locker dlock( droid );
 	// add observer for the droid
 	//droid->registerObserver(ObserverEventType::DESTINATIONREACHED, observer);
-	Reference<Task*> task = new DroidHarvestTask( this );
+	Reference<Task*> task = new DroidHarvestTask( this, droid );
 	droid->addPendingTask("droid_harvest", task, 1000); // 1 sec
 }
 

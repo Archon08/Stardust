@@ -34,6 +34,11 @@ public:
 
 	~DataObjectComponent();
 
+	// P2: JSON serialization hook used by DataObjectComponentReference.
+	virtual void writeJSON(nlohmann::json& j) const {
+		j["parent"] = parent;
+	}
+
 	virtual void initializeTransientMembers();
 
 	virtual void notifyObjectDestroyingFromDatabase();

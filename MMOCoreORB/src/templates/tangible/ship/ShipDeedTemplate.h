@@ -18,8 +18,6 @@ public:
 	ShipDeedTemplate() {
 		shipControlDevice = "";
 		shipType = 0;
-
-		setLoggingName("ShipDeedTemplate");
 	}
 
 	~ShipDeedTemplate() {

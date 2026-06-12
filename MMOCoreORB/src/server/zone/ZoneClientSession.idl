@@ -7,6 +7,7 @@ package server.zone;
 import engine.service.proto.BaseClientProxy;
 import engine.service.proto.BasePacket;
 import engine.core.ManagedObject;
+import engine.core.Task;
 import server.zone.objects.creature.CreatureObject;
 import system.lang.Time;
 import system.util.VectorMap;
@@ -53,6 +54,11 @@ class ZoneClientSession extends ManagedObject {
 	public native void info(final string msg, boolean force = false);
 	public native void debug(final string msg);
 	public native void error(final string msg);
+
+	// P2: minimal ordered-task execution (Stardust has no PendingTasksMap; execute via task manager).
+	@local
+	@dirty
+	public native void executeOrderedTask(Task task);
 
 	public native string getAddress();
 
