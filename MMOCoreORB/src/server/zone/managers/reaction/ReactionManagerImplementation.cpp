@@ -97,7 +97,7 @@ void ReactionManagerImplementation::loadLuaConfig() {
 	lua = nullptr;
 }
 
-void ReactionManagerImplementation::sendChatReaction(AiAgent* npc, int type, int state, bool force) {
+void ReactionManagerImplementation::sendChatReaction(AiAgent* npc, SceneObject* object, int type, int state, bool force) {
 	StringBuffer message;
 
 	if (npc->getReactionStf() != "") {
