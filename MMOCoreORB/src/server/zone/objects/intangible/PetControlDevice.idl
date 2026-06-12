@@ -40,6 +40,10 @@ class PetControlDevice extends ControlDevice {
 	@weakReference
 	protected SceneObject lastCommandTarget;
 
+	// Modern (space-port) bt leaf companions expect the last commanding player.
+	@weakReference
+	protected SceneObject lastCommander;
+
 	// The most recent name used in command training
 	protected string futureName;
 
@@ -78,6 +82,7 @@ class PetControlDevice extends ControlDevice {
 		trainingCommand = 0;
 		lastCommand = 0;
 		lastCommandTarget = null;
+		lastCommander = null;
 		namingProgress = 0;
 		futureName = "";
 		growthStage = 0;
@@ -227,6 +232,19 @@ class PetControlDevice extends ControlDevice {
 	@preLocked
 	public void setLastCommandTarget(SceneObject target) {
 		lastCommandTarget = target;
+	}
+
+	@local
+	@preLocked
+	public void setLastCommander(SceneObject commander) {
+		lastCommander = commander;
+	}
+
+	@dirty
+	@local
+	@weakReference
+	public SceneObject getLastCommander() {
+		return lastCommander;
 	}
 
 	@dirty
