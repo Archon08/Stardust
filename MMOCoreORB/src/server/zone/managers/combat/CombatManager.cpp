@@ -2195,7 +2195,7 @@ void CombatManager::broadcastCombatSpam(TangibleObject* attacker, TangibleObject
 #ifdef COV_DEBUG
 		info("Null closeobjects vector in CombatManager::broadcastCombatSpam", true);
 #endif
-		zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionY(), COMBAT_SPAM_RANGE, &closeObjects, true);
+		zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionZ(), attacker->getWorldPositionY(), COMBAT_SPAM_RANGE, &closeObjects, true);
 	}
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -2604,7 +2604,7 @@ Reference<SortedVector<ManagedReference<TangibleObject*> >* > CombatManager::get
 #ifdef COV_DEBUG
 			attacker->info("Null closeobjects vector in CombatManager::getAreaTargets", true);
 #endif
-			zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionY(), 128, &closeObjects, true);
+			zone->getInRangeObjects(attacker->getWorldPositionX(), attacker->getWorldPositionZ(), attacker->getWorldPositionY(), 128, &closeObjects, true);
 		}
 
 		for (int i = 0; i < closeObjects.size(); ++i) {
