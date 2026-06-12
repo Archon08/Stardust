@@ -50,7 +50,7 @@ void MapLocationEntry::setObject(SceneObject *obj) {
 	if(object == nullptr)
 		return;
 
-	PlanetMapCategory* category = object->getPlanetMapCategory();
+	const PlanetMapCategory* category = object->getPlanetMapCategory();
 
 	if (category == nullptr)
 		return;
@@ -126,7 +126,7 @@ bool MapLocationEntry::insertToMessage(BaseMessage* message, CreatureObject* pla
 	if (object == nullptr)
 		return false;
 
-	PlanetMapCategory* category = object->getPlanetMapCategory();
+	const PlanetMapCategory* category = object->getPlanetMapCategory();
 
 	if (category == nullptr)
 		return false;
