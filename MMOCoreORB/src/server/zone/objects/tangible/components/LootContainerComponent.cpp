@@ -41,7 +41,7 @@ int LootContainerComponent::notifyObjectRemoved(SceneObject* sceneObject, SceneO
 
 
 bool LootContainerComponent::checkContainerPermission(SceneObject* sceneObject, CreatureObject* creature, uint16 permission) const {
-	ContainerPermissions* permissions = sceneObject->getContainerPermissions();
+	const ContainerPermissions* permissions = sceneObject->getContainerPermissions();
 	if(permission == ContainerPermissions::MOVEIN)
 		return false;
 	else if (permission == ContainerPermissions::MOVEOUT ){
