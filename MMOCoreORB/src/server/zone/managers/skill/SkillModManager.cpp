@@ -239,7 +239,7 @@ void SkillModManager::verifySkillBoxSkillMods(CreatureObject* creature) {
 	mods.setAllowOverwriteInsertPlan();
 	mods.setNullValue(0);
 
-	SkillList* skillList = creature->getSkillList();
+	const SkillList* skillList = creature->getSkillList();
 	for(int i = 0; i < skillList->size(); ++i) {
 		Reference<Skill*> skill = skillList->get(i);
 		auto skillMods = skill->getSkillModifiers();
