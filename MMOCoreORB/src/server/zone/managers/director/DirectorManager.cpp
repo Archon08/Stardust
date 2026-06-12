@@ -6,6 +6,7 @@
  */
 
 #include "DirectorManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/objects/creature/LuaCreatureObject.h"
 #include "templates/params/creature/ObjectFlag.h"
