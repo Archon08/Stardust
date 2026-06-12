@@ -60,11 +60,16 @@ public:
 		return rows.get(idx);
 	}
 
-	inline int getTotalRows() {
+	// const overload for read-only callers (e.g. QuestTasks over a const DataTableIff)
+	inline const DataTableRow* getRow(int idx) const {
+		return rows.get(idx);
+	}
+
+	inline int getTotalRows() const {
 		return rows.size();
 	}
 
-	inline int getTotalColumns() {
+	inline int getTotalColumns() const {
 		return columns.size();
 	}
 };
