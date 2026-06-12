@@ -10,7 +10,7 @@
 
 class CreatureObjectMessage6 : public TangibleObjectMessage6 {
 public:
-	CreatureObjectMessage6(CreatureObject* creo)
+	CreatureObjectMessage6(const CreatureObject* creo)
 			: TangibleObjectMessage6(creo, 0x4352454F, 0x16) {
 
 		insertShort((uint16)creo->getLevel());
@@ -23,13 +23,13 @@ public:
 		insertInt(creo->getGuildID());
 		insertLong(creo->getTargetID());
 		insertByte(creo->getMoodID());
-		insertInt(creo->getPerformanceCounter()); //might be switched
-		insertInt(creo->getInstrumentID()); //might be switched
+		insertInt(creo->getPerformanceStartTime()); // Doesn't appear to be used by the client
+		insertInt(creo->getPerformanceType());
 
-		DeltaVector<int>* ham = creo->getHAM();
+		const DeltaVector<int>* ham = creo->getHAM();
 		ham->insertToMessage(this);
 
-		DeltaVector<int>* maxHam = creo->getMaxHAM();
+		const DeltaVector<int>* maxHam = creo->getMaxHAM();
 		maxHam->insertToMessage(this);
 
 		insertEquipmentList(creo);
@@ -41,8 +41,8 @@ public:
 		setSize();
 	}
 
-	void insertEquipmentList(CreatureObject* creo) {
-		DeltaVector<ManagedReference<TangibleObject*> >* wearables = creo->getWearablesDeltaVector();
+	void insertEquipmentList(const CreatureObject* creo) {
+		const DeltaVector<ManagedReference<TangibleObject*> >* wearables = creo->getWearablesDeltaVector();
 		wearables->insertToMessage(this);
 
 	}
