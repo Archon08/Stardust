@@ -26,6 +26,9 @@ protected:
 	ManagedWeakReference<CreatureObject*> lastAutoTarget;
 	Reference<Task*> turretFireTask;
 	AtomicInteger numberOfPlayersInRange;
+	float maxMineRange;
+	Time explodeDelay;
+	SynchronizedSortedVector<uint64> notifiedPlayers;
 
 public:
 	TurretDataComponent() {
@@ -36,6 +39,8 @@ public:
 		controller = nullptr;
 		manualTarget = nullptr;
 		turretFireTask = nullptr;
+		maxMineRange = 32.f;
+		explodeDelay.updateToCurrentTime();
 	}
 
 	~TurretDataComponent() {
@@ -76,6 +81,26 @@ public:
 
 	int getMaxRange () {
 		return maxRange;
+	}
+
+	float getMaxMineRange() {
+		return maxMineRange;
+	}
+
+	bool canExplodeMine() {
+		return explodeDelay.isPast();
+	}
+
+	bool hasNotifiedPlayer(const uint64 oid) {
+		return notifiedPlayers.contains(oid);
+	}
+
+	void addNotifiedPlayer(const uint64 oid) {
+		notifiedPlayers.put(oid);
+	}
+
+	void removeNotifiedPlayer(const uint64 oid) {
+		notifiedPlayers.drop(oid);
 	}
 
 	float getAttackSpeed() {
