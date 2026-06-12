@@ -8,6 +8,8 @@ import server.zone.objects.scene.SceneObject;
 import server.zone.objects.area.areashapes.AreaShape;
 import server.zone.objects.pathfinding.NavArea;
 include system.util.Vector;
+import engine.util.u3d.Vector3;
+import engine.util.u3d.Vector4;
 import server.zone.Zone;
 
 @mock
@@ -24,11 +26,15 @@ class ActiveArea extends SceneObject {
 
 	protected AreaShape areaShape;
 
+	protected string areaName;
+
 	@dereferenced
 	protected transient Vector<SceneObject> attachedScenery;
 
 	public ActiveArea() {
 		cellObjectID = 0;
+
+		areaName = "";
 
 		noBuildArea = false;
 
@@ -190,6 +196,37 @@ class ActiveArea extends SceneObject {
 	public AreaShape getAreaShape() {
 		return areaShape;
 	}
+
+	@preLocked
+	public void setAreaName(final string name) {
+		areaName = name;
+	}
+
+	@read
+	public string getAreaName() {
+		return areaName;
+	}
+
+	@dereferenced
+	@local
+	@read
+	public native Vector3 getAreaCenter();
+
+	@read
+	public native float getWidth();
+
+	@read
+	public native float getHeight();
+
+	@dereferenced
+	@local
+	@read
+	public native Vector4 getRectangularDimensions();
+
+	@dereferenced
+	@local
+	@read
+	public native Vector3 getCuboidDimensions();
 
 	@dirty
 	public native boolean intersectsWith(ActiveArea area);
