@@ -183,7 +183,7 @@ public:
 				}
 
 				uint32 tempCRC = 0;
-				CreatureTemplate* crTemplate = agent->getCreatureTemplate();
+				const CreatureTemplate* crTemplate = agent->getCreatureTemplate();
 
 				if (crTemplate != nullptr)
 					tempCRC = crTemplate->getTemplateName().hashCode();
@@ -212,7 +212,7 @@ public:
 		ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
 		ghost->addToActivePets(creature);
 
-		CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
+		const CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
 
 		if (creatureTemplate != nullptr)
 			playerManager->awardExperience(player, "creaturehandler", 20 * creatureTemplate->getLevel());
