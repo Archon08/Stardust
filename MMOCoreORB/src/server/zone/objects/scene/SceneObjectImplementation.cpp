@@ -45,6 +45,8 @@
 #include "server/zone/objects/ship/ai/SpaceStationObject.h"
 #include "server/zone/objects/ship/ai/CapitalShipObject.h"
 #include "server/zone/objects/ship/PobShipObject.h"
+#include "server/zone/objects/creature/ai/AiAgent.h"
+#include "templates/params/creature/PlayerArrangement.h"
 //#include "PositionUpdateTask.h"
 
 #include "variables/ContainerPermissions.h"
@@ -2042,7 +2044,7 @@ Reference<SceneObject*> SceneObjectImplementation::getContainerObjectRecursive(u
 }
 
 const Vector<String>* SceneObjectImplementation::getArrangementDescriptor(int idx) const {
-	return &templateObject->getArrangementDescriptors().get(idx);
+	return &templateObject->getArrangementDescriptors()->get(idx);
 }
 
 bool SceneObjectImplementation::hasObjectInSlottedContainer(SceneObject* object) {
@@ -2129,7 +2131,7 @@ Reference<SceneObject*> SceneObjectImplementation::getCraftedComponentsSatchel()
 }
 
 int SceneObjectImplementation::getArrangementDescriptorSize() const {
-	return templateObject->getArrangementDescriptors().size();
+	return templateObject->getArrangementDescriptors()->size();
 }
 
 bool SceneObjectImplementation::isDataPad() const {
