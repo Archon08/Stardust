@@ -8,9 +8,9 @@
 #ifndef PLAYERZONECOMPONENT_H_
 #define PLAYERZONECOMPONENT_H_
 
-#include "server/zone/objects/scene/components/ZoneComponent.h"
+#include "server/zone/objects/scene/components/GroundZoneComponent.h"
 
-class PlayerZoneComponent : public ZoneComponent {
+class PlayerZoneComponent : public GroundZoneComponent {
 public:
 	void notifyInsert(SceneObject* sceneObject, QuadTreeEntry* entry) const;
 
