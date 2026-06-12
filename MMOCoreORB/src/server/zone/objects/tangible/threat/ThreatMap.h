@@ -192,6 +192,14 @@ public:
 	CreatureObject* getHighestDamageGroupLeader();
 
 	CreatureObject* getHighestThreatCreature();
+
+	// Modern (space-port) accessor: bt leaf FollowActions expects a TangibleObject*.
+	// On this branch the threat map is still CreatureObject-keyed, so forward to
+	// getHighestThreatCreature() (CreatureObject is-a TangibleObject).
+	TangibleObject* getHighestThreatAttacker() {
+		return getHighestThreatCreature();
+	}
+
 	uint32 getTotalDamage();
 
 	void addAggro(CreatureObject* target, int value, uint64 duration = 0);
