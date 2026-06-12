@@ -55,6 +55,11 @@ class ZoneClientSession extends ManagedObject {
 	public native void error(final string msg);
 
 	public native string getAddress();
+
+	// P2: session telemetry accessors (additive, mirror upstream; consumed by TransactionLog)
+	public native string getIPAddress();
+
+	public native unsigned short getPort();
 	
 	// setters and getters
 	public native void setPlayer(CreatureObject playerCreature);
