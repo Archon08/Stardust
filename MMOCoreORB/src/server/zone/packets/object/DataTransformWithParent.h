@@ -284,7 +284,7 @@ public:
 			return;
 		}
 
-		ContainerPermissions* perms = newParent->getContainerPermissions();
+		const ContainerPermissions* perms = newParent->getContainerPermissions();
 
 		if (!perms->hasInheritPermissionsFromParent()) {
 			if (!newParent->checkContainerPermission(object, ContainerPermissions::WALKIN)) {
