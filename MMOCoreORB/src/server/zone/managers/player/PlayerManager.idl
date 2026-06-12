@@ -344,6 +344,7 @@ class PlayerManager extends Observer implements Logger {
 
 	@local
 	public native void disseminateExperience(TangibleObject destructedObject, ThreatMap threatMap, SynchronizedVector<CreatureObject> lairSpawnedCreatures = null,Zone lairZone=null);
+	@local
 	public native void disseminateSpaceExperience(ShipAiAgent destructedObject, ThreatMap threatMap);
 
 	public native int calculatePlayerLevel(CreatureObject player);

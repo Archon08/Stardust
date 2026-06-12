@@ -296,6 +296,7 @@ class PlanetManager extends ManagedService implements Logger {
 	public native Vector3 getJtlLaunchLocations();
 
 	// P2: GCW reinforcement landing-point selection (ported from upstream)
+	@dereferenced
 	public native Vector3 getInSightSpawnPoint(CreatureObject creature, float minDistance, float maxDistance, float angle);
 	private native boolean noInterferingObjects(CreatureObject creature, @dereferenced final Vector3 position);
 

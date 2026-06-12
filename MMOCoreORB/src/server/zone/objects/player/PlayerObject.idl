@@ -1399,8 +1399,7 @@ class PlayerObject extends IntangibleObject {
 		launchPoint.setCityName(cityName);
 	}
 
-	@local
-	public void setSpaceLaunchLocation(@dereferenced Vector3 location) {
+	public void setSpaceLaunchLocation(Vector3 location) {
 		launchPoint.setLocation(location);
 	}
 
@@ -1551,8 +1550,7 @@ class PlayerObject extends IntangibleObject {
 
 	public native int getOwnedChatRoomCount();
 
-	@local
-	public void setBankLocation(final string location) {
+	public void setBankLocation(string location) {
 		bankLocation = location;
 	}
 
