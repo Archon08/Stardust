@@ -38,7 +38,7 @@ class GroupObject extends SceneObject {
 
 	unsigned long masterLooterID;
 
-	String bandSong;
+	string bandSong;
 
 	public GroupObject() {
 		groupLevel = 0;
