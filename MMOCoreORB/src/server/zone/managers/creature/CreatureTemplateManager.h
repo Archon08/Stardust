@@ -37,6 +37,8 @@ protected:
 	HashTable<String, Reference<MobileOutfitGroup*> > outfits;
 	static AtomicInteger loadedMobileTemplates;
 
+	VectorMap<uint32, Vector<String> > dressMap;
+
 	float globalAttackSpeedOverride;
 
 public:
@@ -59,6 +61,7 @@ public:
 	static int addLairTemplate(lua_State* L);
 	static int addPatrolPathTemplate(lua_State* L);
 	static int addOutfitGroup(lua_State* L);
+	static int addDressGroup(lua_State* L);
 
 	static int checkArgumentCount(lua_State* L, int args);
 
@@ -132,6 +135,14 @@ public:
 
 	float getGlobalAttackSpeedOverride() const {
 		return globalAttackSpeedOverride;
+	}
+
+	const Vector<String>& getDressGroup(uint32 crc) {
+		return dressMap.get(crc);
+	}
+
+	const Vector<String>& getDressGroup(const String& ascii) {
+		return dressMap.get(ascii.hashCode());
 	}
 
 };
