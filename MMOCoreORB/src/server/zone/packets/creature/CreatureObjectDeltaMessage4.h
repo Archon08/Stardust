@@ -31,6 +31,11 @@ public:
 		addFloatUpdate(0x05, creo->getSpeedMultiplierMod());
 	}
 
+	// Stardust entertainer delta: terrainNegotiation CREO4 field (preserve original index)
+	void updateTerrainNegotiation() {
+		addFloatUpdate(0x09, creo->getTerrainNegotiation());
+	}
+
 	void updateListenToID(uint64 objectid) {
 		startUpdate(0x06);
 		insertLong(objectid);
