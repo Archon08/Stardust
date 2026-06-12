@@ -35,3 +35,13 @@ DataObjectComponent* DataObjectComponentReference::operator= (DataObjectComponen
 
 	return obj;
 }
+
+void to_json(nlohmann::json& j, const DataObjectComponentReference& ref) {
+	auto object = ref.get();
+
+	if (object != nullptr)
+		object->writeJSON(j);
+	else
+		j = {};
+
+}
