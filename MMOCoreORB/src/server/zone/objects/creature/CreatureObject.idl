@@ -2413,6 +2413,10 @@ class CreatureObject extends TangibleObject {
 	@preLocked
 	public native void removeOutOfRangeObjects();
 
+	// P2: declare Stardust-custom out-of-range close-objects maintenance (impl exists; was missing decl)
+	@preLocked
+	public native void updateCOV();
+
 	@preLocked
 	public native void synchronizeCloseObjects();
 
