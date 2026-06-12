@@ -88,7 +88,7 @@ void DroidPersonalityModuleDataComponent::onCall() {
 
 	droid->registerObserver(ObserverEventType::DEFENDERADDED, observer);
 
-	droid->sendReactionChat(ReactionManager::HI, ReactionManager::NICE, true);
+	droid->sendReactionChat(nullptr, ReactionManager::HI, ReactionManager::NICE, true);
 }
 
 void DroidPersonalityModuleDataComponent::onStore() {
@@ -106,7 +106,7 @@ void DroidPersonalityModuleDataComponent::onStore() {
 	Locker dlock(droid);
 
 	droid->dropObserver(ObserverEventType::DEFENDERADDED, observer);
-	droid->sendReactionChat(ReactionManager::BYE, ReactionManager::NICE, true);
+	droid->sendReactionChat(nullptr, ReactionManager::BYE, ReactionManager::NICE, true);
 }
 
 void DroidPersonalityModuleDataComponent::copy(BaseDroidModuleComponent* other) {
