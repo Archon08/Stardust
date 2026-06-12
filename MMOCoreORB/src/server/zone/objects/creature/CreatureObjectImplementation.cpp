@@ -1398,7 +1398,7 @@ void CreatureObjectImplementation::removeAllSkillModsOfType(const int modType, b
 }
 
 int CreatureObjectImplementation::getSkillMod(const String& skillmod) const {
-	Locker locker(&skillModMutex);
+	ReadLocker locker(&skillModMutex);
 	return skillModList.getSkillMod(skillmod);
 }
 
@@ -1539,7 +1539,7 @@ void CreatureObjectImplementation::updateLocomotion() {
 				CreatureLocomotion::FAST);
 }
 
-UnicodeString CreatureObjectImplementation::getCreatureName() {
+UnicodeString CreatureObjectImplementation::getCreatureName() const {
 	return getCustomObjectName();
 }
 
@@ -1603,7 +1603,7 @@ void CreatureObjectImplementation::setAccelerationMultiplierBase(
 	}
 }
 
-void CreatureObjectImplementation::setAccelerationMultiplierMod(float newMultiplierMod, bool notifyClient) {
+void CreatureObjectImplementation::setAccelerationMultiplierMod(float newMultiplierMod, bool notifyClient, bool recalculateBuffs) {
 	float buffMod = getSkillMod("private_acceleration_multiplier") > 0 ? (float)getSkillMod("private_acceleration_multiplier") / 100.f : 1.f;
 
 	if (accelerationMultiplierMod == newMultiplierMod * buffMod)
@@ -1670,7 +1670,7 @@ void CreatureObjectImplementation::setFactionRank(int rank, bool notifyClient) {
 	broadcastMessage(msg, true);
 }
 
-void CreatureObjectImplementation::setSpeedMultiplierMod(float newMultiplierMod, bool notifyClient) {
+void CreatureObjectImplementation::setSpeedMultiplierMod(float newMultiplierMod, bool notifyClient, bool recalculateBuffs) {
 	float buffMod = 1;
 
 	if (posture == CreaturePosture::UPRIGHT) {
@@ -2059,7 +2059,7 @@ void CreatureObjectImplementation::notifyLoadFromDatabase() {
 	ZoneServer* zoneServer = server->getZoneServer();
 	SkillManager* skillManager = SkillManager::instance();
 
-	SkillList* playerSkillList = getSkillList();
+	const SkillList* playerSkillList = getSkillList();
 
 	int totalSkillPointsWasted = 250;
 
@@ -2156,7 +2156,7 @@ void CreatureObjectImplementation::dismount() {
 	executeObjectControllerAction(STRING_HASHCODE("dismount"));
 }
 
-float CreatureObjectImplementation::calculateBFRatio() {
+float CreatureObjectImplementation::calculateBFRatio() const {
 	if (shockWounds <= 250)
 		return 1.f;
 
@@ -2428,7 +2428,7 @@ void CreatureObjectImplementation::setRootedState(int durationSeconds) {
 	}
 }
 
-bool CreatureObjectImplementation::setNextAttackDelay(uint32 mod, int del) {
+bool CreatureObjectImplementation::setNextAttackDelay(CreatureObject* attacker, const String& command, uint32 mod, int del) {
 	if (cooldownTimerMap->isPast("nextAttackDelayRecovery")) {
 		//del += mod;
 		cooldownTimerMap->updateToCurrentAndAddMili("nextAttackDelay", del * 1000);
@@ -2437,9 +2437,16 @@ bool CreatureObjectImplementation::setNextAttackDelay(uint32 mod, int del) {
 		showFlyText("combat_effects", "warcry_hit", 0x00, 0xFF, 0x00);
 
 		if (isPlayerCreature()) {
-			StringIdChatParameter stringId("combat_effects", "delay_applied_self");
-			stringId.setDI(del);
-			sendSystemMessage(stringId);
+			if (STRING_HASHCODE("panicshot") == command.hashCode() && attacker != nullptr) {
+				StringIdChatParameter params("@combat_effects:delay_notify"); // You duck for cover from %TT's wild shooting! Your next action is delayed for %DI seconds
+				params.setDI(del);
+				params.setTT(attacker->getFirstName());
+				sendSystemMessage(params);
+			} else {
+				StringIdChatParameter stringId("combat_effects", "delay_applied_self");
+				stringId.setDI(del);
+				sendSystemMessage(stringId);
+			}
 		}
 
 		return true;
@@ -2515,7 +2522,7 @@ void CreatureObjectImplementation::renewBuff(uint32 buffCRC, int duration, bool 
 				buff->sendTo(creo);
 		}
 
-		Vector<unsigned long long>* secondaryCRCs = buff->getSecondaryBuffCRCs();
+		const Vector<unsigned long long>* secondaryCRCs = buff->getSecondaryBuffCRCs();
 		blocker.release();
 
 		for(int i=0; i<secondaryCRCs->size(); i++) {
@@ -2531,7 +2538,7 @@ bool CreatureObjectImplementation::removeBuff(uint32 buffcrc) {
 	bool ret = creatureBuffs.removeBuff(buffcrc);
 
 	if (buff != nullptr) {
-		Vector<unsigned long long>* secondaryCRCs = buff->getSecondaryBuffCRCs();
+		const Vector<unsigned long long>* secondaryCRCs = buff->getSecondaryBuffCRCs();
 
 		for (int i = 0; i < secondaryCRCs->size(); i++) {
 			removeBuff(secondaryCRCs->get(i));
@@ -2838,7 +2845,7 @@ void CreatureObjectImplementation::sendCustomCombatSpam(const UnicodeString& cus
 	sendMessage(spam);
 }
 
-String CreatureObjectImplementation::getFirstName() {
+String CreatureObjectImplementation::getFirstName() const {
 	UnicodeString fullName = getCustomObjectName();
 
 	int idx = fullName.indexOf(' ');
@@ -2850,7 +2857,7 @@ String CreatureObjectImplementation::getFirstName() {
 	}
 }
 
-String CreatureObjectImplementation::getLastName() {
+String CreatureObjectImplementation::getLastName() const {
 	UnicodeString lastName;
 
 	UnicodeString fullName = getCustomObjectName();
@@ -2875,7 +2882,15 @@ Reference<PlayerObject*> CreatureObjectImplementation::getPlayerObject() {
 	return getSlottedObject("ghost").castTo<PlayerObject*> ();
 }
 
-bool CreatureObjectImplementation::isAggressiveTo(CreatureObject* object) {
+bool CreatureObjectImplementation::isAggressiveTo(TangibleObject* target) {
+	if (target == nullptr || !target->isCreatureObject() || getObjectID() == target->getObjectID())
+		return false;
+
+	CreatureObject* object = target->asCreatureObject();
+
+	if (object == nullptr)
+		return false;
+
 	PlayerObject* ghost = getPlayerObject();
 	PlayerObject* targetGhost = object->getPlayerObject();
 
@@ -3116,7 +3131,7 @@ int CreatureObjectImplementation::notifyObjectDestructionObservers(TangibleObjec
 
 	if (attacker->isAiAgent()) {
 		AiAgent* aiAgent = attacker->asAiAgent();
-		aiAgent->sendReactionChat(ReactionManager::GLOAT);
+		aiAgent->sendReactionChat(asSceneObject(), ReactionManager::GLOAT);
 	}
 
 	return TangibleObjectImplementation::notifyObjectDestructionObservers(attacker, condition, isCombatAction);
@@ -3143,7 +3158,7 @@ void CreatureObjectImplementation::createChildObjects() {
 		if (obj == nullptr)
 			continue;
 
-		ContainerPermissions* permissions = obj->getContainerPermissions();
+		const ContainerPermissions* permissions = obj->getContainerPermissions();
 		permissions->setOwner(getObjectID());
 		permissions->setInheritPermissionsFromParent(false);
 		permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
@@ -3222,7 +3237,7 @@ int CreatureObjectImplementation::handleObjectMenuSelect(CreatureObject* player,
 	return TangibleObjectImplementation::handleObjectMenuSelect(player, selectedID);
 }
 
-float CreatureObjectImplementation::calculateCostAdjustment(uint8 stat, float baseCost) {
+float CreatureObjectImplementation::calculateCostAdjustment(uint8 stat, float baseCost) const {
 	float cost = baseCost - (((float)(this->getHAM(stat) - 300) / 1200.f) * baseCost);
 
 	if(cost < 0)
