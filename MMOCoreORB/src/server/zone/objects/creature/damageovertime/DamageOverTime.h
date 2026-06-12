@@ -40,6 +40,8 @@ public:
 	DamageOverTime(CreatureObject* attacker, uint64 tp, uint8 attrib, uint32 str, uint32 dur, int secondaryStr = 0);
 
 	DamageOverTime(const DamageOverTime& dot);
+
+	friend void to_json(nlohmann::json& j, const DamageOverTime& t);
 	DamageOverTime& operator=(const DamageOverTime& dot);
 
 	void addSerializableVariables();
