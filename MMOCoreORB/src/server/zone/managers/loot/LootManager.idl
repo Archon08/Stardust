@@ -9,6 +9,8 @@ import engine.core.ManagedService;
 import system.thread.atomic.AtomicInteger;
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.creature.ai.AiAgent;
+import server.zone.objects.ship.ai.ShipAiAgent;
+include server.zone.objects.transaction.TransactionLog;
 import server.zone.managers.crafting.CraftingManager;
 import server.zone.managers.object.ObjectManager;
 import engine.lua.LuaObject;
@@ -158,21 +160,24 @@ class LootManager extends ManagedService implements Logger {
 	private native void loadLootableMods( LuaObject modTable, SortedVector<string> mods );
 	
 	@local
-	public native TangibleObject createLootObject(LootItemTemplate templateObject, int level, boolean maxCondition = false);
+	public native TangibleObject createLootObject(@dereferenced TransactionLog trx, LootItemTemplate templateObject, int level, boolean maxCondition = false);
 	
 	@local
 	public native string getRandomLootableMod( unsigned int sceneObjectType );	
 	
 	public native int calculateLootCredits(int level);
 
-	public native boolean createLoot(SceneObject container, AiAgent creature);
+	public native boolean createLoot(@dereferenced TransactionLog trx, SceneObject container, AiAgent creature);
+
+	// P2: ship-destruction loot overload (ported from upstream)
+	public native unsigned long createLoot(@dereferenced TransactionLog trx, SceneObject container, ShipAiAgent shipAgent);
 	
 	@local
-	public native boolean createLootFromCollection(SceneObject container, final LootGroupCollection collection, int level);
+	public native boolean createLootFromCollection(@dereferenced TransactionLog trx, SceneObject container, final LootGroupCollection collection, int level);
 	
-	public native boolean createLoot(SceneObject container, final string lootGroup, int level = -1, boolean maxCondition = false);
+	public native unsigned long createLoot(@dereferenced TransactionLog trx, SceneObject container, final string lootGroup, int level = -1, boolean maxCondition = false);
 
-	public native boolean createLootSet(SceneObject container, final string lootGroup, int level, boolean maxCondition,int setSize);	
+	public native boolean createLootSet(@dereferenced TransactionLog trx, SceneObject container, final string lootGroup, int level, boolean maxCondition,int setSize);	
 	
 	//public native void generateStats(final string lootTemplate, CraftingValues)
 	
