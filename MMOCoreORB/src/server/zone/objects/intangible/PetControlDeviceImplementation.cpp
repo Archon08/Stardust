@@ -175,7 +175,7 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 
 		if (object != nullptr) {
 			if (object->isCreature() && petType == PetManager::CREATUREPET) {
-				Reference<CreatureTemplate*> activePetTemplate = object->getCreatureTemplate();
+				Reference<const CreatureTemplate*> activePetTemplate = object->getCreatureTemplate();
 
 				if (activePetTemplate == nullptr || activePetTemplate->getTemplateName() == "at_st")
 					continue;
@@ -197,8 +197,8 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 					return;
 				}
 			} else if (object->isCreature() && petType == PetManager::FACTIONPET) {
-				Reference<CreatureTemplate*> activePetTemplate = object->getCreatureTemplate();
-				Reference<CreatureTemplate*> callingPetTemplate = pet->getCreatureTemplate();
+				Reference<const CreatureTemplate*> activePetTemplate = object->getCreatureTemplate();
+				Reference<const CreatureTemplate*> callingPetTemplate = pet->getCreatureTemplate();
 
 				if (activePetTemplate == nullptr || callingPetTemplate == nullptr || activePetTemplate->getTemplateName() != "at_st")
 					continue;
@@ -529,7 +529,7 @@ bool PetControlDeviceImplementation::growPet(CreatureObject* player, bool force,
 		return true;
 	ManagedReference<Creature*> pet = cast<Creature*>(controlledObject.get());
 
-	Reference<CreatureTemplate*> creatureTemplate = pet->getCreatureTemplate();
+	Reference<const CreatureTemplate*> creatureTemplate = pet->getCreatureTemplate();
 
 	if (creatureTemplate == nullptr)
 		return true;
@@ -618,7 +618,7 @@ void PetControlDeviceImplementation::arrestGrowth() {
 
 	ManagedReference<Creature*> pet = cast<Creature*>(controlledObject.get());
 
-	Reference<CreatureTemplate*> creatureTemplate = pet->getCreatureTemplate();
+	Reference<const CreatureTemplate*> creatureTemplate = pet->getCreatureTemplate();
 
 	if (creatureTemplate == nullptr)
 		return;
