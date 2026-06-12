@@ -38,6 +38,7 @@ include server.zone.managers.collision.IntersectionResults;
 include server.zone.managers.player.VeteranRewardList;
 include server.zone.managers.player.JukeboxSong;
 include server.zone.managers.player.QuestInfo;
+include server.zone.managers.player.QuestTasks;
 include server.zone.objects.player.badges.Badge;
 include system.util.Vector;
 include system.lang.ref.Reference;
@@ -88,6 +89,16 @@ class PlayerManager extends Observer implements Logger {
 	@dereferenced
 	protected transient Vector<Reference<QuestInfo> > questInfo;
 
+	protected transient VectorMap<unsigned int, string> questCrcTable;
+
+	@dereferenced
+	private transient ReadWriteLock questTaskMutex;
+
+	@dereferenced
+	protected transient VectorMap<unsigned int, Reference<QuestTasks> > questTasksCache;
+
+	protected unsigned int coaWinningFaction;
+
 	@dereferenced
 	private transient OnlineZoneClientMap onlineZoneClientMap;
 
@@ -102,13 +113,14 @@ class PlayerManager extends Observer implements Logger {
 	public static final unsigned int VORTEX_SQUADRON = 8;
 	public static final unsigned int HAVOC_SQUADRON = 9;
 
-	public native PlayerManager(ZoneServer zoneServer, ZoneProcessServer impl);
+	public native PlayerManager(ZoneServer zoneServer, ZoneProcessServer impl, boolean trackOnlineUsers);
 	public native void loadNameMap();
 
 	private native void loadLuaConfig();
 	private native void loadStartingLocations();
 	private native void loadPermissionLevels();
 	private native void loadQuestInfo();
+	private native void loadQuestCrcTable();
 
 	public native void finalize();
 
@@ -434,6 +446,17 @@ class PlayerManager extends Observer implements Logger {
 		return questInfo.get(questID);
 	}
 
+	@local
+	public native QuestTasks getQuestTasks(final unsigned int questCrc);
+
+	public unsigned int getCoaWinningFaction() {
+		return coaWinningFaction;
+	}
+
+	public void setCoaWinningFaction(unsigned int faction) {
+		coaWinningFaction = faction;
+	}
+
 	/**
 	 * Sends a confirmation box to the student asking if they want to learn the skill.
 	 * @pre student crosslocked with teacher
@@ -462,6 +485,10 @@ class PlayerManager extends Observer implements Logger {
 	public OnlineZoneClientMap getOnlineZoneClientMap() {
 		return onlineZoneClientMap;
 	}
+
+	@local
+	@dereferenced
+	public native Vector<unsigned long> getOnlinePlayerList();
 
 	public native void getCleanupCharacterCount();
 
