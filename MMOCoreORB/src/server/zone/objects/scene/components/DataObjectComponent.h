@@ -78,6 +78,11 @@ public:
 		return false;
 	}
 
+	// Stardust renamed Scanner->Detector; keep isScannerData for modern autogen (SceneObject.idl) compatibility
+	virtual bool isScannerData(){
+		return isDetectorData();
+	}
+
 	virtual bool isGCWBaseData(){
 		return false;
 	}
