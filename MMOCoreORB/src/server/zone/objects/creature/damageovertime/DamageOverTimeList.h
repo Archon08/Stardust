@@ -10,6 +10,7 @@
 
 #include "engine/engine.h"
 #include "DamageOverTime.h"
+#include "engine/util/json_utils.h"
 
 class DamageOverTimeList : private VectorMap<uint64, Vector<DamageOverTime> > {
 protected:
@@ -18,6 +19,11 @@ protected:
 	bool dot;
 	Mutex guard;
 public:
+	friend void to_json(nlohmann::json& j, const DamageOverTimeList& l) {
+		const VectorMap<uint64, Vector<DamageOverTime> >& map = l;
+		to_json(j, map);
+	}
+
 	DamageOverTimeList() {
 		setNoDuplicateInsertPlan();
 		dot = false;
