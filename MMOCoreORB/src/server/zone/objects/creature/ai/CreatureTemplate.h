@@ -11,6 +11,7 @@
 #include "engine/engine.h"
 #include "server/zone/objects/creature/ai/variables/CreatureAttackMap.h"
 #include "templates/params/creature/CreatureFlag.h"
+#include "templates/params/creature/ObjectFlag.h"
 #include "templates/tangible/SharedWeaponObjectTemplate.h"
 #include "server/zone/managers/loot/lootgroup/LootGroupCollection.h"
 
@@ -74,6 +75,8 @@ protected:
 	int aggroRadius;
 	unsigned int pvpBitmask;
 	unsigned int creatureBitmask;
+	int mobType = 0;
+	String healerType;
 	unsigned int diet;
 
 
@@ -181,6 +184,18 @@ public:
 
 	inline bool isKiller() {
 		return creatureBitmask & CreatureFlag::KILLER;
+	}
+
+	inline bool isHealer() {
+		return creatureBitmask & ObjectFlag::HEALER;
+	}
+
+	inline int getMobType() const {
+		return mobType;
+	}
+
+	inline const String& getHealerType() const {
+		return healerType;
 	}
 
 	inline bool isPack() {
