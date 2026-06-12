@@ -4,6 +4,7 @@
 */
 
 #include "server/zone/objects/intangible/ShipControlDevice.h"
+#include "server/ServerCore.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
