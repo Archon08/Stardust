@@ -362,6 +362,10 @@ public:
 		return attacks;
 	}
 
+	inline CreatureAttackMap* getAttacks() const {
+		return attacks;
+	}
+
 	inline String getPatrolPathTemplate() {
 		return patrolPathTemplate;
 	}
