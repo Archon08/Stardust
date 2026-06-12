@@ -864,7 +864,7 @@ void ChatManagerImplementation::handleSocialInternalMessage(CreatureObject* send
 #ifdef COV_DEBUG
 		sender->info("Null closeobjects vector in ChatManager::handleSocialInternalMessage", true);
 #endif
-		zone->getInRangeObjects(sender->getWorldPositionX(), sender->getWorldPositionX(), 128, &closeEntryObjects, true);
+		zone->getInRangeObjects(sender->getWorldPositionX(), sender->getWorldPositionZ(), sender->getWorldPositionY(), 128, &closeEntryObjects, true);
 	}
 
 	float range = defaultSpatialChatDistance;
@@ -1077,7 +1077,7 @@ void ChatManagerImplementation::broadcastChatMessage(CreatureObject* sourceCreat
 #ifdef COV_DEBUG
 		sourceCreature->info("Null closeobjects vector in ChatManager::broadcastChatMessage", true);
 #endif
-		zone->getInRangeObjects(sourceCreature->getWorldPositionX(), sourceCreature->getWorldPositionY(), 128, &closeEntryObjects, true);
+		zone->getInRangeObjects(sourceCreature->getWorldPositionX(), sourceCreature->getWorldPositionZ(), sourceCreature->getWorldPositionY(), 128, &closeEntryObjects, true);
 	}
 
 	short range = defaultSpatialChatDistance;
@@ -1210,7 +1210,7 @@ void ChatManagerImplementation::broadcastChatMessage(CreatureObject* sourceCreat
 #ifdef COV_DEBUG
 		sourceCreature->info("Null closeobjects vector in ChatManager::broadcastChatMessage(StringId)", true);
 #endif
-		zone->getInRangeObjects(sourceCreature->getWorldPositionX(), sourceCreature->getWorldPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeEntryObjects, true);
+		zone->getInRangeObjects(sourceCreature->getWorldPositionX(), sourceCreature->getWorldPositionZ(), sourceCreature->getWorldPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeEntryObjects, true);
 	}
 
 	short range = defaultSpatialChatDistance;
