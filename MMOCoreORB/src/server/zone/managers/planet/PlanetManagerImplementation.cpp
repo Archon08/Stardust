@@ -1262,3 +1262,7 @@ void PlanetManagerImplementation::scheduleShuttle(CreatureObject* shuttle, int s
 
 	task->schedule((task->getLandedTime() + task->getLandingTime()) * 1000);
 }
+
+Vector3 PlanetManagerImplementation::getJtlLaunchLocations() {
+	return jtlLaunchLocation;
+}
