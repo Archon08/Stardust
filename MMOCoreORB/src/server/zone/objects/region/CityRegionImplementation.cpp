@@ -598,7 +598,7 @@ void CityRegionImplementation::setRadius(float rad) {
 	locker.release();
 
 	if (registered) {
-		Reference<PlanetMapCategory*> cityCat = TemplateManager::instance()->getPlanetMapCategoryByName("city");
+		Reference<const PlanetMapCategory*> cityCat = TemplateManager::instance()->getPlanetMapCategoryByName("city");
 
 		newRegion->setPlanetMapCategory(cityCat);
 		newRegion->getZone()->registerObjectWithPlanetaryMap(newRegion);

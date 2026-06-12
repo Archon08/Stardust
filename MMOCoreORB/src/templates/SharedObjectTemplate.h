@@ -65,8 +65,8 @@ protected:
 	//uint32 clientObjectCRC;
 	String clientTemplateFileName;
 
-	Reference<PlanetMapCategory*> planetMapCategory;
-	Reference<PlanetMapCategory*> planetMapSubCategory;
+	Reference<const PlanetMapCategory*> planetMapCategory;
+	Reference<const PlanetMapCategory*> planetMapSubCategory;
 	bool autoRegisterWithPlanetMap;
 
 	String fullTemplateString;
@@ -199,6 +199,8 @@ public:
 	const static int DROIDMODULEPERSONALITY = 0x4000057;
 	const static int VEHICLE = 0x4000058;
 	const static int XPPURCHASE = 0x4000059;
+	const static int SCHEMATICFRAGMENT = 0x400005B;
+	const static int NAVICOMPUTERDEED = 0x400005C;
 public:
 	SharedObjectTemplate();
 
@@ -417,11 +419,11 @@ public:
 		return attributeListComponent;
 	}
 
-	inline PlanetMapCategory* getPlanetMapCategory() const {
+	inline const PlanetMapCategory* getPlanetMapCategory() const {
 		return planetMapCategory;
 	}
 
-	inline PlanetMapCategory* getPlanetMapSubCategory() const {
+	inline const PlanetMapCategory* getPlanetMapSubCategory() const {
 		return planetMapSubCategory;
 	}
 

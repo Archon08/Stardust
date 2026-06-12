@@ -86,7 +86,8 @@
 #include "server/zone/objects/installation/components/InstallationObjectMenuComponent.h"
 #include "server/zone/objects/installation/components/FactoryObjectMenuComponent.h"
 #include "server/zone/objects/installation/components/MinefieldMenuComponent.h"
-#include "server/zone/ZoneContainerComponent.h"
+#include "server/zone/GroundZoneContainerComponent.h"
+#include "server/zone/SpaceZoneContainerComponent.h"
 #include "server/zone/objects/structure/components/StructureContainerComponent.h"
 #include "server/zone/objects/tangible/components/ElevatorMenuComponent.h"
 #include "server/zone/objects/tangible/components/ElevatorUpMenuComponent.h"
@@ -189,7 +190,8 @@ ComponentManager::ComponentManager() {
 
 	components.put("ArtCrateMenuComponent", new ArtCrateMenuComponent());
 
-	components.put("ZoneContainerComponent", new ZoneContainerComponent());
+	components.put("GroundZoneContainerComponent", new GroundZoneContainerComponent());
+	components.put("SpaceZoneContainerComponent", new SpaceZoneContainerComponent());
 
 	components.put("HolocronMenuComponent", new HolocronMenuComponent());
 	components.put("WaypointDatapadMenuComponent", new WaypointDatapadMenuComponent());
