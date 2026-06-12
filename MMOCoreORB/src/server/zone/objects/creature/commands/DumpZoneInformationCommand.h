@@ -64,7 +64,7 @@ public:
 		StringBuffer msg;
 
 		float posX = creature->getPositionX(), posZ = creature->getPositionZ(), posY = creature->getPositionY();
-		Quaternion* direction = creature->getDirection();
+		const Quaternion* direction = creature->getDirection();
 
 		msg << "x = " << posX << ", z = " << posZ << ", y = " << posY << ", ow = " << direction->getW()
 				<< ", ox = " << direction->getX() << ", oz = " << direction->getZ() << ", oy = " << direction->getY()
