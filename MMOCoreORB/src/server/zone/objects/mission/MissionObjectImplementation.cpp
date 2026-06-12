@@ -5,6 +5,7 @@
  *      Author: theanswer
  */
 
+#include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/mission/MissionObject.h"
 #include "server/zone/objects/mission/MissionObjective.h"
 #include "server/zone/packets/mission/MissionObjectMessage6.h"
