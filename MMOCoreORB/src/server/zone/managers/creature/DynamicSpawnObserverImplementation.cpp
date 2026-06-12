@@ -1,4 +1,5 @@
 #include "server/zone/managers/creature/DynamicSpawnObserver.h"
+#include "server/zone/managers/creature/observers/CreatureHerdObserver.h"
 #include "server/zone/objects/creature/events/RespawnCreatureTask.h"
 #include "server/zone/objects/creature/events/DespawnDynamicSpawnTask.h"
 #include "server/zone/objects/creature/ai/CreatureTemplate.h"
@@ -139,4 +140,8 @@ void DynamicSpawnObserverImplementation::spawnInitialMobiles(SceneObject* buildi
 			}
 		}
 	}
+}
+
+CreatureHerdObserver* DynamicSpawnObserverImplementation::getHerdObserver() {
+	return herdObserver.get();
 }
