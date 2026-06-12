@@ -22,7 +22,7 @@ public:
 
 	void run() {
 		while (threatMap.size() > 0) {
-			CreatureObject* creature = threatMap.elementAt(0).getKey();
+			TangibleObject* creature = threatMap.elementAt(0).getKey();
 
 			if (creature != nullptr && threatMapObserver != nullptr) {
 				Locker clocker(creature);
