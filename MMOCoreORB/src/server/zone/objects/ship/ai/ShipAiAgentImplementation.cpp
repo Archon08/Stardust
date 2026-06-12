@@ -46,6 +46,7 @@
 #include "server/zone/packets/ui/CreateClientPathMessage.h"
 #include "server/zone/packets/chat/ChatSystemMessage.h"
 #include "server/zone/managers/ship/ShipManager.h"
+#include "server/zone/managers/ship/tasks/SpaceCommTimerTask.h"
 #include "server/zone/objects/player/FactionStatus.h"
 #include "server/zone/objects/ship/ai/events/ShipAiPatrolPathFinder.h"
 #include "server/zone/managers/spacecombat/projectile/ShipMissile.h"
