@@ -3158,7 +3158,7 @@ void CreatureObjectImplementation::createChildObjects() {
 		if (obj == nullptr)
 			continue;
 
-		const ContainerPermissions* permissions = obj->getContainerPermissions();
+		ContainerPermissions* permissions = obj->getContainerPermissionsForUpdate(); // P2: mutate via ForUpdate (getContainerPermissions now const)
 		permissions->setOwner(getObjectID());
 		permissions->setInheritPermissionsFromParent(false);
 		permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
@@ -3267,7 +3267,7 @@ void CreatureObjectImplementation::setFaction(unsigned int crc) {
 		if (currentZone != nullptr) {
 			// Notify nearby active areas of faction change
 			SortedVector<ManagedReference<ActiveArea* > > activeAreas;
-			currentZone->getInRangeActiveAreas(player->getPositionX(), player->getPositionY(), &activeAreas, true);
+			currentZone->getInRangeActiveAreas(player->getPositionX(), player->getPositionZ(), player->getPositionY(), &activeAreas, true); // P2: 3D signature (added Z)
 
 			for (int i = 0; i < activeAreas.size(); i++) {
 				ActiveArea* area = activeAreas.get(i);
@@ -3290,7 +3290,7 @@ void CreatureObjectImplementation::setFaction(unsigned int crc) {
 			if (pet == nullptr)
 				continue;
 
-			CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
+			const CreatureTemplate* creatureTemplate = pet->getCreatureTemplate(); // P2: getCreatureTemplate now returns const
 
 			if (creatureTemplate != nullptr) {
 				String templateFaction = creatureTemplate->getFaction();
@@ -3399,7 +3399,7 @@ float CreatureObjectImplementation::getTemplateRadius() {
 	return creoTempl->getCollisionRadius()*getHeight();
 }
 
-bool CreatureObjectImplementation::hasEffectImmunity(uint8 effectType) {
+bool CreatureObjectImplementation::hasEffectImmunity(uint8 effectType) const {
 	switch (effectType) {
 	case CommandEffect::BLIND:
 	case CommandEffect::DIZZY:
@@ -3422,7 +3422,7 @@ bool CreatureObjectImplementation::hasEffectImmunity(uint8 effectType) {
 	return false;
 }
 
-bool CreatureObjectImplementation::hasDotImmunity(uint32 dotType) {
+bool CreatureObjectImplementation::hasDotImmunity(uint32 dotType) const {
 	switch (dotType) {
 	case CreatureState::POISONED:
 	case CreatureState::BLEEDING:
@@ -3439,7 +3439,7 @@ bool CreatureObjectImplementation::hasDotImmunity(uint32 dotType) {
 	return false;
 }
 
-int CreatureObjectImplementation::getSpecies() {
+int CreatureObjectImplementation::getSpecies() const {
 	SharedCreatureObjectTemplate* creoData = templateObject.castTo<SharedCreatureObjectTemplate*>().get();
 
 	if (creoData == nullptr)
@@ -3448,7 +3448,7 @@ int CreatureObjectImplementation::getSpecies() {
 	return creoData->getSpecies();
 }
 
-int CreatureObjectImplementation::getGender() {
+int CreatureObjectImplementation::getGender() const {
 	SharedCreatureObjectTemplate* creoData = templateObject.castTo<SharedCreatureObjectTemplate*>().get();
 
 	if (creoData == nullptr)
@@ -3611,7 +3611,7 @@ void CreatureObjectImplementation::removePersonalEnemyFlag(uint64 enemyID) {
 		sendPvpStatusTo(enemy);
 }
 
-bool CreatureObjectImplementation::hasPersonalEnemyFlag(CreatureObject* enemy) {
+bool CreatureObjectImplementation::hasPersonalEnemyFlag(CreatureObject* enemy) const {
 	uint64 enemyOID = enemy->getObjectID();
 	uint64 expireTime = personalEnemyFlags.get(enemyOID);
 
