@@ -2197,6 +2197,14 @@ bool PlayerObjectImplementation::hasBhTef() {
 	return !lastBhPvpCombatActionTimestamp.isPast();
 }
 
+bool PlayerObjectImplementation::hasGcwTef() {
+	return !lastGcwPvpCombatActionTimestamp.isPast();
+}
+
+bool PlayerObjectImplementation::hasCrackdownTefTowards(unsigned int factionCrc) {
+	return !lastCrackdownGcwCombatActionTimestamp.isPast() && factionCrc != 0 && crackdownFactionTefCrc == factionCrc;
+}
+
 void PlayerObjectImplementation::schedulePvpTefRemovalTask(bool removeGcwTefNow, bool removeBhTefNow) {
 	ManagedReference<CreatureObject*> parent = getParent().get().castTo<CreatureObject*>();
 
