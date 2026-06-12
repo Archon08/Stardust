@@ -102,9 +102,9 @@ class ManufactureSchematic extends IntangibleObject {
 
 		manufactureLimit = 1000;
 
-		super.getContainerPermissions().setInheritPermissionsFromParent(true);
+		super.getContainerPermissionsForUpdate().setInheritPermissionsFromParent(true);
 
-		ContainerPermissions permissions = super.getContainerPermissions();
+		ContainerPermissions permissions = super.getContainerPermissionsForUpdate();
 		permissions.clearDefaultDenyPermission(ContainerPermissions.MOVECONTAINER);
 		permissions.clearDenyPermission("owner", ContainerPermissions.MOVECONTAINER);
 	}
