@@ -18,6 +18,8 @@
 #include "templates/slots/ArrangementDescriptor.h"
 #include "templates/manager/PlanetMapCategoryList.h"
 #include "templates/manager/PlanetMapCategory.h"
+#include "templates/manager/PlanetMapSubCategory.h"
+#include "templates/manager/PlanetMapSubCategoryList.h"
 #include "templates/manager/PortalLayoutMap.h"
 
 class TemplateCRCMap;
@@ -37,6 +39,8 @@ class TemplateManager : public Singleton<TemplateManager>, public Logger, public
 	InteriorMap* interiorMap;
 
 	PlanetMapCategoryList planetMapCategoryList;
+
+	PlanetMapSubCategoryList planetMapSubCategoryList;
 
 	SynchronizedVectorMap<String, Reference<StructureFootprint*> > structureFootprints;
 
@@ -139,6 +143,27 @@ public:
 
 		while (iterator.hasNext()) {
 			Reference<PlanetMapCategory*>& cat = iterator.getNextValue();
+
+			if (cat->getIndex() == index)
+				return cat.get();
+		}
+
+		return nullptr;
+	}
+
+	PlanetMapSubCategory* getPlanetMapSubCategoryByName(const String& name) {
+		return planetMapSubCategoryList.get(name);
+	}
+
+	PlanetMapSubCategory* getPlanetMapSubCategoryByCrc(int crc) {
+		return planetMapSubCategoryList.get(crc);
+	}
+
+	PlanetMapSubCategory* getPlanetMapSubCategoryById(int index) {
+		HashTableIterator<int, Reference<PlanetMapSubCategory*> > iterator(planetMapSubCategoryList);
+
+		while (iterator.hasNext()) {
+			Reference<PlanetMapSubCategory*>& cat = iterator.getNextValue();
 
 			if (cat->getIndex() == index)
 				return cat.get();
