@@ -144,7 +144,7 @@ void BuildingObjectImplementation::sendTo(SceneObject* player, bool doClose, boo
 	for (int i = 0; i < cells.size(); ++i) {
 		auto& cell = cells.get(i);
 
-		ContainerPermissions* perms = cell->getContainerPermissions();
+		const ContainerPermissions* perms = cell->getContainerPermissions();
 
 		if (!perms->hasInheritPermissionsFromParent()) {
 			CreatureObject* creo = player->asCreatureObject();
@@ -183,7 +183,7 @@ bool BuildingObjectImplementation::hasTemplateEjectionPoint() {
 		return true;
 }
 
-Vector3 BuildingObjectImplementation::getTemplateEjectionPoint() {
+Vector3 BuildingObjectImplementation::getTemplateEjectionPoint() const {
 	SharedBuildingObjectTemplate* buildingTemplate = templateObject.castTo<SharedBuildingObjectTemplate*>();
 
 	return buildingTemplate->getEjectionPoint();
@@ -933,15 +933,13 @@ bool BuildingObjectImplementation::isInPlayerCity() {
 }
 
 bool BuildingObjectImplementation::canPlayerRegisterWithin() {
-	PlanetMapCategory* pmc = getPlanetMapSubCategory();
+	const PlanetMapSubCategory* subCategory = getPlanetMapSubCategory();
+	const PlanetMapCategory* category = getPlanetMapCategory();
 
-	if (pmc == nullptr)
-		pmc = getPlanetMapCategory();
-
-	if (pmc == nullptr)
+	if (subCategory == nullptr && category == nullptr)
 		return false;
 
-	String categoryName = pmc->getName();
+	String categoryName = subCategory != nullptr ? subCategory->getName() : category->getName();
 	if (categoryName == "medicalcenter" || categoryName == "hotel" || categoryName == "cantina" || categoryName == "theater" || categoryName == "guild_theater" || categoryName == "tavern")
 		return true;
 
@@ -1276,7 +1274,7 @@ void BuildingObjectImplementation::createChildObjects() {
 				}
 			}
 
-			ContainerPermissions* permissions = obj->getContainerPermissions();
+			ContainerPermissions* permissions = obj->getContainerPermissionsForUpdate();
 			permissions->setOwner(getObjectID());
 			permissions->setInheritPermissionsFromParent(false);
 			permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
@@ -1447,7 +1445,7 @@ void BuildingObjectImplementation::spawnChildCreature(String& mobile, int respaw
 	childCreatureObjects.put(creature);
 }
 
-bool BuildingObjectImplementation::hasTemplateChildCreatures() {
+bool BuildingObjectImplementation::hasTemplateChildCreatures() const {
 	SharedBuildingObjectTemplate* buildingTemplate = cast<SharedBuildingObjectTemplate*>(getObjectTemplate());
 
 	if (buildingTemplate == nullptr)
@@ -1492,7 +1490,7 @@ void BuildingObjectImplementation::destroyChildObjects() {
 	}
 }
 
-void BuildingObjectImplementation::changeSign(SignTemplate* signConfig) {
+void BuildingObjectImplementation::changeSign(const SignTemplate* signConfig) {
 	if (signConfig == nullptr)
 		return;
 
@@ -1546,7 +1544,7 @@ void BuildingObjectImplementation::changeSign(SignTemplate* signConfig) {
 	getZone()->transferObject(signObject, -1, false);
 
 	// Set sign permissions
-	ContainerPermissions* permissions = signSceno->getContainerPermissions();
+	ContainerPermissions* permissions = signSceno->getContainerPermissionsForUpdate();
 	permissions->setOwner(getObjectID());
 	permissions->setInheritPermissionsFromParent(false);
 	permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
@@ -1583,7 +1581,7 @@ void BuildingObjectImplementation::changeSign(SignTemplate* signConfig) {
 bool BuildingObjectImplementation::togglePrivacy() {
 	// If the building is a cantina then we need to add/remove it from the planet's
 	// mission map for performance locations.
-	PlanetMapCategory* planetMapCategory = getPlanetMapCategory();
+	const PlanetMapCategory* planetMapCategory = getPlanetMapCategory();
 	if (planetMapCategory != nullptr) {
 		String planetMapCategoryName = planetMapCategory->getName();
 		if (planetMapCategoryName == "cantina") {
@@ -1614,7 +1612,7 @@ BuildingObject* BuildingObjectImplementation::asBuildingObject() {
 	return _this.getReferenceUnsafeStaticCast();
 }
 
-Vector<Reference<MeshData*> > BuildingObjectImplementation::getTransformedMeshData(const Matrix4* parentTransform) {
+Vector<Reference<MeshData*> > BuildingObjectImplementation::getTransformedMeshData(const Matrix4* parentTransform) const {
 	Vector<Reference<MeshData*> > data;
 
 	Quaternion directionRecast(direction.getW(), direction.getX(), direction.getY(), -direction.getZ());
@@ -1683,11 +1681,11 @@ bool BuildingObjectImplementation::isBuildingObject() {
 	return true;
 }
 
-float BuildingObjectImplementation::getOutOfRangeDistance() const {
+float BuildingObjectImplementation::getOutOfRangeDistance(uint64 specialRangeID) {
 	return ZoneServer::CLOSEOBJECTRANGE * 4;
 }
 
-String BuildingObjectImplementation::getCellName(uint64 cellID) {
+String BuildingObjectImplementation::getCellName(uint64 cellID) const {
 	SharedBuildingObjectTemplate* buildingTemplate = templateObject.castTo<SharedBuildingObjectTemplate*>();
 
 	if (buildingTemplate == nullptr)
