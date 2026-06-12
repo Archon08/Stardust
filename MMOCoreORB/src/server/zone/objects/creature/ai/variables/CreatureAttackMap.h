@@ -33,11 +33,11 @@ public:
 		return val && val2;
 	}
 
-	String getCommand() {
+	String getCommand() const {
 		return command;
 	}
 
-	String getArguments() {
+	String getArguments() const {
 		return arguments;
 	}
 
@@ -62,15 +62,15 @@ public:
 		add(attack);
 	}
 
-	String getCommand(int i) {
+	String getCommand(int i) const {
 		return get(i).getCommand();
 	}
 
-	String getArguments(int i) {
+	String getArguments(int i) const {
 		return get(i).getArguments();
 	}
 
-	int getRandomAttackNumber() {
+	int getRandomAttackNumber() const {
 		return System::random(size() - 1);
 	}
 };
