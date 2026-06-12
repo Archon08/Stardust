@@ -7,6 +7,7 @@ package server.zone.objects.player;
 import engine.service.proto.BaseMessage;
 import engine.service.proto.BasePacket;
 import engine.util.u3d.Vector3;
+import server.zone.objects.player.variables.SpaceLaunchPoint;
 import server.zone.objects.building.BuildingObject;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.creature.ai.AiAgent;
@@ -238,6 +239,10 @@ class PlayerObject extends IntangibleObject {
 	@dereferenced
 	protected Time lastGcwPvpCombatActionTimestamp;
 
+	// P2: crackdown GCW TEF backing members (additive; mirror upstream)
+	protected Time lastCrackdownGcwCombatActionTimestamp;
+	protected unsigned int crackdownFactionTefCrc;
+
 	@dereferenced
 	protected Reference<PvpTefRemovalTask> pvpTefTask;
 
@@ -286,6 +291,9 @@ class PlayerObject extends IntangibleObject {
 	protected transient unsigned long sessionStatsTotalMovement;
 	protected transient unsigned long sessionStatsTotalCredits;
 	protected transient string sessionStatsIPAddress;
+	@dereferenced
+	protected SpaceLaunchPoint launchPoint;
+
 	protected int pilotTier;
 	protected unsigned int pilotSquadron;
 	protected int playerLogLevel;
@@ -871,6 +879,19 @@ class PlayerObject extends IntangibleObject {
 		return conversatingCreature;
 	}
 
+	// P2: additive SceneObject-typed conversation accessors (reuse conversatingCreature; mirror upstream semantics)
+	public void setConversatingObject(SceneObject creature) {
+		if (!(creature))
+			conversatingCreature = 0;
+		else
+			conversatingCreature = creature.getObjectID();
+	}
+
+	@dirty
+	public unsigned long getConversatingObject() {
+		return conversatingCreature;
+	}
+
 	@local
 	public native void setTrainerCoordinates(@dereferenced final Vector3 trainer);
 
@@ -1368,6 +1389,47 @@ class PlayerObject extends IntangibleObject {
 		return pilotSquadron;
 	}
 
+	// P2: JTL launch-point mutators/accessors (additive; SpaceLaunchPoint exists in tree; mirror upstream)
+	public void setSpaceLaunchZone(string zoneName) {
+		launchPoint.setGroundZoneName(zoneName);
+	}
+
+	public void setSpaceLaunchCityName(string cityName) {
+		launchPoint.setCityName(cityName);
+	}
+
+	public void setSpaceLaunchLocation(@dereferenced Vector3 location) {
+		launchPoint.setLocation(location);
+	}
+
+	@dereferenced
+	public string getSpaceLaunchZone() {
+		return launchPoint.getGoundZoneName();
+	}
+
+	@dereferenced
+	public string getSpaceLaunchCityName() {
+		return launchPoint.getCityName();
+	}
+
+	@local
+	@dereferenced
+	public Vector3 getSpaceLaunchLocation() {
+		return launchPoint.getLocation();
+	}
+
+	public void setPilotSquadron(unsigned int squadron) {
+		pilotSquadron = squadron;
+	}
+
+	public void setPilotTier(int tier) {
+		if (tier > 5 || tier < 0) {
+			return;
+		}
+
+		pilotTier = tier;
+	}
+
 	// P2: additive player log level getter (consumed by TransactionLog; mirror upstream)
 	@read
 	public int getLogLevel() {
@@ -1708,6 +1770,11 @@ class PlayerObject extends IntangibleObject {
 	public native void updateLastGcwPvpCombatActionTimestamp();
 
 	public native boolean hasPvpTef();
+
+	// P2: crackdown/GCW TEF predicates (additive; mirror upstream)
+	public native boolean hasGcwTef();
+
+	public native boolean hasCrackdownTefTowards(unsigned int factionCrc);
 	
 	public native boolean hasBhTef();
 	
