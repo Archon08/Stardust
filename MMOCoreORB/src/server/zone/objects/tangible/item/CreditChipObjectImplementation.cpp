@@ -6,6 +6,7 @@
  */
 
 #include "server/zone/objects/tangible/item/CreditChipObject.h"
+#include "server/zone/managers/radial/RadialOptions.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
