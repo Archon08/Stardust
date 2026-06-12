@@ -193,10 +193,11 @@ public:
 
 	CreatureObject* getHighestThreatCreature();
 
-	// Modern (space-port) accessor: bt leaf FollowActions expects a TangibleObject*.
-	// On this branch the threat map is still CreatureObject-keyed, so forward to
-	// getHighestThreatCreature() (CreatureObject is-a TangibleObject).
-	TangibleObject* getHighestThreatAttacker() {
+	// Modern (space-port) accessor used by bt leaf FollowActions. On this branch the threat
+	// map is still CreatureObject-keyed; return CreatureObject* (caller stores it as a
+	// SceneObject*). Returning CreatureObject* avoids needing TangibleObject's full
+	// definition here (CreatureObject is only forward-declared in this header).
+	CreatureObject* getHighestThreatAttacker() {
 		return getHighestThreatCreature();
 	}
 
