@@ -182,6 +182,20 @@ String ZoneClientSessionImplementation::getAddress() {
 	return session->getFullIPAddress();
 }
 
+String ZoneClientSessionImplementation::getIPAddress() {
+	if (session != nullptr)
+		return session->getAddress().getIPAddress();
+
+	return "0.0.0.0";
+}
+
+uint16 ZoneClientSessionImplementation::getPort() {
+	if (session != nullptr)
+		return session->getAddress().getPort();
+
+	return 0;
+}
+
 BaseClientProxy* ZoneClientSessionImplementation::getSession() {
 	return session;
 }
