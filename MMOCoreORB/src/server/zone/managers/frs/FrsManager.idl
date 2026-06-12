@@ -137,6 +137,7 @@ class FrsManager extends ManagedService implements Logger {
 	}
 	
 	public native void initialize();
+	public native void stop();
 	public native void loadLuaConfig();
 	public native void loadFrsData();
 
