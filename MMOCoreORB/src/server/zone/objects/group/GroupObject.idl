@@ -158,7 +158,7 @@ class GroupObject extends SceneObject {
 	}
 
 	@preLocked
-	public native boolean initializeLeader(CreatureObject leader, CreatureObject member);
+	public native boolean initializeLeader(CreatureObject leader);
 
 	@local
 	@dirty
