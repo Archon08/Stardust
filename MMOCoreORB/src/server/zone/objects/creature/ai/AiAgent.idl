@@ -399,6 +399,13 @@ class AiAgent extends CreatureObject {
 	public native void clearRunningChain();
 	public native void setAITemplate();
 
+	@preLocked
+	public void activateLoad(final string temp) {
+		setAITemplate();
+
+		activateAiBehavior();
+	}
+
 	@local
 	@preLocked
 	public native Behavior getBehaviorTree(@dereferenced final BehaviorTreeSlot slot);
