@@ -96,7 +96,11 @@ public:
 	}
 
 	void loadTemplates() {
-		Lua* lua = DirectorManager::instance()->getLuaInstance();
+		Lua* lua = new Lua();
+		lua->init();
+		lua->setLoggingName("AiMapLuaInstance");
+
+		initialize(lua);
 		loadTemplates(lua);
 	}
 
