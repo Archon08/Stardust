@@ -4005,7 +4005,7 @@ SortedVector<String> PlayerManagerImplementation::getTeachableSkills(CreatureObj
 	SortedVector<String> skills;
 	skills.setNoDuplicateInsertPlan();
 
-	SkillList* skillList = teacher->getSkillList();
+	const SkillList* skillList = teacher->getSkillList();
 
 	SkillManager* skillManager = SkillManager::instance();
 
