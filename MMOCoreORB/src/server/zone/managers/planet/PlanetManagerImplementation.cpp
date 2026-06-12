@@ -721,7 +721,7 @@ void PlanetManagerImplementation::loadClientRegions(LuaObject* outposts) {
 
 	IffStream* iffStream = templateManager->openIffFile("datatables/clientregion/" + zone->getZoneName() + ".iff");
 
-	Reference<PlanetMapCategory*> cityCat = TemplateManager::instance()->getPlanetMapCategoryByName("city");
+	Reference<const PlanetMapCategory*> cityCat = TemplateManager::instance()->getPlanetMapCategoryByName("city");
 
 	if (iffStream == nullptr) {
 		info("No client regions found.");
