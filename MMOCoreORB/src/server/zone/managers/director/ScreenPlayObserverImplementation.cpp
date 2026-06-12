@@ -21,26 +21,28 @@ int ScreenPlayObserverImplementation::notifyObserverEvent(uint32 eventType, Obse
 		startScreenPlay.callFunction();
 
 		if (lua_gettop(lua->getLuaState()) == 0) {
-			Logger::console.error("ScreenPlayObserverImplementation::notifyObserverEvent didnt return a value from " + play + ":" + key);
+			error() << "ScreenPlayObserverImplementation::notifyObserverEvent didnt return a value from " << play << ":" << key;
 
-			assert(0 && "no return value in  ScreenPlayObserverImplementation::notifyObserverEvent");
-
-			return 1;
+			return 0;
 		}
 
 		if (!lua_isnumber(lua->getLuaState(), -1)) {
-			String msg = "ScreenPlayObserver " + play + ":" + key + "didnt return a valid value in an observer handler";
-			Logger::console.error(msg);
-			assert(0 && "Failed");
+			error() <<  "ScreenPlayObserver " << play << ":" << key << " didnt return a valid value for a observer handler.";
+			return 0;
 		}
 
 		ret = lua->getIntParameter(lua->getLuaState());
 
-	} catch (LuaPanicException& panic) {
-		Logger::console.error("Panic exception: " + panic.getMessage() + " while trying to run SceenPlayObserver: " + play + ":" + key);
+	} catch (const LuaPanicException& panic) {
+		error() << "Panic exception: " << panic.getMessage() << " while trying to run SceenPlayObserver: " << play << ":" << key;
 	}
 
 	//1 remove observer, 0 keep observer
 
 	return ret;
+}
+
+void ScreenPlayObserverImplementation::storeFloatValue(const String& dataKey, float dataVal) {
+	uint64 dataHash = dataKey.hashCode();
+	floatData.put(dataHash, dataVal);
 }
