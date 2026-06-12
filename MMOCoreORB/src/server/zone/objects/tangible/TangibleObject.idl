@@ -50,6 +50,10 @@ class TangibleObject extends SceneObject {
 	protected short level;
 
 	protected unsigned int optionsBitmask;
+
+	protected int unmitigatedDamage;
+
+	protected boolean inNoCombatArea;
 	@dereferenced
 	protected AtomicInteger magicBits;
 
@@ -117,6 +121,10 @@ class TangibleObject extends SceneObject {
 		useCount = 1;
 
 		conditionDamage = 0;
+
+		unmitigatedDamage = 0;
+
+		inNoCombatArea = false;
 
 		sliceable = false;
 		sliced = false;
@@ -583,6 +591,41 @@ class TangibleObject extends SceneObject {
 			return defenderList.get(0);
 
 		return null;
+	}
+
+	@read
+	public boolean hasDefenders() {
+		return defenderList.size() > 0;
+	}
+
+	@read
+	public int getUnmitigatedDamage() {
+		return unmitigatedDamage;
+	}
+
+	@preLocked
+	public void addUnmitigatedDamage(float damage) {
+		unmitigatedDamage += (int)damage;
+	}
+
+	@read
+	public boolean isInNoCombatArea() {
+		return inNoCombatArea;
+	}
+
+	@preLocked
+	public void setInNoCombatArea(boolean val) {
+		inNoCombatArea = val;
+	}
+
+	@dirty
+	public boolean isInvulnerable() {
+		return (optionsBitmask & OptionBitmask.INVULNERABLE) != 0;
+	}
+
+	@dirty
+	public boolean isDestroying() {
+		return (optionsBitmask & OptionBitmask.DESTROYING) != 0;
 	}
 
 	@read
