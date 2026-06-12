@@ -38,6 +38,8 @@ class GroupObject extends SceneObject {
 
 	unsigned long masterLooterID;
 
+	String bandSong;
+
 	public GroupObject() {
 		groupLevel = 0;
 		factionPetLevel = 0;
@@ -48,6 +50,8 @@ class GroupObject extends SceneObject {
 
 		lootRule = GroupManager.FREEFORALL;
 		masterLooterID = 0;
+
+		bandSong = "";
 	}
 
 	@dirty
@@ -191,6 +195,16 @@ class GroupObject extends SceneObject {
 
 	@preLocked
 	private native void removeGroupModifiers(CreatureObject player, boolean isLeader);
+
+	@read
+	public string getBandSong() {
+		return bandSong;
+	}
+
+	@preLocked
+	public void setBandSong(final string song) {
+		bandSong = song;
+	}
 
 	@dirty
 	public native boolean isOtherMemberPlayingMusic(CreatureObject player);
