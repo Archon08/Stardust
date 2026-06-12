@@ -7,6 +7,7 @@
 
 #include "server/zone/packets/DeltaMessage.h"
 #include "server/zone/objects/group/GroupObject.h"
+#include "server/zone/objects/creature/CreatureObject.h"
 
 class GroupObjectDeltaMessage6 : public DeltaMessage, public Logger {
 	GroupObject* group;
