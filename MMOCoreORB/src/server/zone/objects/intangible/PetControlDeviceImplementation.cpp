@@ -904,7 +904,7 @@ void PetControlDeviceImplementation::fillAttributeList(AttributeListMessage* alm
 			alm->insertAttribute("creature_damage", String::valueOf(pet->getDamageMin()) + " - " + String::valueOf(pet->getDamageMax()));
 
 			if (petType == PetManager::CREATUREPET) {
-				CreatureAttackMap* attMap = pet->getAttackMap();
+				const CreatureAttackMap* attMap = pet->getAttackMap();
 
 				if (attMap != nullptr && attMap->size() > 0) {
 					String cmd = attMap->getCommand(0);
