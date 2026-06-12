@@ -8,7 +8,7 @@
 #include "server/zone/objects/tangible/Container.h"
 
 bool PlaceableLootContainerComponent::checkContainerPermission(SceneObject* sceneObject, CreatureObject* creature, uint16 permission) const {
-	ContainerPermissions* permissions = sceneObject->getContainerPermissions();
+	const ContainerPermissions* permissions = sceneObject->getContainerPermissions();
 
 	if(!sceneObject->isContainerObject())
 		return false;
