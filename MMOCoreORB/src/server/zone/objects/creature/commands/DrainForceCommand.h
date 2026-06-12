@@ -67,7 +67,7 @@ public:
 			return GENERALERROR;
 
 		if (!creature->checkCooldownRecovery(skillName)){
-				Time* timeRemaining = creature->getCooldownTime(skillName);
+				const Time* timeRemaining = creature->getCooldownTime(skillName);
 				creature->playMusicMessage("sound/ui_negative.snd");
 				creature->sendSystemMessage("You can not " + skillNameDisplay + " for another " +  getCooldownString(timeRemaining->miliDifference() * -1));
 				return GENERALERROR;
