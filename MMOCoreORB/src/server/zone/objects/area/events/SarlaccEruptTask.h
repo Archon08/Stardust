@@ -27,7 +27,7 @@ public:
 		Zone* zone = sarlaccArea->getZone();
 
 		Reference<SortedVector<ManagedReference<TreeEntry*> >*> closeObjects = new SortedVector<ManagedReference<TreeEntry*> >();
-		zone->getInRangeObjects(sarlaccArea->getWorldPositionX(), sarlaccArea->getWorldPositionY(), 60, closeObjects, true);
+		zone->getInRangeObjects(sarlaccArea->getWorldPositionX(), sarlaccArea->getWorldPositionZ(), sarlaccArea->getWorldPositionY(), 60, closeObjects, true);
 
 		for (int i = 0; i < closeObjects->size(); ++i) {
 			SceneObject* scno = cast<SceneObject*>(closeObjects->get(i).get());
