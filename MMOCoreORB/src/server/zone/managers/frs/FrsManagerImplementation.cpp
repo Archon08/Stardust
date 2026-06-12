@@ -54,6 +54,27 @@ void FrsManagerImplementation::initialize() {
 		voteStatusTask->schedule(VOTE_STATUS_TICK - miliDiff);
 }
 
+void FrsManagerImplementation::stop() {
+	if (rankMaintenanceTask != nullptr) {
+		rankMaintenanceTask->cancel();
+		rankMaintenanceTask = nullptr;
+	}
+
+	if (voteStatusTask != nullptr) {
+		voteStatusTask->cancel();
+		voteStatusTask = nullptr;
+	}
+
+	managerData = nullptr;
+	lightEnclave = nullptr;
+	darkEnclave = nullptr;
+
+	lightRankingData.removeAll();
+	darkRankingData.removeAll();
+	roomRequirements.removeAll();
+	experienceValues.removeAll();
+}
+
 void FrsManagerImplementation::loadFrsData() {
 	info("Loading frs manager data from frsmanager.db");
 
