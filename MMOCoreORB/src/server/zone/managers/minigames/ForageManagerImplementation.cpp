@@ -259,7 +259,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 		else
 			resName = "seafood_crustacean";
 
-		if(forageGiveResource(player, forageX, forageY, planet, resName)) {
+		if(forageGiveResource(trx, player, forageX, forageY, planet, resName)) {
 			if (mullosks)
 				player->sendSystemMessage("@harvesting:found_mollusks");
 			else
@@ -299,7 +299,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 			lootGroup = "forage_food";
 
 		} else if (dice > 39 && dice < 110) { //Resources.
-			if(forageGiveResource(player, forageX, forageY, planet, resName)) {
+			if(forageGiveResource(trx, player, forageX, forageY, planet, resName)) {
 				player->sendSystemMessage("@skl_use:sys_forage_success");
 				return true;
 			} else {
@@ -328,7 +328,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 		}
 		else if (dice > 39 && dice < 110) { // Eggs
 			resName = "meat_egg";
-			if(forageGiveResource(player, forageX, forageY, planet, resName)) {
+			if(forageGiveResource(trx, player, forageX, forageY, planet, resName)) {
 				player->sendSystemMessage("@lair_n:found_eggs");
 				return true;
 			} else {
@@ -350,7 +350,7 @@ bool ForageManagerImplementation::forageGiveItems(CreatureObject* player, int fo
 	return true;
 }
 
-bool ForageManagerImplementation::forageGiveResource(CreatureObject* player, float forageX, float forageY, const String& planet, String& resType) {
+bool ForageManagerImplementation::forageGiveResource(TransactionLog& trx, CreatureObject* player, float forageX, float forageY, const String& planet, String& resType) {
 	if (player == nullptr)
 		return false;
 
@@ -396,6 +396,6 @@ bool ForageManagerImplementation::forageGiveResource(CreatureObject* player, flo
 	}
 
 	int quantity = System::random(30) + 10;
-	resourceManager->harvestResourceToPlayer(player, resource, quantity);
+	resourceManager->harvestResourceToPlayer(trx, player, resource, quantity);
 	return true;
 }

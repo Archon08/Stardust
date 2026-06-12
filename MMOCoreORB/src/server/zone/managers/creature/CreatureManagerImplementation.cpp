@@ -734,14 +734,19 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 		return;
 	}
 
+	TransactionLog trx(TrxCode::HARVESTED, owner, resourceSpawn);
+
 	if (pet->hasStorage()) {
-		bool didit = resourceManager->harvestResourceToPlayer(droid, resourceSpawn, quantityExtracted);
+		bool didit = resourceManager->harvestResourceToPlayer(trx, droid, resourceSpawn, quantityExtracted);
 		if (!didit) {
-			resourceManager->harvestResourceToPlayer(owner, resourceSpawn, quantityExtracted);
+			trx.addState("droidOverflow", true);
+			resourceManager->harvestResourceToPlayer(trx, owner, resourceSpawn, quantityExtracted);
 		}
 	} else {
-		resourceManager->harvestResourceToPlayer(owner, resourceSpawn, quantityExtracted);
+		resourceManager->harvestResourceToPlayer(trx, owner, resourceSpawn, quantityExtracted);
 	}
+
+	trx.commit();
 
 	/// Send System Messages
 	StringIdChatParameter harvestMessage("skl_use", creatureHealth);
@@ -889,7 +894,9 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 	if (creature->getParent().get() != nullptr)
 		quantityExtracted = 1;
 
-	resourceManager->harvestResourceToPlayer(player, resourceSpawn, quantityExtracted);
+	TransactionLog trx(TrxCode::HARVESTED, player, resourceSpawn);
+	resourceManager->harvestResourceToPlayer(trx, player, resourceSpawn, quantityExtracted);
+	trx.commit();
 
 	/// Send System Messages
 	StringIdChatParameter harvestMessage("skl_use", creatureHealth);

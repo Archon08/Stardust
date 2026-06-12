@@ -1069,7 +1069,7 @@ void ResourceSpawner::sendSampleResults(CreatureObject* player, const float dens
 	}
 }
 
-bool ResourceSpawner::addResourceToPlayerInventory(CreatureObject* player, ResourceSpawn* resourceSpawn, int unitsExtracted) {
+bool ResourceSpawner::addResourceToPlayerInventory(TransactionLog& trx, CreatureObject* player, ResourceSpawn* resourceSpawn, int unitsExtracted) {
 	// Add resource to inventory
 	ManagedReference<SceneObject*> inventory = player->getSlottedObject("inventory");
 	Locker locker(inventory);
@@ -1087,6 +1087,11 @@ bool ResourceSpawner::addResourceToPlayerInventory(CreatureObject* player, Resou
 				if  ((resource->getQuantity() + unitsExtracted) <= ResourceContainer::MAXSIZE ){
 					int newStackSize = resource->getQuantity() + unitsExtracted;
 					resource->setQuantity(newStackSize);
+					trx.addRelatedObject(resource);
+					trx.addState("resourceType", resourceSpawn->getType());
+					trx.addState("resourceID", resourceSpawn->getObjectID());
+					trx.addState("resourceName", resourceSpawn->getName());
+					trx.addState("resourceQuantity", unitsExtracted);
 					return true;
 				}else{
 					unitsExtracted = unitsExtracted - (ResourceContainer::MAXSIZE - resource->getQuantity());
@@ -1101,17 +1106,24 @@ bool ResourceSpawner::addResourceToPlayerInventory(CreatureObject* player, Resou
 		if (!player->isIncapacitated() && !player->isDead()){
 			player->setPosture(CreaturePosture::UPRIGHT, true);
 		}
+		trx.abort() << "No inventory space";
 		return false;
 	}
 	// Create New resource container if one isn't found in inventory
 	Reference<ResourceContainer*> harvestedResource = resourceSpawn->createResource(unitsExtracted);
 
+	trx.addRelatedObject(harvestedResource);
+
 	if (inventory->transferObject(harvestedResource, -1, false)) {
+		trx.addState("resourceType", resourceSpawn->getType());
+		trx.addState("resourceID", resourceSpawn->getObjectID());
+		trx.addState("resourceName", resourceSpawn->getName());
+		trx.addState("resourceQuantity", unitsExtracted);
 		inventory->broadcastObject(harvestedResource, true);
 		return true;
 	} else {
           	Locker resLocker(harvestedResource);
-          
+
 		harvestedResource->destroyObjectFromDatabase(true);
 		return false;
 	}
@@ -1145,12 +1157,12 @@ Reference<ResourceContainer*> ResourceSpawner::harvestResource(CreatureObject* p
 	return nullptr;
 }
 
-bool ResourceSpawner::harvestResource(CreatureObject* player, ResourceSpawn* resourceSpawn, int quantity) {
+bool ResourceSpawner::harvestResource(TransactionLog& trx, CreatureObject* player, ResourceSpawn* resourceSpawn, int quantity) {
 	Locker locker(resourceSpawn);
 
 	resourceSpawn->extractResource(player->getZone()->getZoneName(), quantity);
 
-	return addResourceToPlayerInventory(player, resourceSpawn, quantity);
+	return addResourceToPlayerInventory(trx, player, resourceSpawn, quantity);
 }
 
 ResourceSpawn* ResourceSpawner::getCurrentSpawn(const String& restype, const String& zoneName) {

@@ -3,6 +3,7 @@
 		See file COPYING for copying conditions.*/
 
 #include "server/zone/managers/resource/ResourceManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "ResourceShiftTask.h"
 #include "resourcespawner/SampleTask.h"
 #include "resourcespawner/SampleResultsTask.h"
@@ -214,8 +215,12 @@ void ResourceManagerImplementation::sendResourceListForSurvey(CreatureObject* pl
 ResourceContainer* ResourceManagerImplementation::harvestResource(CreatureObject* player, const String& type, const int quantity) {
 	return resourceSpawner->harvestResource(player, type, quantity);
 }
-bool ResourceManagerImplementation::harvestResourceToPlayer(CreatureObject* player, ResourceSpawn* resourceSpawn, const int quantity) {
-	return resourceSpawner->harvestResource(player, resourceSpawn, quantity);
+bool ResourceManagerImplementation::harvestResourceToPlayer(TransactionLog& trx, CreatureObject* player, ResourceSpawn* resourceSpawn, const int quantity) {
+	trx.addState("resourceID", resourceSpawn->getObjectID());
+	trx.addState("resourceType", resourceSpawn->getType());
+	trx.addState("resourceName", resourceSpawn->getName());
+	trx.addState("resourceQuantity", quantity);
+	return resourceSpawner->harvestResource(trx, player, resourceSpawn, quantity);
 }
 
 void ResourceManagerImplementation::sendSurvey(CreatureObject* playerCreature, const String& resname) {

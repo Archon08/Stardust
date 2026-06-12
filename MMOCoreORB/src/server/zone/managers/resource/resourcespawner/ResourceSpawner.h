@@ -15,6 +15,7 @@
 #include "server/zone/ZoneProcessServer.h"
 #include "server/zone/managers/name/NameManager.h"
 #include "server/zone/managers/object/ObjectManager.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "resourcetree/ResourceTree.h"
 #include "resourcemap/ResourceMap.h"
 
@@ -119,8 +120,8 @@ public:
 	void sendSampleResults(CreatureObject* player, const float density, const String& resname);
 
 	Reference<ResourceContainer*> harvestResource(CreatureObject* player, const String& type, const int quantity);
-	bool harvestResource(CreatureObject* player, ResourceSpawn* resourceSpawn, int quantity);
-	bool addResourceToPlayerInventory(CreatureObject* player, ResourceSpawn* resourceSpawn, int unitsExtracted);
+	bool harvestResource(TransactionLog& trx, CreatureObject* player, ResourceSpawn* resourceSpawn, int quantity);
+	bool addResourceToPlayerInventory(TransactionLog& trx, CreatureObject* player, ResourceSpawn* resourceSpawn, int unitsExtracted);
 
 	ResourceSpawn* getCurrentSpawn(const String& restype, const String& zoneName);
 
