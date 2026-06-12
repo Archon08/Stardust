@@ -3158,7 +3158,7 @@ void PlayerManagerImplementation::lootAll(CreatureObject* player, CreatureObject
 			cashCredits += (cashCredits * luck) / 20;
 
 		player->addCashCredits(cashCredits, true);
-		ai->setCashCredits(0);
+		ai->clearCashCredits(false);
 
 		StringIdChatParameter param("base_player", "prose_coin_loot"); //You loot %DI credits from %TT.
 		param.setDI(cashCredits);
