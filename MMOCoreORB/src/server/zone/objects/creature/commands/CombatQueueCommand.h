@@ -727,7 +727,7 @@ public:
 			defender->removeBuff(STRING_HASHCODE("retreat"));
 			break;
 		case CommandEffect::NEXTATTACKDELAY:
-			defender->setNextAttackDelay(mod, duration);
+			defender->setNextAttackDelay(attacker, name, mod, duration);
 			break;
 		case CommandEffect::HEALTHDEGRADE:
 			buff = new Buff(defender, STRING_HASHCODE("healthdegrade"), duration, BuffType::STATE);
@@ -751,7 +751,7 @@ public:
 			if (defender->hasState(CreatureState::COVER)) {
 				defender->clearState(CreatureState::COVER);
 				defender->sendSystemMessage("@combat_effects:strafe_system");
-				defender->setNextAttackDelay(mod, duration);
+				defender->setNextAttackDelay(attacker, name, mod, duration);
 			}
 			break;
 		case CommandEffect::ATTACKER_FORCE_STAND:
