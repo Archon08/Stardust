@@ -48,14 +48,12 @@ public:
 				tokenizer.getStringToken(tempName);
 
 			if (!tempName.isEmpty() && tempName == "checkThreads") {
-				creature->sendSystemMessage("Current number of AiMoveEvents: " + String::valueOf(AiMap::instance()->activeMoveEvents.get()));
-				creature->sendSystemMessage("Current number of scheduled AiMoveEvents: " + String::valueOf(AiMap::instance()->scheduledMoveEvents.get()));
-				creature->sendSystemMessage("Current number of scheduled AiMoveEvents with followObject: " + String::valueOf(AiMap::instance()->moveEventsWithFollowObject.get()));
-				creature->sendSystemMessage("Current number of scheduled AiMoveEvents retreating: " + String::valueOf(AiMap::instance()->moveEventsRetreating.get()));
-				creature->sendSystemMessage("Current number of AiAwarenessEvents: " + String::valueOf(AiMap::instance()->activeAwarenessEvents.get()));
-				creature->sendSystemMessage("Current number of scheduled AiAwarenessEvents: " + String::valueOf(AiMap::instance()->scheduledAwarenessEvents.get()));
+				creature->sendSystemMessage("Current number of active AiBehaviorEvents: " + String::valueOf(AiMap::instance()->activeBehaviorEvents.get()));
+				creature->sendSystemMessage("Current number of scheduled AiBehaviorEvents: " + String::valueOf(AiMap::instance()->scheduledBehaviorEvents.get()));
+				creature->sendSystemMessage("Current number of AiBehaviorEvents with followObject: " + String::valueOf(AiMap::instance()->behaviorsWithFollowObject.get()));
+				creature->sendSystemMessage("Current number of AiBehaviorEvents retreating: " + String::valueOf(AiMap::instance()->behaviorsRetreating.get()));
+				creature->sendSystemMessage("Current number of AiAgent exceptions: " + String::valueOf(AiMap::instance()->countExceptions.get()));
 				creature->sendSystemMessage("Current number of AiRecoveryEvents: " + String::valueOf(AiMap::instance()->activeRecoveryEvents.get()));
-				creature->sendSystemMessage("Current number of AiWaitEvents: " + String::valueOf(AiMap::instance()->activeWaitEvents.get()));
 
 				ZoneServer* server = creature->getZoneServer();
 
