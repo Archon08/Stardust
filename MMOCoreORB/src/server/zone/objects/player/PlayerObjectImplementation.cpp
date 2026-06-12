@@ -796,6 +796,71 @@ void PlayerObjectImplementation::removeAbilities(Vector<Ability*>& abilities, bo
 	}
 }
 
+void PlayerObjectImplementation::addDroidCommands(Vector<Ability*>& abilities, bool notifyClient) {
+	if (abilities.size() == 0)
+		return;
+
+	if (notifyClient) {
+		PlayerObjectDeltaMessage9* msg = new PlayerObjectDeltaMessage9(_this.getReferenceUnsafeStaticCast());
+		msg->startUpdate(0);
+
+		Ability* initialAbility = abilities.get(0);
+		droidCommandList.add(initialAbility);
+		abilityList.add(initialAbility, msg, abilities.size());
+
+		for (int i = 1; i < abilities.size(); ++i) {
+			Ability* ability = abilities.get(i);
+
+			if (ability == nullptr)
+				continue;
+
+			droidCommandList.add(ability);
+			abilityList.add(ability, msg, 0);
+		}
+
+		msg->close();
+
+		sendMessage(msg);
+	} else {
+		for (int i = 0; i < abilities.size(); ++i) {
+			Ability* ability = abilities.get(i);
+
+			if (ability == nullptr)
+				continue;
+
+			droidCommandList.add(ability);
+			abilityList.add(ability);
+		}
+	}
+}
+
+void PlayerObjectImplementation::removeDroidCommands() {
+	if (droidCommandList.size() == 0)
+		return;
+
+	Ability* initialAbility = droidCommandList.get(0);
+
+	PlayerObjectDeltaMessage9* msg = new PlayerObjectDeltaMessage9(_this.getReferenceUnsafeStaticCast());
+	msg->startUpdate(0);
+
+	abilityList.remove(abilityList.find(initialAbility), msg, droidCommandList.size());
+
+	for (int i = 1; i < droidCommandList.size(); ++i) {
+		Ability* ability = droidCommandList.get(i);
+
+		if (ability == nullptr)
+			continue;
+
+		abilityList.remove(abilityList.find(ability), msg, 0);
+	}
+
+	msg->close();
+
+	sendMessage(msg);
+
+	droidCommandList.removeAll();
+}
+
 bool PlayerObjectImplementation::addSchematics(Vector<ManagedReference<DraftSchematic* > >& schematics, bool notifyClient) {
 	if (schematics.size() == 0)
 		return false;
