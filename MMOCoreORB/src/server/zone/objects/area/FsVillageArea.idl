@@ -8,15 +8,16 @@ package server.zone.objects.area;
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.area.ActiveArea;
 
+@json
 class FsVillageArea extends ActiveArea {
 
 	public FsVillageArea() {
 		super();
 
-		super.noBuildArea = true;
-		super.noSpawnArea = true;
+		super.addAreaFlag(ActiveArea.NOBUILDZONEAREA);
+		super.addAreaFlag(ActiveArea.NOSPAWNAREA);
 	}
-	
+
 	@dirty
 	public native void notifyEnter(SceneObject player);
 }
