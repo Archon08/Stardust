@@ -45,6 +45,7 @@ SharedObjectTemplate::SharedObjectTemplate() {
 	inheritPermissionsFromParent = false;
 
 	noTrade = false;
+	delayedContainerLoad = false;
 }
 
 void SharedObjectTemplate::parseVariableData(const String& varName, LuaObject* templateData) {
@@ -160,8 +161,10 @@ void SharedObjectTemplate::parseVariableData(const String& varName, LuaObject* t
 		}
 
 		luaItemList.pop();
-	} else if (varName == "zoneComponent") {
-		zoneComponent = Lua::getStringParameter(state);
+	} else if (varName == "groundZoneComponent") {
+		groundZoneComponent = Lua::getStringParameter(state);
+	} else if (varName == "spaceZoneComponent") {
+		spaceZoneComponent = Lua::getStringParameter(state);
 	} else if (varName == "objectMenuComponent") {
 		objectMenuComponent = Lua::getStringParameter(state);
 	} else if (varName == "attributeListComponent") {
@@ -196,6 +199,8 @@ void SharedObjectTemplate::parseVariableData(const String& varName, LuaObject* t
 		obj.pop();
 	} else if (varName == "enableNavMeshUpdates") {
 		updatesNavMesh = Lua::getBooleanParameter(state);
+	} else if (varName == "delayedContainerLoad") {
+		delayedContainerLoad = Lua::getBooleanParameter(state);
 	} else {
 		//Logger::console.error("unknown variable " + varName);
 		templateData->pop();
