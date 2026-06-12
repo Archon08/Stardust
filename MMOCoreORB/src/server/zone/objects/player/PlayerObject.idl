@@ -275,6 +275,20 @@ class PlayerObject extends IntangibleObject {
 	@rawTemplate(value = "uint32, PlayerQuestData")
 	protected DeltaVectorMap playerQuestsData;
 
+	// P2: session telemetry + JTL pilot progression backing members (additive, mirror upstream)
+	protected unsigned long miliSecsPlayed;
+	protected unsigned long miliSecsSession;
+	protected unsigned long sessionStatsMiliSecs;
+	protected transient long sessionStatsLastCredits;
+	protected transient int sessionStatsLastSkillPoints;
+	protected transient unsigned long sessionStatsActivityXP;
+	protected transient unsigned long sessionStatsActivityMovement;
+	protected transient unsigned long sessionStatsTotalMovement;
+	protected transient unsigned long sessionStatsTotalCredits;
+	protected transient string sessionStatsIPAddress;
+	protected int pilotTier;
+	protected unsigned int pilotSquadron;
+
 	public static final int LFG = 1;
 	public static final int NEWBIEHELPER = 2;
 	public static final int ROLEPLAYER = 4;
@@ -1319,6 +1333,38 @@ class PlayerObject extends IntangibleObject {
 	@dirty
 	public DeltaVectorMap getPlayerQuestsData() {
 		return playerQuestsData;
+	}
+
+	// P2: session telemetry getters (additive, mirror upstream; consumed by TransactionLog)
+	@read
+	public unsigned long getPlayedMiliSecs() {
+		return miliSecsPlayed;
+	}
+
+	@read
+	public unsigned long getSessionMiliSecs() {
+		return miliSecsSession;
+	}
+
+	@read
+	public unsigned long getSessionTotalMovement() {
+		return sessionStatsTotalMovement;
+	}
+
+	@read
+	public long getSessionTotalCredits() {
+		return sessionStatsTotalCredits;
+	}
+
+	// P2: JTL pilot progression getters (additive, mirror upstream)
+	@read
+	public int getPilotTier() {
+		return pilotTier;
+	}
+
+	@read
+	public int getPilotSquadron() {
+		return pilotSquadron;
 	}
 
 	@local
