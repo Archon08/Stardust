@@ -111,63 +111,63 @@ public:
 
 	void readObject(LuaObject* templateData);
 
-	inline float getKinetic() {
+	inline float getKinetic() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::KINETIC))
 			return kinetic - 100;
 		else
 			return kinetic;
 	}
 
-	inline float getEnergy() {
+	inline float getEnergy() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::ENERGY))
 			return energy - 100;
 		else
 			return energy;
 	}
 
-	inline float getElectricity() {
+	inline float getElectricity() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::ELECTRICITY))
 			return electricity - 100;
 		else
 			return electricity;
 	}
 
-	inline float getStun() {
+	inline float getStun() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::STUN))
 			return stun - 100;
 		else
 			return stun;
 	}
 
-	inline float getBlast() {
+	inline float getBlast() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::BLAST))
 			return blast - 100;
 		else
 			return blast;
 	}
 
-	inline float getHeat() {
+	inline float getHeat() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::HEAT))
 			return heat - 100;
 		else
 			return heat;
 	}
 
-	inline float getCold() {
+	inline float getCold() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::COLD))
 			return cold - 100;
 		else
 			return cold;
 	}
 
-	inline float getAcid() {
+	inline float getAcid() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::ACID))
 			return acid - 100;
 		else
 			return acid;
 	}
 
-	inline float getLightSaber() {
+	inline float getLightSaber() const {
 		if (isSpecialProtection(SharedWeaponObjectTemplate::LIGHTSABER))
 			return lightSaber - 100;
 		else
@@ -246,11 +246,11 @@ public:
 		return meatAmount;
 	}
 
-	inline unsigned int getFerocity() {
+	inline unsigned int getFerocity() const {
 		return ferocity;
 	}
 
-	inline unsigned int getArmor() {
+	inline unsigned int getArmor() const {
 		return armor;
 	}
 
@@ -354,6 +354,10 @@ public:
 		return weapons;
 	}
 
+	inline const Vector<String>& getWeapons() const {
+		return weapons;
+	}
+
 	inline CreatureAttackMap* getAttacks() {
 		return attacks;
 	}
@@ -406,7 +410,7 @@ public:
 		return personalityStf;
 	}
 
-	inline bool isSpecialProtection(int resistType) {
+	inline bool isSpecialProtection(int resistType) const {
 		switch (resistType) {
 		case SharedWeaponObjectTemplate::KINETIC:
 			return kinetic > 100;
