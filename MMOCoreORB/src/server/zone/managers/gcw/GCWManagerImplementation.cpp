@@ -2507,13 +2507,16 @@ int GCWManagerImplementation::isStrongholdCity(String& city) {
 	return 0;
 }
 
-void GCWManagerImplementation::runCrackdownScan(AiAgent* scanner, CreatureObject* player) {
+bool GCWManagerImplementation::runCrackdownScan(AiAgent* scanner, CreatureObject* player) {
 	if (!player->isPlayerCreature() || !scanner->isInRange(player, 16) || !CollisionManager::checkLineOfSight(scanner, player)) {
-		return;
+		return false;
 	}
 
 	if (scanner->checkCooldownRecovery("crackdown_scan") && player->checkCooldownRecovery("crackdown_scan")) {
 		ContrabandScanSession* contrabandScanSession = new ContrabandScanSession(scanner, player);
 		contrabandScanSession->initializeSession();
+		return true;
 	}
+
+	return false;
 }
