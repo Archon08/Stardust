@@ -126,7 +126,7 @@ void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {
 		ManagedReference<RectangularAreaShape*> rectangularAreaShape = new RectangularAreaShape();
 		Locker shapeLocker(rectangularAreaShape);
 		rectangularAreaShape->setAreaCenter(x, y);
-		rectangularAreaShape->setDimensions(height, width);
+		rectangularAreaShape->setDimensions(x - width / 2.f, y - height / 2.f, x + width / 2.f, y + height / 2.f);
 		area->setAreaShape(rectangularAreaShape);
 	} else if (radius > 0) {
 		ManagedReference<CircularAreaShape*> circularAreaShape = new CircularAreaShape();
