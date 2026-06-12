@@ -870,6 +870,16 @@ class TangibleObject extends SceneObject {
 		return antiDecayKitObject;
 	}
 
+	// P2: additive owner-id of anti-decay kit (consumed by TransactionLog; mirror upstream)
+	@read
+	public unsigned long getAntiDecayKitObjectID() {
+		if (!hasAntiDecayKit()) {
+			return 0;
+		}
+
+		return antiDecayKitObject.getObjectID();
+	}
+
 	@preLocked
 	public void applyAntiDecayKit(CreatureObject player, SceneObject adk) {
 		if(!hasAntiDecayKit()) {
