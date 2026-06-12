@@ -820,7 +820,7 @@ int LuaSceneObject::getPlayersInRange(lua_State *L) {
 	lua_newtable(L);
 
 	Reference<SortedVector<ManagedReference<TreeEntry*> >*> closeObjects = new SortedVector<ManagedReference<TreeEntry*> >();
-	thisZone->getInRangeObjects(realObject->getWorldPositionX(), realObject->getWorldPositionY(), range, closeObjects, true);
+	thisZone->getInRangeObjects(realObject->getWorldPositionX(), realObject->getWorldPositionZ(), realObject->getWorldPositionY(), range, closeObjects, true);
 	int numPlayers = 0;
 
 	for (int i = 0; i < closeObjects->size(); ++i) {
