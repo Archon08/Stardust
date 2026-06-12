@@ -1730,7 +1730,7 @@ void CityManagerImplementation::promptUnregisterCity(CityRegion* city, CreatureO
 }
 
 void CityManagerImplementation::registerCity(CityRegion* city, CreatureObject* mayor) {
-	Reference<PlanetMapCategory*> cityCat = TemplateManager::instance()->getPlanetMapCategoryByName("city");
+	Reference<const PlanetMapCategory*> cityCat = TemplateManager::instance()->getPlanetMapCategoryByName("city");
 
 	if (cityCat == nullptr)
 		return;
