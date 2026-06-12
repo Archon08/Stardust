@@ -35,7 +35,7 @@ class AreaShape extends ManagedObject {
 	 */
 	@dereferenced
 	@local
-	@dirty
+	@read
 	public native Vector3 getAreaCenter();
 
 	/**
@@ -116,6 +116,24 @@ class AreaShape extends ManagedObject {
 	 */
 	@dirty
 	public abstract boolean isRingAreaShape() {
+		return false;
+	}
+
+	/**
+	 * Check if this is a cuboid area shape.
+	 * @return true if it is a cuboid area shape.
+	 */
+	@read
+	public abstract boolean isCuboidAreaShape() {
+		return false;
+	}
+
+	/**
+	 * Check if this is a sphere area shape.
+	 * @return true if it is a sphere area shape.
+	 */
+	@read
+	public abstract boolean isSphereAreaShape() {
 		return false;
 	}
 
