@@ -615,7 +615,7 @@ int CreatureManagerImplementation::notifyDestruction(TangibleObject* destructor,
 		shouldRescheduleCorpseDestruction = playerManager->shouldRescheduleCorpseDestruction(player, destructedObject);
 
 	} catch (...) {
-		destructedObject->scheduleDespawn();
+		destructedObject->scheduleDespawn(10, true);
 
 		// now we can safely lock destructor again
 		if (destructedObject != destructor)
