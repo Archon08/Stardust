@@ -959,7 +959,7 @@ void CreatureManagerImplementation::tame(Creature* creature, CreatureObject* pla
 		return;
 	}
 
-	CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
+	const CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
 
 	if (creatureTemplate == nullptr)
 		return;
