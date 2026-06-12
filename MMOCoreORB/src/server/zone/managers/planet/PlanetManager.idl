@@ -56,6 +56,11 @@ class PlanetManager extends ManagedService implements Logger {
 	protected int starportLandedTime;
 	protected int starportLandingTime;
 
+	protected transient string jtlZoneName;
+
+	@dereferenced
+	protected transient Vector3 jtlLaunchLocation;
+
 	public static final int SHUTTLEPORT = 0;
 	public static final int STARPORT = 1;
 
@@ -279,6 +284,16 @@ class PlanetManager extends ManagedService implements Logger {
 	public MissionTargetMap getPerformanceLocations() {
 		return performanceLocations;
 	}
+
+	@dirty
+	public string getJtlZoneName() {
+		return jtlZoneName;
+	}
+
+	@dirty
+	@local
+	@dereferenced
+	public native Vector3 getJtlLaunchLocations();
 
 	/**
 	 * Checks to see if the point is an existing planet travel point.
