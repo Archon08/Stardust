@@ -128,7 +128,7 @@ public:
 		int totalItems = lootContainer->getContainerObjectsSize();
 		if (totalItems < 1) return NOPICKUPITEMS;
 
-		const ContainerPermissions* contPerms = lootContainer->getContainerPermissions();
+		ContainerPermissions* contPerms = lootContainer->getContainerPermissionsForUpdate();
 		if (contPerms == nullptr) return NOPICKUPITEMS;
 
 		SceneObject* playerInventory = creature->getSlottedObject("inventory");
@@ -139,7 +139,7 @@ public:
 			SceneObject* object = lootContainer->getContainerObject(i);
 			if (object == nullptr) continue;
 
-			const ContainerPermissions* itemPerms = object->getContainerPermissions();
+			ContainerPermissions* itemPerms = object->getContainerPermissionsForUpdate();
 			if (itemPerms == nullptr) continue;
 
 			//Check if player owns the loot item.
