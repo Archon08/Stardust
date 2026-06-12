@@ -180,7 +180,7 @@ void TangibleObjectImplementation::setFactionStatus(int status) {
 			if (pet == nullptr)
 				continue;
 
-			CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
+			const CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
 
 			if (creatureTemplate != nullptr) {
 				String templateFaction = creatureTemplate->getFaction();
@@ -241,7 +241,7 @@ void TangibleObjectImplementation::broadcastPvpStatusBitmask() {
 
 		CreatureObject* thisCreo = asCreatureObject();
 
-		SortedVector<QuadTreeEntry*> closeObjects(closeobjects->size(), 10);
+		SortedVector<TreeEntry*> closeObjects(closeobjects->size(), 10);
 
 		closeobjects->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
 
