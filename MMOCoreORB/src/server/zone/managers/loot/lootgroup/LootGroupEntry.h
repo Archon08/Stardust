@@ -22,6 +22,9 @@ public:
 		lootChance = chance;
 	}
 
+	LootGroupEntry(const LootGroupEntry& entry) : Object(), templateName(entry.templateName), lootChance(entry.lootChance) {
+	}
+
 	void readObject(LuaObject* lua) {
 		templateName = lua->getStringField("group");
 		lootChance = lua->getIntField("chance");
@@ -51,11 +54,11 @@ public:
 
 	}
 
-	inline String& getLootGroupName() {
+	inline const String& getLootGroupName() const {
 		return templateName;
 	}
 
-	inline int getLootChance() {
+	inline int getLootChance() const {
 		return lootChance;
 	}
 };
