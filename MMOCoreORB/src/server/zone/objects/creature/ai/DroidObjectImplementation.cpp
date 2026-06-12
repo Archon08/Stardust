@@ -247,11 +247,11 @@ void DroidObjectImplementation::initDroidWeapons() {
 		weapon->setAttackSpeed(getAttackSpeed());
 	}
 
-	if (readyWeapon != nullptr) {
-		Locker locker(readyWeapon);
-		readyWeapon->setMinDamage(getDamageMin());
-		readyWeapon->setMaxDamage(getDamageMax());
-		readyWeapon->setAttackSpeed(getAttackSpeed());
+	if (primaryWeapon != nullptr) {
+		Locker locker(primaryWeapon);
+		primaryWeapon->setMinDamage(getDamageMin());
+		primaryWeapon->setMaxDamage(getDamageMax());
+		primaryWeapon->setAttackSpeed(getAttackSpeed());
 	}
 }
 
