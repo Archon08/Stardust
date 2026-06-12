@@ -81,5 +81,8 @@ class CreditObject extends ManagedObject {
 	@rawTemplate(value = 'CreatureObject*')
 	public native WeakReference getOwner();
 
+	// P2: additive owner-id accessor (consumed by TransactionLog; derived from owner reference)
+	public native unsigned long getOwnerObjectID();
+
 	public native void setOwner(CreatureObject obj);
 }
