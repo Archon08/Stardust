@@ -717,7 +717,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 			if (lootItem == nullptr)
 				continue;
 
-			ContainerPermissions* itemPerms = lootItem->getContainerPermissions();
+			ContainerPermissions* itemPerms = lootItem->getContainerPermissionsForUpdate();
 			if (itemPerms == nullptr)
 				continue;
 
@@ -788,7 +788,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 					continue;
 
 			//Make sure the item is not left on the corpse for another member.
-			ContainerPermissions* itemPerms = object->getContainerPermissions();
+			const ContainerPermissions* itemPerms = object->getContainerPermissions();
 			if (itemPerms == nullptr || itemPerms->getOwnerID() != 0)
 				continue;
 
@@ -820,7 +820,7 @@ void GroupManager::makeLeader(GroupObject* group, CreatureObject* player, Creatu
 			return;
 
 		//Set the winner as owner of the item.
-		ContainerPermissions* itemPerms = object->getContainerPermissions();
+		ContainerPermissions* itemPerms = object->getContainerPermissionsForUpdate();
 		if (itemPerms == nullptr)
 			return;
 
