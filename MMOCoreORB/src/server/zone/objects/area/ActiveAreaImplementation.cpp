@@ -19,7 +19,7 @@ bool ActiveAreaImplementation::containsPoint(float px, float py, uint64 cellid) 
 
 bool ActiveAreaImplementation::containsPoint(float px, float py) {
 	if (areaShape == nullptr) {
-		return QuadTreeEntryImplementation::containsPoint(px, py);
+		return TreeEntryImplementation::containsPoint(px, py);
 	}
 
 	return areaShape->containsPoint(px, py);
