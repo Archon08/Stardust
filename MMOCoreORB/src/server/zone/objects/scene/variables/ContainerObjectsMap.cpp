@@ -83,6 +83,7 @@ void ContainerObjectsMap::loadObjects() {
 		return;
 
 	VectorMap<uint64, uint64> oidsCopy = *oids;
+	const auto size = oidsCopy.size();
 
 	for (int i = 0; i < oidsCopy.size(); ++i) {
 		uint64 oid = oidsCopy.elementAt(i).getKey();
@@ -103,12 +104,14 @@ void ContainerObjectsMap::loadObjects() {
 	ManagedReference<SceneObject*> sceno = container.get();
 
 	if (sceno != nullptr) {
+		const auto name = sceno->getLoggingName() + " OnContainerLoadedLambda" + String::valueOf(size);
+
 		Core::getTaskManager()->executeTask([sceno] () {
 			if (sceno->getZoneServer()->isServerShuttingDown())
 				return;
 
 			sceno->onContainerLoaded();
-		}, "OnContainerLoadedLambda");
+		}, name.toCharArray(), "slowQueue");
 	}
 }
 
@@ -169,7 +172,9 @@ void ContainerObjectsMap::unloadObjects() {
 		if (obj != nullptr) {
 			Locker olocker(obj);
 			parent->broadcastDestroy(obj, true);
-			obj->removeObjectFromZone(zone, parent);
+
+			if (zone != nullptr)
+				obj->removeObjectFromZone(zone, parent);
 		}
 	}
 }
@@ -179,7 +184,9 @@ void ContainerObjectsMap::notifyLoadFromDatabase() {
 }
 
 bool ContainerObjectsMap::toBinaryStream(ObjectOutputStream* stream) {
+#ifndef ODB_SERIALIZATION
 	Locker locker(containerLock);
+#endif
 
 	if (oids != nullptr)
 		return oids->toBinaryStream(stream);
@@ -265,7 +272,7 @@ int ContainerObjectsMap::size() {
 	return containerObjects.size();
 }
 
-bool ContainerObjectsMap::contains(uint64 oid) {
+bool ContainerObjectsMap::contains(uint64 oid) const {
 	ReadLocker locker(containerLock);
 
 	if (oids != nullptr)
@@ -299,4 +306,13 @@ void ContainerObjectsMap::cancelUnloadTask() {
 
 		unloadTask = nullptr;
 	}
+}
+
+void server::zone::objects::scene::to_json(nlohmann::json& j, const server::zone::objects::scene::ContainerObjectsMap& map) {
+	auto oids = map.getOids();
+
+	if (oids != nullptr)
+		j = *oids;
+	else
+		j = *map.getContainerObjects();
 }
