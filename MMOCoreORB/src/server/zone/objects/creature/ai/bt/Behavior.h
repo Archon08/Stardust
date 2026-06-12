@@ -29,7 +29,7 @@ namespace bt {
 
 class CompositeBehavior;
 
-class Behavior {
+class Behavior : public Object {
 protected:
 	WeakReference<AiAgent*> agent; // this is like the blackboard
 	uint8 result;
