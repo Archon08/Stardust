@@ -286,7 +286,7 @@ public:
 		return faction;
 	}
 
-	inline int getLevel() {
+	inline int getLevel() const {
 		return level;
 	}
 
@@ -366,7 +366,7 @@ public:
 		templateName = t;
 	}
 
-	inline String getTemplateName() {
+	inline String getTemplateName() const {
 		return templateName;
 	}
 
