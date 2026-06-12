@@ -91,6 +91,7 @@ protected:
 	SortedVector<String> loadedDerivedFiles;
 
 	bool noTrade;
+	bool forceNoTrade = false; // Stardust additive: modern SceneObject autogen calls isForceNoTrade()
 	bool updatesNavMesh;
 
 public:
@@ -329,6 +330,10 @@ public:
 
 	inline bool isNoTrade() {
 		return noTrade;
+	}
+
+	inline bool isForceNoTrade() const {
+		return forceNoTrade;
 	}
 
 	inline float getScaleThresholdBeforeExtentTest() const {
