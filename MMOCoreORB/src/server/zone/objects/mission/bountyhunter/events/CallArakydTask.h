@@ -135,7 +135,7 @@ public:
 		if (vec == nullptr)
 			return true;
 
-		SortedVector<QuadTreeEntry*> closeObjects;
+		SortedVector<TreeEntry*> closeObjects;
 		vec->safeCopyTo(closeObjects);
 
 		for (int j = 0; j < closeObjects.size(); j++) {
