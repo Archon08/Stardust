@@ -79,7 +79,8 @@ protected:
 	PortalLayout* portalLayout;
 	AppearanceTemplate* appearanceTemplate;
 	bool loadedPortalLayout, loadedAppearanceTemplate;
-	String zoneComponent, attributeListComponent;
+	String groundZoneComponent, attributeListComponent;
+	String spaceZoneComponent;
 	String containerComponent;
 	String objectMenuComponent;
 	
@@ -93,6 +94,7 @@ protected:
 	bool noTrade;
 	bool forceNoTrade = false; // Stardust additive: modern SceneObject autogen calls isForceNoTrade()
 	bool updatesNavMesh;
+	bool delayedContainerLoad;
 
 public:
 	const static int SHOT = 'SHOT';
@@ -395,8 +397,16 @@ public:
 		return containerComponent;
 	}
 
-	inline const String& getZoneComponent() {
-		return zoneComponent;
+	inline const String& getGroundZoneComponent() const {
+		return groundZoneComponent;
+	}
+
+	inline const String& getSpaceZoneComponent() const {
+		return spaceZoneComponent;
+	}
+
+	bool getDelayedContainerLoad() const {
+		return delayedContainerLoad;
 	}
 
 	inline const String& getObjectMenuComponent() {
