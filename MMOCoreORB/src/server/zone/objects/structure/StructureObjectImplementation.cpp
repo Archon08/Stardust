@@ -519,7 +519,7 @@ bool StructureObjectImplementation::isCivicStructure() {
 }
 
 bool StructureObjectImplementation::isCityHall() {
-	return dynamic_cast<CityHallZoneComponent*>(getZoneComponent()) != nullptr;
+	return dynamic_cast<CityHallZoneComponent*>(getGroundZoneComponent()) != nullptr;
 }
 
 bool StructureObjectImplementation::isCommercialStructure() {
