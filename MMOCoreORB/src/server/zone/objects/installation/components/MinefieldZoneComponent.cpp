@@ -15,7 +15,7 @@
 #include "MinefieldAttackTask.h"
 #include "server/zone/objects/installation/components/TurretObserver.h"
 
-void MinefieldZoneComponent::notifyPositionUpdate(SceneObject* sceneObject, QuadTreeEntry* entry) const {
+void MinefieldZoneComponent::notifyPositionUpdate(SceneObject* sceneObject, TreeEntry* entry) const {
 	// if we don't have any mines, just exit
 	if(sceneObject->getContainerObjectsSize() == 0 )
 		return;
