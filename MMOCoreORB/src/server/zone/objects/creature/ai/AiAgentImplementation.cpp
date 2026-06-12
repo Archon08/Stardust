@@ -189,13 +189,13 @@ void AiAgentImplementation::loadTemplateData(CreatureTemplate* templateData) {
 				weao->setAttackSpeed(petDeed->getAttackSpeed());
 			}
 
-			readyWeapon = weao;
+			primaryWeapon = weao;
 		} else {
-			readyWeapon = nullptr;
+			primaryWeapon = nullptr;
 			error("could not create weapon " + weaponToUse);
 		}
 	} else {
-		readyWeapon = nullptr;
+		primaryWeapon = nullptr;
 	}
 
 	Reference<WeaponObject*> defaultWeapon = getSlottedObject("default_weapon").castTo<WeaponObject*>();
@@ -356,7 +356,7 @@ void AiAgentImplementation::setupAttackMaps() {
 	Reference<WeaponObject*> defaultWeapon = getSlottedObject("default_weapon").castTo<WeaponObject*>();
 
 	if ((zoneServer = getZoneServer()) != nullptr && (objectController = zoneServer->getObjectController()) != nullptr) {
-		attackMap = new CreatureAttackMap();
+		primaryAttackMap = new CreatureAttackMap();
 		defaultAttackMap = new CreatureAttackMap();
 
 		for (int i = 0; i < fullAttackMap->size(); i++) {
@@ -364,8 +364,8 @@ void AiAgentImplementation::setupAttackMaps() {
 			if (attack == nullptr)
 				continue;
 
-			if (readyWeapon != nullptr && (attack->getWeaponType() & readyWeapon->getWeaponBitmask())) {
-				attackMap->add(fullAttackMap->get(i));
+			if (primaryWeapon != nullptr && (attack->getWeaponType() & primaryWeapon->getWeaponBitmask())) {
+				primaryAttackMap->add(fullAttackMap->get(i));
 
 			}
 
@@ -375,14 +375,14 @@ void AiAgentImplementation::setupAttackMaps() {
 		}
 
 		// if we didn't get any attacks or the weapon is NULL, drop the reference to the attack maps
-		if (attackMap->isEmpty())
-			attackMap = nullptr;
+		if (primaryAttackMap->isEmpty())
+			primaryAttackMap = nullptr;
 
 		if (defaultAttackMap->isEmpty())
 			defaultAttackMap = nullptr;
 
 	} else {
-		attackMap = nullptr;
+		primaryAttackMap = nullptr;
 		defaultAttackMap = nullptr;
 	}
 }
@@ -413,16 +413,16 @@ void AiAgentImplementation::setLevel(int lvl, bool randomHam) {
 	minDmg *= ratio;
 	maxDmg *= ratio;
 
-	if (readyWeapon != nullptr) {
-		float mod = 1 - 0.1*readyWeapon->getArmorPiercing();
-		readyWeapon->setMinDamage(minDmg * mod);
-		readyWeapon->setMaxDamage(maxDmg * mod);
+	if (primaryWeapon != nullptr) {
+		float mod = 1 - 0.1*primaryWeapon->getArmorPiercing();
+		primaryWeapon->setMinDamage(minDmg * mod);
+		primaryWeapon->setMaxDamage(maxDmg * mod);
 
-		SharedWeaponObjectTemplate* weaoTemp = cast<SharedWeaponObjectTemplate*>(readyWeapon->getObjectTemplate());
+		SharedWeaponObjectTemplate* weaoTemp = cast<SharedWeaponObjectTemplate*>(primaryWeapon->getObjectTemplate());
 		if (weaoTemp != nullptr && weaoTemp->getPlayerRaces()->size() > 0) {
-			readyWeapon->setAttackSpeed(speed);
+			primaryWeapon->setAttackSpeed(speed);
 		} else if (petDeed != nullptr) {
-			readyWeapon->setAttackSpeed(petDeed->getAttackSpeed());
+			primaryWeapon->setAttackSpeed(petDeed->getAttackSpeed());
 		}
 	}
 
@@ -1061,8 +1061,8 @@ void AiAgentImplementation::selectWeapon() {
 	ManagedReference<WeaponObject*> defaultWeapon = getSlottedObject("default_weapon").castTo<WeaponObject*>();
 
 	if (getUseRanged()) {
-		if (readyWeapon != nullptr && readyWeapon->isRangedWeapon()) {
-			finalWeap = readyWeapon;
+		if (primaryWeapon != nullptr && primaryWeapon->isRangedWeapon()) {
+			finalWeap = primaryWeapon;
 		} else if (defaultWeapon != nullptr && defaultWeapon->isRangedWeapon()) {
 			finalWeap = defaultWeapon;
 		}
@@ -1077,9 +1077,9 @@ void AiAgentImplementation::selectWeapon() {
 		float readyWeaponRangeDiff = -1.f;
 		float defaultWeaponRangeDiff = 100.f;
 
-		if (readyWeapon != nullptr) {
-			finalWeap = readyWeapon;
-			readyWeaponRangeDiff = fabs(readyWeapon->getIdealRange() - dist);
+		if (primaryWeapon != nullptr) {
+			finalWeap = primaryWeapon;
+			readyWeaponRangeDiff = fabs(primaryWeapon->getIdealRange() - dist);
 		}
 
 		if (defaultWeapon != nullptr && defaultWeapon->getMaxRange() >= dist) {
@@ -3157,7 +3157,7 @@ void AiAgentImplementation::activateLoad(const String& temp) {
 bool AiAgentImplementation::hasRangedWeapon() {
 	Reference<WeaponObject*> defaultWeapon = getSlottedObject("default_weapon").castTo<WeaponObject*>();
 
-	return (defaultWeapon != nullptr && defaultWeapon->isRangedWeapon()) || (readyWeapon != nullptr && readyWeapon->isRangedWeapon());
+	return (defaultWeapon != nullptr && defaultWeapon->isRangedWeapon()) || (primaryWeapon != nullptr && primaryWeapon->isRangedWeapon());
 }
 
 bool AiAgentImplementation::getUseRanged() {
