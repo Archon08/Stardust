@@ -138,7 +138,7 @@ void CreatureImplementation::fillAttributeList(AttributeListMessage* alm, Creatu
 		alm->insertAttribute("challenge_level", getAdultLevel());
 
 	//int skillNum = skillCommands.size();
-	CreatureAttackMap* attackMap = getAttackMap();
+	const CreatureAttackMap* attackMap = getAttackMap();
 	int skillNum = 0;
 	if (attackMap != nullptr)
 		skillNum = attackMap->size();
@@ -443,11 +443,11 @@ void CreatureImplementation::setPetLevel(int newLevel) {
 	minDmg *= ratio;
 	maxDmg *= ratio;
 
-	if (readyWeapon != nullptr) {
-		float mod = 1.f - 0.1f*float(readyWeapon->getArmorPiercing());
+	if (primaryWeapon != nullptr) {
+		float mod = 1.f - 0.1f*float(primaryWeapon->getArmorPiercing());
 
-		readyWeapon->setMinDamage(minDmg * mod);
-		readyWeapon->setMaxDamage(maxDmg * mod);
+		primaryWeapon->setMinDamage(minDmg * mod);
+		primaryWeapon->setMaxDamage(maxDmg * mod);
 	}
 
 	if (defaultWeapon != nullptr) {
