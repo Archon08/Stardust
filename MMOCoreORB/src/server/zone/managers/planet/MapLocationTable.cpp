@@ -28,7 +28,7 @@ void MapLocationTable::transferObject(SceneObject* object) {
 		MapLocationEntry entry(object);
 		sorted.put(entry);
 
-		locations.put(pmc->getName(), sorted);
+		locations.put(pmcName, sorted);
 	} else {
 		SortedVector<MapLocationEntry>& vector = locations.elementAt(index).getValue();
 
