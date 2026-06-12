@@ -234,7 +234,7 @@ public:
 		Reference<CellObject*> targetCell = creature->getParent().get().castTo<CellObject*>();
 
 		if (targetCell != nullptr) {
-			ContainerPermissions* perms = targetCell->getContainerPermissions();
+			const ContainerPermissions* perms = targetCell->getContainerPermissions();
 
 			if (!perms->hasInheritPermissionsFromParent()) {
 				if (!targetCell->checkContainerPermission(targetPlayer, ContainerPermissions::WALKIN)) {
