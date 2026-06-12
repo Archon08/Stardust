@@ -247,7 +247,9 @@ int LuaCreatureObject::setMoodString(lua_State* L) {
 }
 
 int LuaCreatureObject::sendOpenHolocronToPageMessage(lua_State* L) {
-	realObject->sendOpenHolocronToPageMessage();
+	String value = lua_tostring(L, -1);
+
+	realObject->sendOpenHolocronToPageMessage(value);
 
 	return 0;
 }
@@ -359,7 +361,7 @@ int LuaCreatureObject::playMusicMessage(lua_State *L) {
 int LuaCreatureObject::setBankCredits(lua_State *L) {
 	uint32 credits = (uint32) lua_tonumber(L, -1);
 
-	realObject->setBankCredits(credits);
+	realObject->transferCredits(0, credits - realObject->getBankCredits(), true);
 
 	return 0;
 }
@@ -1006,7 +1008,7 @@ int LuaCreatureObject::getDamageDealerList(lua_State* L) {
 		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
 
 		if (entry->getTotalDamage() > 0) {
-			CreatureObject* attacker = copyThreatMap.elementAt(i).getKey();
+			TangibleObject* attacker = copyThreatMap.elementAt(i).getKey();
 
 			count++;
 			lua_pushlightuserdata(L, attacker);
@@ -1028,7 +1030,7 @@ int LuaCreatureObject::getHealingThreatList(lua_State* L) {
 		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
 
 		if (entry->getHeal() > 0) {
-			CreatureObject* healer = copyThreatMap.elementAt(i).getKey();
+			TangibleObject* healer = copyThreatMap.elementAt(i).getKey();
 
 			count++;
 			lua_pushlightuserdata(L, healer);
