@@ -137,14 +137,14 @@ public:
 		return &mods.get(type);
 	}
 
-	int getSkillMod(const String& skillMod) {
+	int getSkillMod(const String& skillMod) const {
 
 		int skill = 0;
 
 		for (int i = 0; i < mods.size(); ++i) {
 
 			uint32 modType = mods.elementAt(i).getKey();
-			SkillModGroup* group = &mods.elementAt(i).getValue();
+			const SkillModGroup* group = &mods.elementAt(i).getValue();
 
 			if (group->contains(skillMod)) {
 
