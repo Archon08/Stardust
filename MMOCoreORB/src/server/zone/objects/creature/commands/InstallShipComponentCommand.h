@@ -6,6 +6,7 @@
 #define INSTALLSHIPCOMPONENTCOMMAND_H_
 
 #include "server/zone/objects/ship/ShipObject.h"
+#include "server/zone/managers/ship/ShipManager.h"
 
 class InstallShipComponentCommand : public QueueCommand {
 public:

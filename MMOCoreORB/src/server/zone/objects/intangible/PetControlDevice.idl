@@ -312,6 +312,12 @@ class PetControlDevice extends ControlDevice {
 		return petType;
 	}
 
+	// P2: certification ability required to associate this (astromech) droid control device with a ship.
+	// Empty string means no special certification is required (callers treat empty as "allowed").
+	public string getRequiredAstromechCert() {
+		return "";
+	}
+
 	@preLocked
 	public void setPetType(int type) {
 		petType = type;

@@ -9,6 +9,7 @@
 #include "server/zone/managers/ship/ShipManager.h"
 #include "server/zone/packets/object/OrientForHyperspace.h"
 #include "server/zone/objects/ship/events/HyperspaceToLocationTask.h"
+#include "server/zone/objects/ship/ShipComponentFlag.h"
 
 class HyperspaceCommand : public QueueCommand {
 public:

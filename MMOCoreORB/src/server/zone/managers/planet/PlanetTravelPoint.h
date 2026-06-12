@@ -116,6 +116,11 @@ public:
 		return arrivalVector;
 	}
 
+	// P2: landing spread radius used when distributing a launched group around the arrival point.
+	inline float getLandingRange() const {
+		return 16.f;
+	}
+
 	inline float getDeparturePositionX() const {
 		return departureVector.getX();
 	}

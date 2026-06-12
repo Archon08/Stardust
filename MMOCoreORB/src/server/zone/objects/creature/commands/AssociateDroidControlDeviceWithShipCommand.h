@@ -83,7 +83,8 @@ public:
 			return GENERALERROR;
 		}
 
-		if (!ghost->hasAbility(droidControl->getRequiredAstromechCert()) && !ghost->hasGodMode()) {
+		const String requiredCert = droidControl->getRequiredAstromechCert();
+		if (!requiredCert.isEmpty() && !ghost->hasAbility(requiredCert) && !ghost->hasGodMode()) {
 			creature->sendSystemMessage("@space/space_interaction:droid_not_certified");
 			return GENERALERROR;
 		}

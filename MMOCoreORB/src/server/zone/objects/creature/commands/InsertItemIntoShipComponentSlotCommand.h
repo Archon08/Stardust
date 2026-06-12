@@ -6,6 +6,7 @@
 #define INSERTITEMINTOSHIPCOMPONENTSLOTCOMMAND_H_
 
 #include "server/zone/objects/ship/components/ShipComponent.h"
+#include "server/zone/objects/ship/ShipCountermeasureData.h"
 
 class InsertItemIntoShipComponentSlotCommand : public QueueCommand {
 public:
