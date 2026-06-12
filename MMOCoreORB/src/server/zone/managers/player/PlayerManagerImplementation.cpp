@@ -33,6 +33,8 @@
 #include "templates/params/OptionBitmask.h"
 #include "server/zone/managers/player/JukeboxSong.h"
 #include "server/zone/managers/player/QuestInfo.h"
+#include "server/zone/managers/player/QuestTasks.h"
+#include "templates/crcstringtable/CrcStringTable.h"
 
 #include "server/zone/objects/intangible/ShipControlDevice.h"
 #include "server/zone/objects/group/GroupObject.h"
@@ -105,10 +107,12 @@
 // Extended Player BH System
 #include "server/zone/objects/player/sui/callbacks/BountyHuntSuiCallback.h"
 
-PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer, ZoneProcessServer* impl) :
+PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer, ZoneProcessServer* impl, bool trackOnlineUsers) :
 										Logger("PlayerManager") {
 	server = zoneServer;
 	processor = impl;
+
+	coaWinningFaction = 0;
 
 	nameMap = new CharacterNameMap();
 
@@ -117,6 +121,7 @@ PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer,
 	loadLuaConfig();
 	loadStartingLocations();
 	loadQuestInfo();
+	loadQuestCrcTable();
 	loadPermissionLevels();
 	loadXpBonusList();
 
@@ -322,6 +327,93 @@ void PlayerManagerImplementation::loadQuestInfo() {
 	}
 
 	info("Loaded " + String::valueOf(questInfo.size()) + " quests.", true);
+}
+
+void PlayerManagerImplementation::loadQuestCrcTable() {
+	TemplateManager* templateManager = TemplateManager::instance();
+
+	IffStream* iffStream = templateManager->openIffFile("misc/quest_crc_string_table.iff");
+
+	if (iffStream == nullptr) {
+		info("quest_crc_string_table.iff could not be found.", true);
+		return;
+	}
+
+	CrcStringTable stringTable;
+	stringTable.readObject(iffStream);
+
+	delete iffStream;
+
+	questCrcTable = stringTable.getTableData();
+
+	info(true) << "Loaded " << questCrcTable.size() << " quests crc's.";
+}
+
+QuestTasks* PlayerManagerImplementation::getQuestTasks(const unsigned int questCrc) {
+	Locker locker(&questTaskMutex);
+
+	if (!questCrcTable.contains(questCrc)) {
+		error("QuestTasks with CRC 0x" + String::hexvalueOf(questCrc) + " not found.");
+		return nullptr;
+	} else {
+		if (!questTasksCache.contains(questCrc)) {
+			String questPath = "datatables/questtask/" + questCrcTable.get(questCrc) + ".iff";
+
+			TemplateManager* templateManager = TemplateManager::instance();
+
+			IffStream* iffStream = templateManager->openIffFile(questPath);
+
+			if (iffStream == nullptr) {
+				error("QuestTask at " + questPath + " cannot be found.");
+				return nullptr;
+			}
+
+			DataTableIff dtable;
+			dtable.readObject(iffStream);
+
+			delete iffStream;
+
+			QuestTasks* questTasks = new QuestTasks();
+			try {
+				questTasks->parseDataTable(dtable);
+
+				questTasksCache.put(questCrc, questTasks);
+			}
+			catch (UnknownDatatableException& e) {
+				error() << "Parsing of " << questPath << " - " << e.getMessage();
+				return nullptr;
+			}
+		}
+
+		Reference<QuestTasks*> questTasks = questTasksCache.get(questCrc);
+		return questTasks;
+	}
+}
+
+Vector<uint64> PlayerManagerImplementation::getOnlinePlayerList() {
+	Vector<uint64> playerList;
+
+	Locker locker(&onlineMapMutex);
+
+	HashTableIterator<uint32, Vector<Reference<ZoneClientSession*> > > iter = onlineZoneClientMap.iterator();
+
+	while (iter.hasNext()) {
+		Vector<Reference<ZoneClientSession*> > clients = iter.next();
+
+		for (int i = 0; i < clients.size(); i++) {
+			ZoneClientSession* session = clients.get(i);
+
+			if (session != nullptr) {
+				CreatureObject* player = session->getPlayer();
+
+				if (player != nullptr) {
+					playerList.add(player->getObjectID());
+				}
+			}
+		}
+	}
+
+	return playerList;
 }
 
 void PlayerManagerImplementation::loadPermissionLevels() {
