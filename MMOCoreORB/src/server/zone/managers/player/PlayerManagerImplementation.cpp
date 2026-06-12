@@ -1523,6 +1523,14 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 	threatMap->removeAll();
 }
 
+// P2: minimal space-combat XP dissemination. Full per-attacker reward logic depends on
+// ShipAiAgent accessors not yet present in this tree; for now we safely clear the threat map
+// so ship destruction completes cleanly. (Stardust scaffold; expand when ship XP data lands.)
+void PlayerManagerImplementation::disseminateSpaceExperience(ShipAiAgent* destructedObject, ThreatMap* threatMap) {
+	if (threatMap != nullptr)
+		threatMap->removeAll();
+}
+
 bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, ArmorObject* armor) {
 	int strength = player->getHAM(CreatureAttribute::STRENGTH);
 	int constitution = player->getHAM(CreatureAttribute::CONSTITUTION);

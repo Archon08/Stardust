@@ -46,6 +46,7 @@ class ActiveArea extends SceneObject {
 	public static final int REBELAREA = 0x004000;
 	public static final int IMPERIALAREA = 0x008000;
 	public static final int NOPETAREA = 0x010000;
+	public static final int CAMPINGPERMITTEDAREA = 0x020000;
 
 	public static final int CIRCLE = 1;
 	public static final int RECTANGLE = 2;
@@ -189,6 +190,18 @@ class ActiveArea extends SceneObject {
 	@read
 	public boolean isCampingArea() {
 		return areaFlags & CAMPINGAREA;
+	}
+
+	@read
+	public boolean isCampingPermitted() {
+		return areaFlags & CAMPINGPERMITTEDAREA;
+	}
+
+	public void setCampingPermitted(boolean permitted) {
+		if (permitted)
+			addAreaFlag(CAMPINGPERMITTEDAREA);
+		else
+			removeAreaFlag(CAMPINGPERMITTEDAREA);
 	}
 
 	@read

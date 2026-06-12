@@ -492,6 +492,35 @@ int NameManager::validateVendorName(const String& name) {
 	return NameManagerResult::ACCEPTED;
 }
 
+// P2: ship-name validation (mirrors vendor-name rules; ships may contain spaces).
+int NameManager::validateShipName(const String& name) {
+	if (name.isEmpty())
+		return NameManagerResult::DECLINED_EMPTY;
+
+	if (name.length() > 40)
+		return NameManagerResult::DECLINED_SYNTAX;
+
+	if (isProfane(name))
+		return NameManagerResult::DECLINED_PROFANE;
+
+	if (isDeveloper(name))
+		return NameManagerResult::DECLINED_DEVELOPER;
+
+	if (isFiction(name))
+		return NameManagerResult::DECLINED_FICT_RESERVED;
+
+	if (isReserved(name))
+		return NameManagerResult::DECLINED_RESERVED;
+
+	if (strspn(name.toCharArray(), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'- ") != name.length())
+		return NameManagerResult::DECLINED_SYNTAX;
+
+	if (name.indexOf("  ") != -1)
+		return NameManagerResult::DECLINED_SYNTAX;
+
+	return NameManagerResult::ACCEPTED;
+}
+
 int NameManager::validateChatRoomName(const String& name) {
 	if (name.isEmpty())
 		return NameManagerResult::DECLINED_EMPTY;

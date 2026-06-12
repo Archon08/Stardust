@@ -7,6 +7,7 @@ package server.zone.objects.player.sui;
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.player.PlayerObject;
+import server.zone.objects.ship.PobShipObject;
 import engine.service.proto.BaseMessage;
 
 include server.zone.packets.ui.SuiCreatePageMessage;
@@ -29,6 +30,9 @@ class SuiBox extends ManagedObject implements Logger {
 
 	@weakReference
 	protected SceneObject usingObject;
+
+	@weakReference
+	protected PobShipObject pobShipObject;
 
 	protected string handlerStr;
 
@@ -300,6 +304,15 @@ class SuiBox extends ManagedObject implements Logger {
 
 	public void setUsingObject(SceneObject object) {
 		usingObject = object;
+	}
+
+	@weakReference
+	public PobShipObject getPobShipObject() {
+		return pobShipObject;
+	}
+
+	public void setPobShipObject(PobShipObject pobShip) {
+		pobShipObject = pobShip;
 	}
 
 	@local

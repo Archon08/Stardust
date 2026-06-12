@@ -25,6 +25,7 @@ include server.zone.managers.player.StartingLocationList;
 include server.zone.managers.player.StartingLocation;
 include server.zone.objects.player.ValidatedPosition;
 include server.zone.objects.tangible.threat.ThreatMap;
+include server.zone.objects.ship.ai.ShipAiAgent;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.scene.SceneObject;
 include server.zone.managers.player.CharacterNameMap;
@@ -342,6 +343,7 @@ class PlayerManager extends Observer implements Logger {
 
 	@local
 	public native void disseminateExperience(TangibleObject destructedObject, ThreatMap threatMap, SynchronizedVector<CreatureObject> lairSpawnedCreatures = null,Zone lairZone=null);
+	public native void disseminateSpaceExperience(ShipAiAgent destructedObject, ThreatMap threatMap);
 
 	public native int calculatePlayerLevel(CreatureObject player);
 	public native int calculatePlayerLevel(CreatureObject player, string xpType);
