@@ -1442,7 +1442,7 @@ void MissionManagerImplementation::randomizeGenericHuntingMission(CreatureObject
 		return;
 	}
 
-	Vector<String>& templatesNames = creatureTemplate->getTemplates();
+	const Vector<String>& templatesNames = creatureTemplate->getTemplates();
 
 	if (templatesNames.size() == 0) {
 		return;
