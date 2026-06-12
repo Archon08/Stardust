@@ -101,7 +101,7 @@ void PlaceStructureSessionImplementation::placeTemporaryNoBuildZone(SharedStruct
 
 	noBuildZone->initializePosition(positionX, 0, positionY);
 	noBuildZone->setAreaShape(areaShape);
-	noBuildZone->setNoBuildArea(true);
+	noBuildZone->addAreaFlag(ActiveArea::NOBUILDZONEAREA);
 
 	thisZone->transferObject(noBuildZone, -1, true);
 
