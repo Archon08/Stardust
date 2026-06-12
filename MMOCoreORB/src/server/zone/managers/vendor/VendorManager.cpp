@@ -337,8 +337,8 @@ void VendorManager::handleRegisterVendorCallback(CreatureObject* player, Tangibl
 		return;
 	}
 
-	Reference<PlanetMapCategory*> planetMapCategory = TemplateManager::instance()->getPlanetMapCategoryByName("vendor");
-	Reference<PlanetMapCategory*> planetMapSubCategory = TemplateManager::instance()->getPlanetMapCategoryByName("vendor_" + planetMapCategoryName);
+	Reference<const PlanetMapCategory*> planetMapCategory = TemplateManager::instance()->getPlanetMapCategoryByName("vendor");
+	Reference<const PlanetMapSubCategory*> planetMapSubCategory = TemplateManager::instance()->getPlanetMapSubCategoryByName("vendor_" + planetMapCategoryName);
 
 	if (planetMapCategory == nullptr || planetMapSubCategory == nullptr)
 		return;
