@@ -540,6 +540,7 @@ class TangibleObject extends SceneObject {
 	}
 
 	@dirty
+	@read
 	public int getLevel() {
 		return level;
 	}
