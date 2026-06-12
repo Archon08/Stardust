@@ -952,7 +952,7 @@ void PlayerManagerImplementation::sendActivateCloneRequest(CreatureObject* playe
 
 	SortedVector<ManagedReference<SceneObject*> > locations = zone->getPlanetaryObjectList("cloningfacility");
 
-	ManagedReference<SceneObject*> closestCloning = zone->getNearestPlanetaryObject(player, "cloningfacility");
+	ManagedReference<SceneObject*> closestCloning = zone->getNearestPlanetaryObject(player, "cloningfacility", "");
 	if(closestCloning == nullptr){
 		warning("nearest cloning facility for player is NULL");
 		return;
