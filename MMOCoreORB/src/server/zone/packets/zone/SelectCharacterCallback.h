@@ -144,8 +144,8 @@ public:
 
 		// Disable music notes if player had been playing music
 		if (!player->isPlayingMusic() && !player->isDancing()) {
-			player->setPerformanceCounter(0, false);
-			player->setInstrumentID(0, false);
+			player->setPerformanceStartTime(0, false);
+			player->setPerformanceType(0, false);
 
 			CreatureObjectDeltaMessage6* dcreo6 = new CreatureObjectDeltaMessage6(player);
 			dcreo6->updatePerformanceAnimation(player->getPerformanceAnimation());
