@@ -21,6 +21,6 @@ Vector3 AreaShapeImplementation::getRandomPosition(const Vector3& origin, float 
 	}
 }
 
-Vector3 AreaShapeImplementation::getAreaCenter() {
+Vector3 AreaShapeImplementation::getAreaCenter() const {
 	return areaCenter;
 }
