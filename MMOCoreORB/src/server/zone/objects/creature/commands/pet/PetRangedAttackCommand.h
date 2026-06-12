@@ -58,7 +58,7 @@ public:
 
 		controlDevice->toggleUseRanged();
 
-		pet->selectWeapon();
+		pet->setupAttackMaps();
 
 		return SUCCESS;
 	}

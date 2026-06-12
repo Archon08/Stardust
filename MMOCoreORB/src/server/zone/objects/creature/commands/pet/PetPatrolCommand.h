@@ -52,7 +52,7 @@ public:
 			return GENERALERROR;
 
 		pet->setTargetObject(nullptr);
-		pet->setFollowState(AiAgent::PATROLLING);
+		pet->setMovementState(AiAgent::PATROLLING);
 		pet->clearSavedPatrolPoints();
 		pet->stopWaiting();
 		pet->setWait(0);

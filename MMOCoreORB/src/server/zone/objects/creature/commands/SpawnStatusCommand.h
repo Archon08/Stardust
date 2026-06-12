@@ -28,7 +28,11 @@ public:
 		if (targetObj == nullptr)
 			return GENERALERROR;
 
-		targetObj->outputLuaTimes(creature);
+		// outputLuaTimes was removed from AiAgent in the modern engine; report basic status instead.
+		StringBuffer status;
+		status << "Spawn status for " << targetObj->getDisplayedName()
+			<< " - movementState: " << targetObj->getMovementState();
+		creature->sendSystemMessage(status.toString());
 
 		return SUCCESS;
 	}

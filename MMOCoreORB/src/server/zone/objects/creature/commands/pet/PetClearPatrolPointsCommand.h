@@ -47,7 +47,7 @@ public:
 
 		controlDevice->clearPatrolPoints();
 
-		if (pet->getFollowState() == AiAgent::PATROLLING) {
+		if (pet->getMovementState() == AiAgent::PATROLLING) {
 			pet->setOblivious();
 		}
 

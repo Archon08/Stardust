@@ -202,7 +202,7 @@ public:
 			}
 		}
 
-		corpse->setCashCredits(0);
+		corpse->clearCashCredits(false);
 
 	}
 
