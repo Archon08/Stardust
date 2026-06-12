@@ -11,6 +11,8 @@
 #include "server/zone/objects/ship/ShipObject.h"
 #include "server/zone/packets/object/DataTransform.h"
 #include "server/zone/packets/object/DataTransformWithParent.h"
+#include "server/zone/packets/scene/UpdateTransformWithParentMessage.h"
+#include "server/zone/packets/scene/LightUpdateTransformWithParentMessage.h"
 #include "templates/params/creature/PlayerArrangement.h"
 
 void SpaceZoneComponent::notifyInsertToZone(SceneObject* sceneObject, SpaceZone* newSpaceZone) const {
