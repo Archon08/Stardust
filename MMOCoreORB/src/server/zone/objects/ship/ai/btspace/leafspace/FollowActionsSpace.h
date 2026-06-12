@@ -383,7 +383,7 @@ public:
 			return FAILURE;
 		}
 
-		ManagedReference<TangibleObject*> topThreat = threatMap->getHighestThreatCreature();
+		ManagedReference<TangibleObject*> topThreat = threatMap->getHighestThreatAttacker();
 
 		// Make sure top threat is not null and is a ship
 		if (topThreat == nullptr || !topThreat->isShipObject()) {
