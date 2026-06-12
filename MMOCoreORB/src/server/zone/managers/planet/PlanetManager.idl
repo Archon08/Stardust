@@ -251,6 +251,10 @@ class PlanetManager extends ManagedService implements Logger {
 		return regionMap.getRegionAt(x, y);
 	}
 
+	public CityRegion getCityRegionAt(float x, float y) {
+		return regionMap.getCityRegionAt(x, y);
+	}
+
 	public synchronized void addRegion(CityRegion region) {
 		regionMap.addRegion(region);
 	}
