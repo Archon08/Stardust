@@ -19,6 +19,7 @@
 #include "server/zone/packets/ship/ShipUpdateTransformMessage.h"
 #include "server/zone/packets/ship/PackedVelocity.h"
 #include "server/zone/packets/ship/PackedRotationRate.h"
+#include "server/zone/packets/object/transform/Transform.h"
 
 #ifdef SHIP_TRANSFORM_DEBUG
 #include "server/zone/managers/ship/ShipManager.h"
