@@ -249,7 +249,7 @@ class GCWManager extends ManagedService implements Logger {
 
 	public native float getGCWDiscount(CreatureObject creature);
 
-	public native void runCrackdownScan(AiAgent scanner, CreatureObject player);
+	public native boolean runCrackdownScan(AiAgent scanner, CreatureObject player);
 
 	@dirty
 	public native int isStrongholdCity(string city);
