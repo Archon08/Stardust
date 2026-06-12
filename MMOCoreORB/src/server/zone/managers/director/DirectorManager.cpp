@@ -2178,7 +2178,7 @@ int DirectorManager::getRegion(lua_State* L) {
 		return 1;
 	}
 
-	SceneObject* region = planetMan->getRegion(regionName);
+	CityRegion* region = planetMan->getRegion(regionName); // P2: Stardust CityRegion is ManagedObject-based (not SceneObject); _setUpdated available
 
 	if (region == nullptr) {
 		lua_pushnil(L);
