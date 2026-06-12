@@ -4,7 +4,7 @@
 #include "server/zone/objects/tangible/components/EventPerkDataComponent.h"
 
 bool ScavengerChestContainerComponent::checkContainerPermission(SceneObject* container, CreatureObject* creature, uint16 permission) const {
-	ContainerPermissions* permissions = container->getContainerPermissions();
+	const ContainerPermissions* permissions = container->getContainerPermissions();
 
 	if(!container->isEventPerkItem())
 		return false;
@@ -70,7 +70,7 @@ int ScavengerChestContainerComponent::notifyObjectRemoved(SceneObject* container
 	if (rootParent != nullptr && rootParent->isCreatureObject()) {
 		CreatureObject* creature = cast<CreatureObject*>(rootParent.get());
 
-		ContainerPermissions* permissions = container->getContainerPermissions();
+		const ContainerPermissions* permissions = container->getContainerPermissions();
 
 		if(!container->isEventPerkItem())
 			return 0;
