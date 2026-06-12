@@ -286,7 +286,7 @@ void CreatureObjectImplementation::sendToOwner(bool doClose) {
 
 	assert(vec != nullptr);
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<TreeEntry*> closeObjects;
 	vec->safeCopyTo(closeObjects);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -514,7 +514,7 @@ void CreatureObjectImplementation::setLevel(int level, bool randomHam) {
 	if (isGrouped()) {
 		Locker clocker(group, asCreatureObject());
 
-		group->calcGroupLevel();
+		group->calculateGroupLevel();
 	}
 }
 
@@ -775,7 +775,7 @@ bool CreatureObjectImplementation::setState(uint64 state, bool notifyClient) {
 				setPosture(CreaturePosture::SITTING, false);
 
 				if (thisZone != nullptr) {
-					SortedVector<QuadTreeEntry*> closeSceneObjects;
+					SortedVector<TreeEntry*> closeSceneObjects;
 					int maxInRangeObjects = 0;
 
 					if (closeobjects == nullptr) {
@@ -3524,7 +3524,7 @@ void CreatureObjectImplementation::updateCOV() {
 
 	CreatureObject* creature = asCreatureObject();
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<TreeEntry*> closeObjects;
 	auto closeObjectsVector = getCloseObjects();
 
 	if (closeObjectsVector == nullptr)
