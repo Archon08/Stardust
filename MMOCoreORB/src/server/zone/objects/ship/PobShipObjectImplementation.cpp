@@ -5,6 +5,7 @@
 
 #include "server/zone/objects/ship/PobShipObject.h"
 #include "server/zone/objects/ship/ShipObject.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/Zone.h"
 #include "server/zone/SpaceZone.h"
 #include "server/zone/ZoneClientSession.h"
