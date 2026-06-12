@@ -8,6 +8,8 @@
 #include "server/zone/managers/loot/LootManager.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
+#include "server/zone/objects/ship/ai/ShipAiAgent.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
 #include "templates/LootItemTemplate.h"
@@ -256,7 +258,7 @@ int LootManagerImplementation::calculateLootCredits(int level) {
 	return credits;
 }
 
-TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* templateObject, int level, bool maxCondition) {
+TangibleObject* LootManagerImplementation::createLootObject(TransactionLog& trx, LootItemTemplate* templateObject, int level, bool maxCondition) {
 	int uncappedLevel = level;
 
 	if(level < 1)
@@ -615,16 +617,16 @@ void LootManagerImplementation::setSockets(TangibleObject* object, CraftingValue
 	}
 }
 
-bool LootManagerImplementation::createLoot(SceneObject* container, AiAgent* creature) {
+bool LootManagerImplementation::createLoot(TransactionLog& trx, SceneObject* container, AiAgent* creature) {
 	const LootGroupCollection* lootCollection = creature->getLootGroups();
 
 	if (lootCollection == nullptr)
 		return false;
 
-	return createLootFromCollection(container, lootCollection, creature->getLevel());
+	return createLootFromCollection(trx, container, lootCollection, creature->getLevel());
 }
 
-bool LootManagerImplementation::createLootFromCollection(SceneObject* container, const LootGroupCollection* lootCollection, int level) {
+bool LootManagerImplementation::createLootFromCollection(TransactionLog& trx, SceneObject* container, const LootGroupCollection* lootCollection, int level) {
 	for (int i = 0; i < lootCollection->count(); ++i) {
 		const LootGroupCollectionEntry* entry = lootCollection->get(i);
 		int lootChance = entry->getLootChance();
@@ -654,7 +656,7 @@ bool LootManagerImplementation::createLootFromCollection(SceneObject* container,
 			if (tempChance < roll)
 				continue;
 
-			createLoot(container, entry->getLootGroupName(), level);
+			createLoot(trx, container, entry->getLootGroupName(), level);
 
 			break;
 		}
@@ -663,12 +665,12 @@ bool LootManagerImplementation::createLootFromCollection(SceneObject* container,
 	return true;
 }
 
-bool LootManagerImplementation::createLoot(SceneObject* container, const String& lootGroup, int level, bool maxCondition) {
+uint64 LootManagerImplementation::createLoot(TransactionLog& trx, SceneObject* container, const String& lootGroup, int level, bool maxCondition) {
 	Reference<LootGroupTemplate*> group = lootGroupMap->getLootGroupTemplate(lootGroup);
 
 	if (group == nullptr) {
 		warning("Loot group template requested does not exist: " + lootGroup);
-		return false;
+		return 0;
 	}
 
 	//Now we do the third roll for the item out of the group.
@@ -678,33 +680,54 @@ bool LootManagerImplementation::createLoot(SceneObject* container, const String&
 
 	//Check to see if the group entry is another group
 	if (lootGroupMap->lootGroupExists(selection))
-		return createLoot(container, selection, level, maxCondition);
+		return createLoot(trx, container, selection, level, maxCondition);
 
 	//Entry wasn't another group, it should be a loot item
 	Reference<LootItemTemplate*> itemTemplate = lootGroupMap->getLootItemTemplate(selection);
 
 	if (itemTemplate == nullptr) {
 		warning("Loot item template requested does not exist: " + group->getLootGroupEntryForRoll(roll) + " for templateName: " + group->getTemplateName());
-		return false;
+		return 0;
 	}
 
-	TangibleObject* obj = createLootObject(itemTemplate, level, maxCondition);
+	TangibleObject* obj = createLootObject(trx, itemTemplate, level, maxCondition);
 
 	if (obj == nullptr)
-		return false;
+		return 0;
 
 	if (container->transferObject(obj, -1, false, true)) {
 		container->broadcastObject(obj, true);
 	} else {
 		obj->destroyObjectFromDatabase(true);
-		return false;
+		return 0;
 	}
 
-
-	return true;
+	return obj->getObjectID();
 }
 
-bool LootManagerImplementation::createLootSet(SceneObject* container, const String& lootGroup, int level, bool maxCondition, int setSize) {
+uint64 LootManagerImplementation::createLoot(TransactionLog& trx, SceneObject* container, ShipAiAgent* shipAgent) {
+	if (container == nullptr || shipAgent == nullptr) {
+		return 0;
+	}
+
+	String lootMapEntry = shipAgent->getLootTable();
+
+	if (!lootGroupMap->lootGroupExists(lootMapEntry) && !lootGroupMap->lootItemExists(lootMapEntry)) {
+		return 0;
+	}
+
+	float lootChanceFloat = shipAgent->getLootChance();
+	uint32 lootChance = lootChanceFloat * 10000000;
+	uint32 playerRoll = System::random(10000000);
+
+	if (playerRoll > lootChance) {
+		return 0;
+	}
+
+	return createLoot(trx, container, lootMapEntry, 0, true);
+}
+
+bool LootManagerImplementation::createLootSet(TransactionLog& trx, SceneObject* container, const String& lootGroup, int level, bool maxCondition, int setSize) {
 	Reference<LootGroupTemplate*> group = lootGroupMap->getLootGroupTemplate(lootGroup);
 
 	if (group == nullptr) {
@@ -725,7 +748,7 @@ bool LootManagerImplementation::createLootSet(SceneObject* container, const Stri
 			return false;
 		}
 
-		TangibleObject* obj = createLootObject(itemTemplate, level, maxCondition);
+		TangibleObject* obj = createLootObject(trx, itemTemplate, level, maxCondition);
 
 		if (obj == nullptr)
 			return false;
