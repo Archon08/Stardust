@@ -869,6 +869,7 @@ class TangibleObject extends SceneObject {
 		return null;
 	}
 
+	@read
 	public boolean hasAntiDecayKit() {
 		return antiDecayKitObject;
 	}

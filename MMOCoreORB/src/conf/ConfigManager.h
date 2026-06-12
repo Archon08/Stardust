@@ -494,6 +494,26 @@ namespace conf {
 			return getInt("Core3.ZoneServerPort", 0);
 		}
 
+		inline int getZoneOnlineCharactersPerAccount() {
+			return getInt("Core3.ZoneOnlineCharactersPerAccount", 2);
+		}
+
+		inline const String& getWebErrorLog() {
+			return getString("Core3.WebErrorLog", "log/web_error.log");
+		}
+
+		inline const String& getWebAccessLog() {
+			return getString("Core3.WebAccessLog", "log/web_access.log");
+		}
+
+		inline const String& getWebPorts() {
+			return getString("Core3.WebPorts", "8080");
+		}
+
+		inline int getWebSessionTimeout() {
+			return getInt("Core3.WebSessionTimeout", 600);
+		}
+
 		const SortedVector<String>& getEnabledZones() {
 			return getSortedStringVector("Core3.ZonesEnabled");
 		}

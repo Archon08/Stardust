@@ -1875,6 +1875,7 @@ class CreatureObject extends TangibleObject {
 	@dirty
 	public native float getTerrainNegotiation();
 
+	@read
 	public string getMoodString() {
 		return moodString;
 	}
