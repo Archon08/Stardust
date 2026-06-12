@@ -95,6 +95,11 @@ public:
 		lua->runFile("scripts/ai/ais.lua");
 	}
 
+	void loadTemplates() {
+		Lua* lua = DirectorManager::instance()->getLuaInstance();
+		loadTemplates(lua);
+	}
+
 	void loadTemplates(Lua* lua) {
 		if (lua == nullptr) {
 			error("Could not get lua AiMap::instance from DirectorManager");
