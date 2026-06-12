@@ -97,7 +97,7 @@ int ContainerComponent::canAddObject(SceneObject* sceneObject, SceneObject* obje
 }
 
 bool ContainerComponent::checkContainerPermission(SceneObject* sceneObject, CreatureObject* creature, uint16 permission) const {
-	ContainerPermissions* permissions = sceneObject->getContainerPermissions();
+	const ContainerPermissions* permissions = sceneObject->getContainerPermissions();
 
 	if (permissions->getOwnerID() == creature->getObjectID()) {
 		return permissions->hasOwnerPermission(permission);
@@ -157,7 +157,7 @@ bool ContainerComponent::transferObject(SceneObject* sceneObject, SceneObject* o
 
 	if (objParent != nullptr || objZone != nullptr) {
 		if (objParent != nullptr)
-			objParent->removeObject(object, sceneObject, notifyClient);
+			objParent->removeObject(object, sceneObject, notifyClient, true);
 
 		if (object->getParent() != nullptr) {
 			object->error("error removing from parent");
@@ -253,7 +253,7 @@ bool ContainerComponent::transferObject(SceneObject* sceneObject, SceneObject* o
 	return true;
 }
 
-bool ContainerComponent::removeObject(SceneObject* sceneObject, SceneObject* object, SceneObject* destination, bool notifyClient) const {
+bool ContainerComponent::removeObject(SceneObject* sceneObject, SceneObject* object, SceneObject* destination, bool notifyClient, bool nullifyParent) const {
 	Locker contLocker(sceneObject->getContainerLock());
 
 	VectorMap<String, ManagedReference<SceneObject*> >* slottedObjects = sceneObject->getSlottedObjects();
@@ -271,7 +271,7 @@ bool ContainerComponent::removeObject(SceneObject* sceneObject, SceneObject* obj
 			objParent->info("i am the parent", true);
 
 			return false;
-		} else
+		} else if (nullifyParent)
 			object->setParent(nullptr);
 	}
 
@@ -314,7 +314,8 @@ bool ContainerComponent::removeObject(SceneObject* sceneObject, SceneObject* obj
 		containerObjects->drop(object->getObjectID());
 	}
 
-	object->setParent(nullptr);
+	if (nullifyParent)
+		object->setParent(nullptr);
 
 	contLocker.release();
 
