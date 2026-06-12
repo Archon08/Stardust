@@ -18,6 +18,7 @@ protected:
 	int attackSpeed;
 	const static int CAPACITY = 20;
 	Vector<WeaponObject*> mines;
+	SynchronizedSortedVector<uint64> notifiedPlayers;
 	SharedInstallationObjectTemplate* templateData;
 	int maxRange;
 public:
@@ -89,8 +90,17 @@ public:
 		return maxRange;
 	}
 
+	bool hasNotifiedPlayer(const uint64 oid) {
+		return notifiedPlayers.contains(oid);
+	}
 
+	void addNotifiedPlayer(const uint64 oid) {
+		notifiedPlayers.put(oid);
+	}
 
+	void removeNotifiedPlayer(const uint64 oid) {
+		notifiedPlayers.drop(oid);
+	}
 
 
 private:
