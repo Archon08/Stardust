@@ -67,7 +67,7 @@ public:
 				player->sendSystemMessage("Object does not have a close object vector");
 				return 1;
 			}
-			SortedVector<QuadTreeEntry*> closeObjects;
+			SortedVector<TreeEntry*> closeObjects;
 			vec->safeCopyTo(closeObjects);
 			locker.release();
 
