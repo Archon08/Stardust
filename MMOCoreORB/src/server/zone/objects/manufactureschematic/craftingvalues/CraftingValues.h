@@ -112,6 +112,20 @@ public:
 		return experimentalValuesMap.getExperimentalPropertySubtitleSize(title);
 	}
 
+	// Upstream-API aliases (space-port transplanted ship-component code expects upstream's
+	// attributesMap naming; Stardust's CraftingValues uses a ValuesMap subtitle model — delegate).
+	String& getAttribute(const int i) {
+		return experimentalValuesMap.getExperimentalPropertySubtitle(i);
+	}
+
+	int getTotalExperimentalAttributes() {
+		return experimentalValuesMap.getExperimentalPropertySubtitleSize();
+	}
+
+	String& getAttributeGroup(const String& attribute) {
+		return experimentalValuesMap.getExperimentalPropertyTitle(attribute);
+	}
+
 	bool hasProperty(const String& attribute) {
 		return experimentalValuesMap.hasProperty(attribute);
 	}
