@@ -14,7 +14,7 @@
 #include "server/zone/Zone.h"
 
 
-void DetectorZoneComponent::notifyPositionUpdate(SceneObject* sceneObject, QuadTreeEntry* entry) const {
+void DetectorZoneComponent::notifyPositionUpdate(SceneObject* sceneObject, TreeEntry* entry) const {
 	ManagedReference<SceneObject*> target = cast<SceneObject*>(entry);
 	if(!sceneObject->isTangibleObject() || target == nullptr){
 		return;
