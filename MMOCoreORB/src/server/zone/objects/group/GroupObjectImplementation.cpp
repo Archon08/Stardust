@@ -769,19 +769,17 @@ void GroupObjectImplementation::updateLootRules() {
 	broadcastMessage(msg);
 }
 
-bool GroupObjectImplementation::initializeLeader(CreatureObject* leader, CreatureObject* member) {
-	if (leader == nullptr || member == nullptr)
+bool GroupObjectImplementation::initializeLeader(CreatureObject* leader) {
+	if (leader == nullptr)
 		return false;
 
 	groupMembers.add(leader, nullptr);
-	groupMembers.add(member, nullptr, 0);
 
 	setMasterLooterID(leader->getObjectID());
 	setLootRule(GroupManager::FREEFORALL);
 	calculateGroupLevel();
 
 	uint64 leaderShipID = 0;
-	uint64 memberShipID = 0;
 
 	if (leader->isPilotingShip()) {
 		ManagedReference<SceneObject*> leaderRootParent = leader->getRootParent();
@@ -790,19 +788,7 @@ bool GroupObjectImplementation::initializeLeader(CreatureObject* leader, Creatur
 			leaderShipID = leaderRootParent->getObjectID();
 	}
 
-	if (member->isPilotingShip()) {
-		ManagedReference<SceneObject*> memberRootParent = member->getRootParent();
-
-		if (memberRootParent != nullptr && memberRootParent->isShipObject())
-			memberShipID = memberRootParent->getObjectID();
-	}
-
 	groupMemberShips.add(leader->getObjectID(), leaderShipID, nullptr);
-	groupMemberShips.add(member->getObjectID(), memberShipID, nullptr, 0);
-
-#ifdef DEBUG_GROUPS
-	info(true) << "Initialize Leader called for Leader: " << leader->getDisplayedName() << " with Initial Member: " << member->getDisplayedName();
-#endif
 
 	return true;
 }
