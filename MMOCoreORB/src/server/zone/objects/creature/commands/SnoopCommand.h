@@ -546,7 +546,7 @@ public:
 			return GENERALERROR;
 		}
 
-		BuffList* bList = target->getBuffList();
+		const BuffList* bList = target->getBuffList();
 		if (bList == nullptr || bList->getBuffListSize() == 0) {
 			creature->sendSystemMessage("No Buffs to Display.");
 			return SUCCESS;
@@ -559,7 +559,7 @@ public:
 			buffText << buff->getBuffName() << ":" <<endl;
 			buffText << "\tCRC: 0x" << hex << buff->getBuffCRC() << endl;
 
-			Vector<uint64>* secondaryCRCs = buff->getSecondaryBuffCRCs();
+			const Vector<uint64>* secondaryCRCs = buff->getSecondaryBuffCRCs();
 			if (secondaryCRCs != nullptr && secondaryCRCs->size() > 0) {
 				buffText << "\tSecondary CRCs: "<< endl;
 				for (int j = 0; j < secondaryCRCs->size(); j++) {
