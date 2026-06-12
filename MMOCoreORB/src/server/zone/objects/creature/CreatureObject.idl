@@ -46,6 +46,7 @@ import system.util.SynchronizedVectorMap;
 import server.zone.managers.auction.AuctionSearchTask;
 import server.zone.objects.tangible.Instrument;
 include server.zone.objects.creature.CommandQueue;
+include server.zone.objects.creature.variables.CommandQueueActionVector;
 include server.zone.objects.ship.ShipObject;
 include system.lang.String;
 
@@ -103,6 +104,9 @@ class CreatureObject extends TangibleObject {
 	protected float runSpeed;
 	protected float walkSpeed;
 	protected float currentSpeed;
+	protected float terrainNegotiation;
+	protected int performanceCounter;
+	protected int instrumentID;
 	protected float waterModPercent;
 	protected float runAcceleration;
 	protected float walkAcceleration;
@@ -160,7 +164,10 @@ class CreatureObject extends TangibleObject {
 	@dereferenced
 	protected transient ReadWriteLock skillModMutex;
 
-	protected transient CommandQueue commandQueue;
+	protected transient CommandQueueActionVector commandQueue;
+
+	@transactional
+	protected transient CommandQueueActionVector immediateQueue;
 
 	protected transient unsigned int lastActionCounter;
 
@@ -666,6 +673,23 @@ class CreatureObject extends TangibleObject {
 	 */
 	@preLocked
 	public native void setListenToID(unsigned long id, boolean notifyClient = true);
+
+	@preLocked
+	public native void setInstrumentID(int instrumentid, boolean notifyClient = true);
+
+	@preLocked
+	public native void setPerformanceCounter(int counter, boolean notifyClient = true);
+
+	@preLocked
+	public native void setTerrainNegotiation(float value, boolean notifyClient = true);
+
+	public native void updateTerrainNegotiation();
+
+	@preLocked
+	public native void activateQueueAction();
+
+	@preLocked
+	public native void activateImmediateAction();
 
 	/**
 	 * Updates the preformance start time
@@ -1764,9 +1788,15 @@ class CreatureObject extends TangibleObject {
 	}
 
 
+	@local
+	@dirty
+	public CommandQueueActionVector getCommandQueue() {
+		return commandQueue;
+	}
+
 	@read
 	public int getCommandQueueSize() {
-		return commandQueue.getQueueSize();
+		return commandQueue.size();
 	}
 
 
@@ -1832,6 +1862,19 @@ class CreatureObject extends TangibleObject {
 	}
 
 	@read
+	@read
+	public int getPerformanceCounter() {
+		return performanceCounter;
+	}
+
+	@read
+	public int getInstrumentID() {
+		return instrumentID;
+	}
+
+	@dirty
+	public native float getTerrainNegotiation();
+
 	public string getMoodString() {
 		return moodString;
 	}
