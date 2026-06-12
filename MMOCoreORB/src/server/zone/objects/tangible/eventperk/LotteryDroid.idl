@@ -159,6 +159,12 @@ class LotteryDroid extends CreatureObject {
 		creditPool = creditPool + amount;
 	}
 
+	// P2: additive credit-pool getter (consumed by TransactionLog; mirror upstream)
+	@read
+	public int getCreditPool() {
+		return creditPool;
+	}
+
 	@read
 	public int getNumPlayers() {
 		return playerList.size();
