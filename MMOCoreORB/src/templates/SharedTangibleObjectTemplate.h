@@ -164,6 +164,12 @@ public:
         return experimentalProperties;
     }
 
+    // Upstream-API alias (space-port transplanted ship-component code uses upstream's
+    // experimentalAttributes naming; Stardust stores the same data as experimentalProperties).
+    Vector<String>* getExperimentalAttributes() {
+        return experimentalProperties;
+    }
+
     Vector<short >* getExperimentalWeights() {
         return experimentalWeights;
     }
