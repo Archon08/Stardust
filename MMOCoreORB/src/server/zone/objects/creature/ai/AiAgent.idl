@@ -347,6 +347,12 @@ class AiAgent extends CreatureObject {
 	@preLocked
 	public abstract native void activateRecovery();
 
+	@preLocked
+	public native void activateMovementEvent();
+
+	@preLocked
+	public native void activateInterrupt(SceneObject source, long msg);
+
 	/**
 	 * Schedules the next movement event
 	 * @pre { this is locked }
