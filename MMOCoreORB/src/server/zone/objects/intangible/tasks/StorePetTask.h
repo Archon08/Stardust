@@ -70,7 +70,7 @@ public:
 		}
 
 
-		CreatureTemplate* creoTemp = pet->getCreatureTemplate();
+		const CreatureTemplate* creoTemp = pet->getCreatureTemplate();
 
 		if (creoTemp != nullptr) {
 			pet->setFaction(creoTemp->getFaction().hashCode());
