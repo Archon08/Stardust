@@ -131,7 +131,7 @@ void WeaponObjectImplementation::createChildObjects() {
 			if (obj == nullptr)
 				continue;
 
-			const ContainerPermissions* permissions = obj->getContainerPermissions();
+			ContainerPermissions* permissions = obj->getContainerPermissionsForUpdate(); // P2: mutate via ForUpdate (getContainerPermissions now const)
 			permissions->setOwner(getObjectID());
 			permissions->setInheritPermissionsFromParent(true);
 			permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
