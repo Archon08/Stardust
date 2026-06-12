@@ -320,6 +320,120 @@ void TangibleObjectImplementation::synchronizedUIStopListen(CreatureObject* play
 
 }
 
+void TangibleObjectImplementation::removeOutOfRangeObjects() {
+	auto rangeCheckObject = asTangibleObject();
+
+	auto rootParent = getRootParent();
+	auto parent = getParent().get();
+
+	if (parent != nullptr && (parent->isVehicleObject() || parent->isMount())) {
+		rangeCheckObject = parent->asTangibleObject();
+	} else if (rootParent != nullptr && (rootParent->isShipObject() || rootParent->isStructureObject())) {
+		rangeCheckObject = rootParent->asTangibleObject();
+	}
+
+	if (rangeCheckObject == nullptr) {
+		return;
+	}
+
+#ifdef DEBUG_COV
+	info(true) << "TangibleObjectImplementation::removeOutOfRangeObjects() called -- by: " << getDisplayedName() << " ID: " << getObjectID() << " Using Parent or Root Object: " << rangeCheckObject->getDisplayedName() << " Parent/Rooot ID: " << rangeCheckObject->getObjectID();
+#endif // DEBUG_COV
+
+	SortedVector<TreeEntry*> closeObjects;
+
+	// Using this Tangible objects COV
+	auto closeObjectsVector = getCloseObjects();
+
+	if (closeObjectsVector == nullptr) {
+		return;
+	}
+
+	closeObjectsVector->safeCopyTo(closeObjects);
+
+	auto worldPos = rangeCheckObject->getWorldPosition();
+
+	float ourX = worldPos.getX();
+	float ourY = worldPos.getY();
+	float ourZ = worldPos.getZ();
+
+	bool objectIsShip = rangeCheckObject->isShipObject();
+
+	uint64 thisObjectID = getObjectID();
+	uint64 rangeCheckObjectId = rangeCheckObject->getObjectID();
+
+	for (int i = closeObjects.size() - 1; i >= 0; i--) {
+		ManagedReference<SceneObject*> covObject = static_cast<SceneObject*>(closeObjects.getUnsafe(i));
+
+		if (covObject == nullptr) {
+			continue;
+		}
+
+		// Skip removing space stations, they are global objects for the space zones and always in range
+		if (covObject->isSpaceStation()) {
+			continue;
+		}
+
+		uint64 covObjectID = covObject->getObjectID();
+
+		// Don't remove ourselves or our parent / root parent that is being used to remove objects out of range
+		if (covObjectID == thisObjectID || covObjectID == rangeCheckObjectId) {
+			continue;
+		}
+
+		// Check for objects inside another object
+		auto covObjectRoot = covObject->getRootParent();
+		uint64 covParentID = covObject->getParentID();
+
+		if (covObjectRoot != nullptr || (covParentID > 0 && parent != nullptr)) {
+			continue;
+		}
+
+		auto objectWorldPos = covObject->getWorldPosition();
+
+		float deltaX = ourX - objectWorldPos.getX();
+		float deltaY = ourY - objectWorldPos.getY();
+
+		float outOfRangeDistance = Math::max(covObject->getOutOfRangeDistance(thisObjectID), rangeCheckObject->getOutOfRangeDistance(covObject->getObjectID()));
+		float outOfRangeSqr = Math::sqr(outOfRangeDistance);
+		float deltaDistance = 0.f;
+
+		// This range calculation is used for everything in GroundZone
+		if (!objectIsShip) {
+			deltaDistance = deltaX * deltaX + deltaY * deltaY;
+		// This Range Calculation is used for Ships in SpaceZone
+		} else {
+			float deltaZ = ourZ - objectWorldPos.getZ();
+			deltaDistance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+		}
+
+		// Check for out of range, if using root parent ship, 3d range calc is used
+		if (deltaDistance < outOfRangeSqr) {
+			continue;
+		}
+
+		// Remove covObject from this objects COV
+		if (rangeCheckObject->isVehicleObject() || rangeCheckObject->isMount()) {
+			rangeCheckObject->removeInRangeObject(covObject);
+		} else {
+			rangeCheckObject = asTangibleObject();
+
+			if (getCloseObjects() != nullptr) {
+				removeInRangeObject(covObject);
+			} else {
+				notifyDissapear(covObject);
+			}
+		}
+
+		// Remove the object from covObjects' COV
+		if (covObject->getCloseObjects() != nullptr) {
+			covObject->removeInRangeObject(rangeCheckObject);
+		} else {
+			covObject->notifyDissapear(rangeCheckObject);
+		}
+	}
+}
+
 void TangibleObjectImplementation::setSerialNumber(const String& serial) {
 	uint32 bitmask = getOptionsBitmask();
 	bitmask |= OptionBitmask::HASSERIAL;
