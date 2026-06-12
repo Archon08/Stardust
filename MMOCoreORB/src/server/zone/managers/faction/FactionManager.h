@@ -68,6 +68,9 @@ public:
 	bool isEnemy(const String& faction1, const String& faction2);
 	bool isAlly(const String& faction1, const String& faction2);
 
+	String getSpaceFactionBySquadron(int spaceSquadron, int tier);
+	uint32 getSpaceFactionHashBySquadron(int spaceSquadron, int tier);
+
 protected:
 	void loadFactionRanks();
 	void loadLuaConfig();
