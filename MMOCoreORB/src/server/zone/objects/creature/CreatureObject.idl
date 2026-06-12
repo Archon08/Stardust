@@ -1466,9 +1466,18 @@ class CreatureObject extends TangibleObject {
 
 	public native void setPostureChangeDelay(unsigned long delay);
 
+	public void updatePostureChangeDelay(int delay) {
+		cooldownTimerMap.updateToCurrentAndAddMili("postureChangeDelay", delay);
+	}
+
 	@read
 	public boolean hasPostureChangeDelay() {
 		return !cooldownTimerMap.isPast("postureChangeDelay");
+	}
+
+	@read
+	public boolean checkPostureChangeDelay() {
+		return cooldownTimerMap.isPast("postureChangeDelay");
 	}
 
 	public void removePostureChangeDelay() {
