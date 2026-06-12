@@ -624,16 +624,12 @@ int CreatureManagerImplementation::notifyDestruction(TangibleObject* destructor,
 		throw;
 	}
 
-	destructedObject->scheduleDespawn();
-
 	if (shouldRescheduleCorpseDestruction) {
-
-		Reference<DespawnCreatureTask*> despawn = destructedObject->getPendingTask("despawn").castTo<DespawnCreatureTask*>();
-
-		if (despawn != nullptr) {
-			despawn->cancel();
-			despawn->reschedule(10000);
-		}
+		// Corpse has nothing of value, schedule despawn for 10s
+		destructedObject->scheduleDespawn(10, true);
+	} else {
+		// Corpse has loot or can be harvested, schedule despawn for 300s
+		destructedObject->scheduleDespawn(300);
 	}
 
 	// now we can safely lock destructor again
