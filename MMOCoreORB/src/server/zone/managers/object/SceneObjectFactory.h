@@ -8,6 +8,8 @@
 #ifndef SCENEOBJECTFACTORY_H_
 #define SCENEOBJECTFACTORY_H_
 
+#include "system/lang.h"
+
 namespace server {
  namespace zone {
   namespace managers {
@@ -22,7 +24,15 @@ namespace server {
    template <typename TypeId, typename Value>
    class ObjectCreatorMap : public HashTable<TypeId, Value> {
 	   int hash(const TypeId& k) const {
-		   return (int)k;
+		   uint32 a = k;
+		   a = (a+0x7ed55d16) + (a<<12);
+		   a = (a^0xc761c23c) ^ (a>>19);
+		   a = (a+0x165667b1) + (a<<5);
+		   a = (a+0xd3a2646c) ^ (a<<9);
+		   a = (a+0xfd7046c5) + (a<<3);
+		   a = (a^0xb55a4f09) ^ (a>>16);
+
+		   return a;
 	   }
 
    public:
@@ -39,10 +49,12 @@ namespace server {
 
    public:
 	   BaseClassType createObject(UniqueIdType uniqueID) {
-		   if (!objectCreator.containsKey(uniqueID))
+		   const auto entry = objectCreator.getEntry(uniqueID);
+
+		   if (!entry)
 			   return nullptr;
 
-		   return objectCreator.get(uniqueID)();
+		   return entry->getValue()();
 	   }
 
 	   template<typename ClassType> bool registerObject(UniqueIdType uniqueID) {
@@ -58,7 +70,7 @@ namespace server {
 		   return objectCreator.drop(uniqueID);
 	   }
 
-	   bool containsObject(UniqueIdType uniqueID) {
+	   bool containsObject(UniqueIdType uniqueID) const {
 		   return objectCreator.containsKey(uniqueID);
 	   }
 
