@@ -43,6 +43,7 @@
 #include "server/zone/managers/collision/CollisionManager.h"
 #include "server/zone/packets/scene/PlayClientEffectLocMessage.h"
 #include "server/zone/managers/gcw/sessions/ContrabandScanSession.h"
+#include "server/zone/managers/gcw/observers/SquadObserver.h"
 
 void GCWManagerImplementation::initialize() {
 	loadLuaConfig();
@@ -165,6 +166,39 @@ void GCWManagerImplementation::loadLuaConfig() {
 	difficulties.pop();
 
 	info("Loaded " + String::valueOf(imperialStrongholds.size()) + " imperial strongholds and " + String::valueOf(rebelStrongholds.size()) + " rebel strongholds.");
+
+	// P2: load squad formations used by security patrols (ported from upstream)
+	LuaObject squadFormationTable = lua->getGlobalObject("squadFormations");
+
+	if (squadFormationTable.isValidTable()) {
+		for (int i = 1; i <= squadFormationTable.getTableSize(); i++) {
+			LuaObject squadFormation = squadFormationTable.getObjectAt(i);
+
+			if (squadFormation.isValidTable()) {
+				String squadType = squadFormation.getStringAt(1);
+				LuaObject squadTemplates = squadFormation.getObjectAt(2);
+
+				if (squadTemplates.isValidTable()) {
+					Vector<String>* temps = new Vector<String>;
+
+					for (int j = 1; j <= squadTemplates.getTableSize(); j++) {
+						String temp = squadTemplates.getStringAt(j);
+
+						temps->add(temp);
+					}
+					squadFormations.put(squadType, temps);
+				}
+
+				squadTemplates.pop();
+			}
+
+			squadFormation.pop();
+		}
+	}
+
+	squadFormationTable.pop();
+
+	info("Loaded " + String::valueOf(squadFormations.size()) + " total squad formations.", true);
 
 	delete lua;
 	lua = nullptr;
@@ -2519,4 +2553,139 @@ bool GCWManagerImplementation::runCrackdownScan(AiAgent* scanner, CreatureObject
 	}
 
 	return false;
+}
+
+// P2: GCW security-patrol spawn (ported from upstream)
+uint64 GCWManagerImplementation::spawnSecurityPatrol(BuildingObject* building, String &patrol, Vector3 &location, uint64 parentID, float direction, bool stationary, bool attackable) {
+	if (zone == nullptr || patrol == "")
+		return 0;
+
+	Vector<String>* squadSpawns = nullptr;
+
+	for (int i = 0; i < squadFormations.size(); i ++) {
+		String formation = squadFormations.elementAt(i).getKey();
+
+		// Check for proper faction and size in the squad string
+		if (formation.hashCode() == patrol.hashCode()) {
+			squadSpawns = squadFormations.elementAt(i).getValue();
+			break;
+		}
+	}
+
+	if (squadSpawns == nullptr || squadSpawns->size() <= 0) {
+		return 0;
+	}
+
+	CreatureManager* creatureManager = zone->getCreatureManager();
+	ManagedReference<SquadObserver*> squadObserver = new SquadObserver();
+
+	if (creatureManager == nullptr || squadObserver == nullptr)
+		return 0;
+
+	AiAgent* squadLeader = nullptr;
+
+	// Handle spawning squad in formation
+	for (int j = 0; j < squadSpawns->size(); j++) {
+		String spawn = squadSpawns->get(j);
+
+		if (spawn == "")
+			continue;
+
+		float xOffset = 0.f;
+		float yOffset = 0.f;
+
+		if (j > 0) {
+			if (j % 2) {
+				xOffset = 0.5;
+				yOffset = j* -1;
+			} else {
+				xOffset = -0.5;
+				yOffset = (j - 1) * -1;
+			}
+		}
+
+		// Get proper rotated coordinates
+		float xOffsetRotated = xOffset * Math::cos(direction) + yOffset * Math::sin(direction);
+		float yOffsetRotated = -xOffset * Math::sin(direction) + yOffset * Math::cos(direction);
+
+		float x = location.getX() + xOffsetRotated;
+		float y = location.getY() + yOffsetRotated;
+
+		if (building != nullptr) {
+			x += building->getPositionX();
+			y += building->getPositionY();
+		}
+
+		float z = CollisionManager::getWorldFloorCollision(x, y, zone, false);
+
+		AiAgent* agent = cast<AiAgent*>(creatureManager->spawnCreature(spawn.hashCode(), 0, x, z, y, 0, false, direction));
+
+		if (agent == nullptr)
+			continue;
+
+		Locker lock(agent);
+
+		// If gcw base is not null, add security patrols to the child creatures so they despawn if it is destroyed
+		if (building != nullptr) {
+			Locker bLocker(building, agent);
+			building->addChildCreatureObject(agent);
+		}
+
+		if (!attackable)
+			agent->setPvpStatusBitmask(0);
+
+		squadObserver->addMember(agent);
+		agent->registerObserver(ObserverEventType::SQUAD, squadObserver);
+
+		if (j == 0) {
+			squadLeader = agent;
+
+			if (stationary) {
+				squadLeader->addObjectFlag(ObjectFlag::STATIC);
+			} else {
+				squadLeader->addObjectFlag(ObjectFlag::SQUAD);
+				squadLeader->setMovementState(AiAgent::PATROLLING);
+			}
+
+			// AI Template must be updated after the creature flags are set but before anything is written to Blackboard
+			agent->setAITemplate();
+			agent->clearPatrolPoints();
+		} else {
+			if (stationary) {
+				agent->addObjectFlag(ObjectFlag::STATIC);
+			} else {
+				agent->addObjectFlag(ObjectFlag::FOLLOW);
+				agent->addObjectFlag(ObjectFlag::SQUAD);
+			}
+
+			agent->setAITemplate();
+			agent->clearPatrolPoints();
+
+			// Set their movement offset so they move in formation
+			Vector3 formationOffset;
+			formationOffset.setX(xOffset);
+			formationOffset.setY(yOffset);
+			agent->writeBlackboard("formationOffset", formationOffset);
+
+			if (!stationary && squadLeader != nullptr) {
+				Locker sLocker(squadLeader, agent);
+
+				agent->setFollowObject(squadLeader);
+				agent->setMovementState(AiAgent::FOLLOWING);
+			}
+		}
+	}
+
+	return squadLeader != nullptr ? squadLeader->getObjectID() : 0;
+}
+
+// P2: contraband-scan session entry (Stardust 2-arg ContrabandScanSession)
+void GCWManagerImplementation::startContrabandScanSession(AiAgent* scanner, CreatureObject* player, bool enforced) {
+	if (scanner == nullptr || player == nullptr)
+		return;
+
+	Reference<ContrabandScanSession*> contrabandScanSession = new ContrabandScanSession(scanner, player);
+
+	if (contrabandScanSession != nullptr)
+		contrabandScanSession->initializeSession();
 }

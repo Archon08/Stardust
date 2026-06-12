@@ -13,6 +13,7 @@ import server.zone.objects.installation.InstallationObject;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.creature.ai.AiAgent;
 import server.zone.objects.scene.SceneObject;
+import engine.util.u3d.Vector3;
 import system.thread.Mutex;
 import server.zone.objects.tangible.deed.Deed;
 
@@ -100,6 +101,9 @@ class GCWManager extends ManagedService implements Logger {
 	@dereferenced
 	protected transient Vector<string> rebelStrongholds;
 
+	@dereferenced
+	protected transient VectorMap<string, Reference<Vector<string> > > squadFormations;
+
 	public GCWManager(Zone zne){
 		imperialBases = 0;
 		imperialScore = 0;
@@ -171,6 +175,10 @@ class GCWManager extends ManagedService implements Logger {
 
 	public native void startVulnerability(BuildingObject building);
 	public native void endVulnerability(BuildingObject building);
+
+	// P2: GCW security-patrol + contraband-scan (ported from upstream)
+	public native unsigned long spawnSecurityPatrol(BuildingObject building, string patrol, @dereferenced Vector3 location, unsigned long parentID, float direction, boolean stationary = false, boolean attackable = true);
+	public native void startContrabandScanSession(AiAgent scanner, CreatureObject player, boolean enforced);
 	public native void initializeNewVulnerability(BuildingObject building);
 	private native void initializeNewVulnerability(DestructibleBuildingDataComponent data);
 	private native void scheduleVulnerabilityStart(BuildingObject building);

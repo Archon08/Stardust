@@ -325,7 +325,10 @@ void ContrabandScanSessionImplementation::checkPlayerFactionRank(Zone* zone, AiA
 			scanner->doAnimation("point_accusingly");
 			player->setFactionStatus(FactionStatus::COVERT);
 
-			Reference<Task*> lambdaTask = new LambdaShuttleWithReinforcementsTask(player, scanner->getFaction(), player->getFactionRank());
+			// P2: align to current LambdaShuttleWithReinforcementsTask ctor (7 args).
+			// Reinforcements land near the player as a containment team.
+			String landingMessage = getFactionStringId(scanner, "containment_team_imperial", "containment_team_rebel");
+			Reference<Task*> lambdaTask = new LambdaShuttleWithReinforcementsTask(player, scanner->getFaction(), player->getFactionRank(), landingMessage, player->getWorldPosition(), player->getDirection(), LambdaShuttleWithReinforcementsTask::CONTAINMENTTEAM);
 			lambdaTask->schedule(TASKDELAY);
 
 			scanState = FINISHED;
