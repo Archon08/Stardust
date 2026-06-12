@@ -73,7 +73,7 @@ public:
 		CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) creature->getCloseObjects();
 
 		if (closeObjectsVector == nullptr) {
-			creature->getZone()->getInRangeObjects(creature->getPositionX(), creature->getPositionY(), 32, &objects, true);
+			creature->getZone()->getInRangeObjects(creature->getPositionX(), creature->getPositionZ(), creature->getPositionY(), 32, &objects, true);
 		} else {
 			closeObjectsVector->safeCopyReceiversTo(objects, CloseObjectsVector::CREOTYPE);
 		}
