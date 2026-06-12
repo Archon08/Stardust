@@ -55,6 +55,11 @@ public:
 	AtomicInteger moveEventsWithFollowObject;
 	AtomicInteger moveEventsRetreating;
 
+	AtomicInteger activeBehaviorEvents;
+	AtomicInteger scheduledBehaviorEvents;
+	AtomicInteger behaviorsWithFollowObject;
+	AtomicInteger behaviorsRetreating;
+
 	AtomicInteger activeAwarenessEvents;
 	AtomicInteger scheduledAwarenessEvents;
 
