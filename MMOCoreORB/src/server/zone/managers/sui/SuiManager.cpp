@@ -237,8 +237,10 @@ void SuiManager::handleBankTransfer(CreatureObject* player, SuiBox* suiBox, uint
 	uint32 currentBank = player->getBankCredits();
 
 	if ((currentCash + currentBank) == ((uint32) cash + (uint32) bank)) {
-		player->setCashCredits(cash);
-		player->setBankCredits(bank);
+		player->clearCashCredits(false);
+		player->addCashCredits(cash, true);
+		player->clearBankCredits(false);
+		player->addBankCredits(bank, true);
 	}
 
 }
