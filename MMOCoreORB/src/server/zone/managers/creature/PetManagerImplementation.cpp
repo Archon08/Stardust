@@ -375,7 +375,7 @@ bool PetManagerImplementation::handleCommandTraining(CreatureObject* speaker, Ai
 		speaker->sendSystemMessage("@pet/pet_menu:pet_learn"); // You teach your pet a new command.
 
 		if (!alreadyTrained) {
-			CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
+			const CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
 
 			if (creatureTemplate == nullptr)
 				return true;
