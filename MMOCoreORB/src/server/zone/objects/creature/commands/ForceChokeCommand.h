@@ -54,7 +54,7 @@ public:
 						// Setup debuff.
 
 						if (!creature->checkCooldownRecovery(skillName)){
-										Time* timeRemaining = creature->getCooldownTime(skillName);
+										const Time* timeRemaining = creature->getCooldownTime(skillName);
 										creature->playMusicMessage("sound/ui_negative.snd");
 										creature->sendSystemMessage("Your target can not be rooted with " + skillNameDisplay + " for another " +  getCooldownString(timeRemaining->miliDifference() * -1));
 						}
