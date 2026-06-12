@@ -388,7 +388,7 @@ void BuildingObjectImplementation::notifyObjectInsertedToZone(SceneObject* objec
 	//info("BuildingObjectImplementation::notifyInsertToZone", true);
 
 	auto closeObjectsVector = getCloseObjects();
-	Vector<QuadTreeEntry*> closeObjects(closeObjectsVector->size(), 10);
+	Vector<TreeEntry*> closeObjects(closeObjectsVector->size(), 10);
 	closeObjectsVector->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -431,7 +431,7 @@ void BuildingObjectImplementation::notifyObjectInsertedToZone(SceneObject* objec
 	//this->sendTo(object, true);
 }
 
-void BuildingObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
+void BuildingObjectImplementation::notifyInsert(TreeEntry* obj) {
 	//info("BuildingObjectImplementation::notifyInsert");
 	//remove when done
 	//return;
@@ -481,7 +481,7 @@ void BuildingObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
 	}
 }
 
-void BuildingObjectImplementation::notifyDissapear(QuadTreeEntry* obj) {
+void BuildingObjectImplementation::notifyDissapear(TreeEntry* obj) {
 	for (int i = 0; i < cells.size(); ++i) {
 		auto& cell = cells.get(i);
 
@@ -503,17 +503,17 @@ void BuildingObjectImplementation::notifyDissapear(QuadTreeEntry* obj) {
 	}
 }
 
-void BuildingObjectImplementation::insert(QuadTreeEntry* entry) {
+void BuildingObjectImplementation::insert(TreeEntry* entry) {
 	//return;
 }
 
-void BuildingObjectImplementation::remove(QuadTreeEntry* entry) {
+void BuildingObjectImplementation::remove(TreeEntry* entry) {
 }
 
-void BuildingObjectImplementation::update(QuadTreeEntry* entry) {
+void BuildingObjectImplementation::update(TreeEntry* entry) {
 }
 
-void BuildingObjectImplementation::inRange(QuadTreeEntry* entry, float range) {
+void BuildingObjectImplementation::inRange(TreeEntry* entry, float range) {
 }
 
 void BuildingObjectImplementation::addCell(CellObject* cell, uint32 cellNumber) {
@@ -619,7 +619,7 @@ void BuildingObjectImplementation::destroyObjectFromDatabase(
 void BuildingObjectImplementation::broadcastCellPermissions() {
 	CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) getCloseObjects();
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<TreeEntry*> closeObjects;
 	closeObjectsVector->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
@@ -647,7 +647,7 @@ void BuildingObjectImplementation::broadcastCellPermissions(uint64 objectid) {
 
 	CloseObjectsVector* closeObjectsVector = getCloseObjects();
 
-	SortedVector<QuadTreeEntry*> closeObjects;
+	SortedVector<TreeEntry*> closeObjects;
 	closeObjectsVector->safeCopyReceiversTo(closeObjects, CloseObjectsVector::CREOTYPE);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
