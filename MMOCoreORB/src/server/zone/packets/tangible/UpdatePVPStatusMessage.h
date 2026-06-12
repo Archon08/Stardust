@@ -8,6 +8,7 @@
 #include "engine/service/proto/BaseMessage.h"
 
 #include "server/zone/objects/tangible/TangibleObject.h"
+#include "templates/params/creature/CreatureFlag.h"
 
 class UpdatePVPStatusMessage : public BaseMessage {
 public:
