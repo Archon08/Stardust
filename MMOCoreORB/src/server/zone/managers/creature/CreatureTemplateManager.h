@@ -37,6 +37,8 @@ protected:
 	HashTable<String, Reference<MobileOutfitGroup*> > outfits;
 	static AtomicInteger loadedMobileTemplates;
 
+	float globalAttackSpeedOverride;
+
 public:
 	static int DEBUG_MODE;
 	enum LUA_ERROR_CODE { NO_ERROR = 0, GENERAL_ERROR, DUPLICATE_MOBILE, INCORRECT_ARGUMENTS, DUPLICATE_CONVO };
@@ -126,6 +128,10 @@ public:
 
 	AiSpeciesData* getAiSpeciesData(uint32 speciesID) {
 		return aiSpeciesData.get(speciesID);
+	}
+
+	float getGlobalAttackSpeedOverride() const {
+		return globalAttackSpeedOverride;
 	}
 
 };
