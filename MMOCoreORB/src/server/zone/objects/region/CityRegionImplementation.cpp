@@ -138,7 +138,7 @@ Region* CityRegionImplementation::addRegion(float x, float y, float radius, bool
 	region->setObjectName(regionName, false);
 
 	if (isClientRegion())
-		region->setNoBuildArea(true);
+		region->addAreaFlag(ActiveArea::NOBUILDZONEAREA);
 
 	zone->transferObject(region, -1, false);
 
