@@ -775,7 +775,7 @@ void PlanetManagerImplementation::loadClientRegions(LuaObject* outposts) {
 				zone->registerObjectWithPlanetaryMap(region);
 			}
 
-			region->setMunicipalZone(true);
+			region->addAreaFlag(ActiveArea::CITY);
 
 			ManagedReference<SceneObject*> scenery = nullptr;
 
@@ -824,7 +824,7 @@ void PlanetManagerImplementation::loadClientRegions(LuaObject* outposts) {
 		areaShape->setAreaCenter(x, y);
 		noBuild->setAreaShape(areaShape);
 		noBuild->setRadius(radius * 2);
-		noBuild->setNoBuildArea(true);
+		noBuild->addAreaFlag(ActiveArea::NOBUILDZONEAREA);
 		// Cities already have "Municipal" protection so the structure no-build should not apply to camps
 		noBuild->setCampingPermitted(true);
 
@@ -984,7 +984,7 @@ bool PlanetManagerImplementation::isSpawningPermittedAt(float x, float y, float 
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
 
-		if (area->isRegion() || area->isMunicipalZone() || area->isNoSpawnArea()) {
+		if (area->isRegion() || area->isCityRegion() || area->isNoSpawnArea()) {
 			return false;
 		}
 	}
@@ -1021,7 +1021,7 @@ bool PlanetManagerImplementation::isBuildingPermittedAt(float x, float y, SceneO
 	for (int i = 0; i < activeAreas.size(); ++i) {
 		ActiveArea* area = activeAreas.get(i);
 
-		if (area->isNoBuildArea()) {
+		if (area->isNoBuildZone()) {
 			return false;
 		}
 	}
@@ -1056,7 +1056,7 @@ bool PlanetManagerImplementation::isCampingPermittedAt(float x, float y, float m
 		}
 
 		// Honor no-build after checking for areas that camping is explicitly allowed
-		if (area->isNoBuildArea()) {
+		if (area->isNoBuildZone()) {
 				return false;
 		}
 	}
