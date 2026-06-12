@@ -401,8 +401,8 @@ void CreatureObjectImplementation::playMusicMessage(const String& file) {
 	sendMessage(message);
 }
 
-void CreatureObjectImplementation::sendOpenHolocronToPageMessage() {
-	OpenHolocronToPageMessage* message = new OpenHolocronToPageMessage();
+void CreatureObjectImplementation::sendOpenHolocronToPageMessage(const String& page) {
+	OpenHolocronToPageMessage* message = new OpenHolocronToPageMessage(page);
 	sendMessage(message);
 }
 
@@ -782,7 +782,7 @@ bool CreatureObjectImplementation::setState(uint64 state, bool notifyClient) {
 #ifdef COV_DEBUG
 						info("Null closeobjects vector in CreatureObjectImplementation::setState", true);
 #endif
-						thisZone->getInRangeObjects(getWorldPositionX(), getWorldPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeSceneObjects, true);
+						thisZone->getInRangeObjects(getWorldPositionX(), getWorldPositionZ(), getWorldPositionY(), ZoneServer::CLOSEOBJECTRANGE, &closeSceneObjects, true);
 						maxInRangeObjects = closeSceneObjects.size();
 					} else {
 						closeobjects->safeCopyReceiversTo(closeSceneObjects, 1);
@@ -1290,20 +1290,6 @@ void CreatureObjectImplementation::addEncumbrance(int type, int value,
 	setEncumbrance(type, newValue, notifyClient);
 }
 
-void CreatureObjectImplementation::setBankCredits(int credits,
-		bool notifyClient) {
-
-	Locker locker(creditObject);
-	creditObject->setBankCredits(credits, notifyClient);
-}
-
-void CreatureObjectImplementation::setCashCredits(int credits,
-		bool notifyClient) {
-
-	Locker locker(creditObject);
-	creditObject->setCashCredits(credits, notifyClient);
-}
-
 void CreatureObjectImplementation::addSkill(Skill* skill, bool notifyClient) {
 	if (skillList.contains(skill))
 		return;
@@ -1411,7 +1397,7 @@ void CreatureObjectImplementation::removeAllSkillModsOfType(const int modType, b
 	}
 }
 
-int CreatureObjectImplementation::getSkillMod(const String& skillmod) {
+int CreatureObjectImplementation::getSkillMod(const String& skillmod) const {
 	Locker locker(&skillModMutex);
 	return skillModList.getSkillMod(skillmod);
 }
