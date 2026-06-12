@@ -570,7 +570,7 @@ String LootManagerImplementation::getRandomLootableMod( unsigned int sceneObject
 			 sceneObjectType == SceneObjectType::HEADWEAR || sceneObjectType == SceneObjectType::JACKET ||
 			 sceneObjectType == SceneObjectType::PANTS || sceneObjectType == SceneObjectType::ROBE ||
 			 sceneObjectType == SceneObjectType::SHIRT || sceneObjectType == SceneObjectType::VEST ||
-			 sceneObjectType == SceneObjectType::WOOKIEGARB || sceneObjectType == SceneObjectType::MISCCLOTHING ||
+			 sceneObjectType == SceneObjectType::WOOKIEEGARB || sceneObjectType == SceneObjectType::MISCCLOTHING ||
 			 sceneObjectType == SceneObjectType::SKIRT || sceneObjectType == SceneObjectType::WEARABLECONTAINER ||
 			 sceneObjectType == SceneObjectType::JEWELRY || sceneObjectType == SceneObjectType::RING ||
 			 sceneObjectType == SceneObjectType::BRACELET || sceneObjectType == SceneObjectType::NECKLACE ||
@@ -616,7 +616,7 @@ void LootManagerImplementation::setSockets(TangibleObject* object, CraftingValue
 }
 
 bool LootManagerImplementation::createLoot(SceneObject* container, AiAgent* creature) {
-	LootGroupCollection* lootCollection = creature->getLootGroups();
+	const LootGroupCollection* lootCollection = creature->getLootGroups();
 
 	if (lootCollection == nullptr)
 		return false;
@@ -624,9 +624,9 @@ bool LootManagerImplementation::createLoot(SceneObject* container, AiAgent* crea
 	return createLootFromCollection(container, lootCollection, creature->getLevel());
 }
 
-bool LootManagerImplementation::createLootFromCollection(SceneObject* container, LootGroupCollection* lootCollection, int level) {
+bool LootManagerImplementation::createLootFromCollection(SceneObject* container, const LootGroupCollection* lootCollection, int level) {
 	for (int i = 0; i < lootCollection->count(); ++i) {
-		LootGroupCollectionEntry* entry = lootCollection->get(i);
+		const LootGroupCollectionEntry* entry = lootCollection->get(i);
 		int lootChance = entry->getLootChance();
 
 		if (lootChance <= 0)
@@ -639,14 +639,14 @@ bool LootManagerImplementation::createLootFromCollection(SceneObject* container,
 
 		int tempChance = 0; //Start at 0.
 
-		LootGroups* lootGroups = entry->getLootGroups();
+		const LootGroups* lootGroups = entry->getLootGroups();
 
 		//Now we do the second roll to determine loot group.
 		roll = System::random(10000000);
 
 		//Select the loot group to use.
 		for (int i = 0; i < lootGroups->count(); ++i) {
-			LootGroupEntry* entry = lootGroups->get(i);
+			const LootGroupEntry* entry = lootGroups->get(i);
 
 			tempChance += entry->getLootChance();
 
