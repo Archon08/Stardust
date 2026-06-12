@@ -5,6 +5,7 @@
 
 #include "ComponentSlots.h"
 #include "ShipComponentFlag.h"
+#include "server/zone/objects/transaction/TransactionLog.h"
 #include "system/lang/UnicodeString.h"
 #include "server/zone/Zone.h"
 #include "server/zone/SpaceZone.h"
