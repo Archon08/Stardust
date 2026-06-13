@@ -78,6 +78,10 @@ Luna<LuaPlayerObject>::RegType LuaPlayerObject::Register[] = {
 		{ "setFrsRank", &LuaPlayerObject::setFrsRank },
 		{ "getFrsRank", &LuaPlayerObject::getFrsRank },
 		{ "getFrsCouncil", &LuaPlayerObject::getFrsCouncil },
+		{ "getPilotTier", &LuaPlayerObject::getPilotTier },
+		{ "setPilotTier", &LuaPlayerObject::setPilotTier },
+		{ "getPilotSquadron", &LuaPlayerObject::getPilotSquadron },
+		{ "setPilotSquadron", &LuaPlayerObject::setPilotSquadron },
 		{ 0, 0 }
 };
 
@@ -364,6 +368,35 @@ int LuaPlayerObject::setForcePower(lua_State* L) {
 	int forcePower = lua_tointeger(L, -1);
 
 	realObject->setForcePower(forcePower, true);
+
+	return 0;
+}
+
+// P5: pilot certification bindings (consumed by squadron screenplays to grant pilot tier/squadron)
+int LuaPlayerObject::getPilotTier(lua_State* L) {
+	lua_pushinteger(L, realObject->getPilotTier());
+
+	return 1;
+}
+
+int LuaPlayerObject::setPilotTier(lua_State* L) {
+	int tier = lua_tointeger(L, -1);
+
+	realObject->setPilotTier(tier);
+
+	return 0;
+}
+
+int LuaPlayerObject::getPilotSquadron(lua_State* L) {
+	lua_pushinteger(L, realObject->getPilotSquadron());
+
+	return 1;
+}
+
+int LuaPlayerObject::setPilotSquadron(lua_State* L) {
+	uint32 squadron = lua_tointeger(L, -1);
+
+	realObject->setPilotSquadron(squadron);
 
 	return 0;
 }
