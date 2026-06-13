@@ -1,0 +1,69 @@
+name: component-stats
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to harvest'
+        required: true
+        default: 'stardust-space'
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Harvest ship-component stats from Lua templates -> CSV
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, re, csv
+          base="MMOCoreORB/bin/scripts/object/tangible/ship/components"
+          # stat keys we care about across component types
+          keys=["maxSpeed","maxPitch","maxRoll","maxYaw","maxAccelaration","maxAcceleration","maxDeceleration",
+                "engineMaxSpeed","reactorGenerationRate","energyGeneration","shieldHitpointsMaximumFront",
+                "shieldHitpointsMaximumBack","shieldRechargeRate","armorHitpointsMaximum","maxDamage","minDamage",
+                "weaponMaximumDamage","weaponMinimumDamage","weaponRefireRate","weaponEnergyPerShot","hitpoints",
+                "energyMaintenance","mass"]
+          rows=[]
+          for root,_,files in os.walk(base):
+            ctype=root.split("/components/")[-1].split("/")[0] if "/components/" in root else "?"
+            for fn in files:
+              if not fn.endswith(".lua") or fn.startswith("shared_"): continue
+              p=os.path.join(root,fn)
+              try: txt=open(p,encoding="utf-8",errors="ignore").read()
+              except: continue
+              rec={"name":fn[:-4],"ctype":ctype}
+              got=False
+              for k in keys:
+                m=re.search(r'\{\s*"'+re.escape(k)+r'"\s*,\s*([-0-9.]+)\s*\}', txt)
+                if m:
+                  # a key may appear twice (max + base); take the LAST (usually the real cap/base)
+                  vals=re.findall(r'\{\s*"'+re.escape(k)+r'"\s*,\s*([-0-9.]+)\s*\}', txt)
+                  rec[k]=vals[-1]; got=True
+              if got: rows.append(rec)
+          allkeys=["name","ctype"]+keys
+          with open("component_stats.csv","w",newline="") as f:
+            w=csv.DictWriter(f,fieldnames=allkeys); w.writeheader()
+            for r in rows: w.writerow(r)
+          # summary by ctype
+          from collections import Counter, defaultdict
+          c=Counter(r["ctype"] for r in rows)
+          print("harvested", len(rows), "stat-bearing component templates")
+          for t,n in c.most_common(): print(f"  {t}: {n}")
+          # engine maneuver spread (death-spiral relevant)
+          eng=[r for r in rows if r["ctype"]=="engine" and "maxSpeed" in r]
+          sp=sorted(float(r["maxSpeed"]) for r in eng if float(r["maxSpeed"])>1)
+          if sp: print(f"engine maxSpeed spread (>1): n={len(sp)} min={sp[0]} med={sp[len(sp)//2]} max={sp[-1]}")
+          PY
+          echo "--- csv head ---"; head -5 component_stats.csv; wc -l component_stats.csv
+
+      - name: upload csv
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-stats
+          path: component_stats.csv
+          retention-days: 14
