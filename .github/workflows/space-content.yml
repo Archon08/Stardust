@@ -1,0 +1,80 @@
+name: space-content
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to import space Lua content into'
+        required: true
+        default: 'space-port/phase-2'
+
+permissions:
+  contents: write
+
+env:
+  CORE3_PIN: 6856f315a80b5250635b2272695caec1d64204ed
+
+jobs:
+  content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Fetch pinned Core3 snapshot
+        run: |
+          wget -qO /tmp/core3.tar.gz "https://github.com/swgemu/Core3/archive/${CORE3_PIN}.tar.gz"
+          mkdir -p /tmp/core3
+          tar -xzf /tmp/core3.tar.gz -C /tmp/core3 --strip-components=1
+          ls /tmp/core3/MMOCoreORB/bin/scripts/ | head
+
+      - name: "P4: additive space Lua content drop (no Stardust collision — space dirs absent in 2019 tree)"
+        run: |
+          SRC=/tmp/core3/MMOCoreORB/bin/scripts
+          DST=MMOCoreORB/bin/scripts
+          copydir() {  # path under bin/scripts
+            if [ -e "$SRC/$1" ]; then
+              rm -rf "$DST/$1"
+              mkdir -p "$DST/$(dirname "$1")"
+              cp -r "$SRC/$1" "$DST/$1"
+              echo "copied dir: $1 ($(find "$DST/$1" -type f | wc -l) files)"
+            else
+              echo "MISSING UPSTREAM: $1"
+            fi
+          }
+          # behavior-tree + manager + mobile space content
+          copydir ai_space
+          copydir managers/space
+          copydir ship_mobile
+          copydir mobile/space
+          copydir mobile/conversations/space
+          copydir screenplays/space
+          # object templates (space-only subtrees)
+          copydir object/ship
+          copydir object/intangible/ship
+          copydir object/tangible/ship
+          copydir object/tangible/space
+          copydir object/static/space
+          copydir object/draft_schematic/space
+          # loot
+          copydir loot/groups/ship
+          copydir loot/groups/space
+          copydir loot/items/ship
+          copydir loot/items/space
+
+      - name: Summary
+        run: |
+          echo "Total space lua files now in tree:"
+          find MMOCoreORB/bin/scripts -path '*space*' -name '*.lua' | wc -l
+          find MMOCoreORB/bin/scripts/ship_mobile -name '*.lua' 2>/dev/null | wc -l
+
+      - name: Commit and push
+        run: |
+          git config user.name "space-content"
+          git config user.email "noreply@anthropic.com"
+          git add -A MMOCoreORB/bin/scripts
+          git commit -m "P4: additive space Lua content drop from Core3@${CORE3_PIN:0:7} (ai_space, managers/space, ship_mobile 1925 loadouts, mobile/space, screenplays/space, ship/space object templates, space loot) — registration includes reconciled separately" || echo "nothing to commit"
+          git push origin HEAD:${{ github.event.inputs.branch }}
+          git log --oneline -1
+          git diff HEAD~1 --shortstat 2>/dev/null || true
