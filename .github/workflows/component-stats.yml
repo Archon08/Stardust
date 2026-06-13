@@ -43,7 +43,7 @@ jobs:
                 if m:
                   # a key may appear twice (max + base); take the LAST (usually the real cap/base)
                   vals=re.findall(r'\{\s*"'+re.escape(k)+r'"\s*,\s*([-0-9.]+)\s*\}', txt)
-                  rec[k]=vals[-1]; got=True
+                  rec[k]=vals[0]; got=True
               if got: rows.append(rec)
           allkeys=["name","ctype"]+keys
           with open("component_stats.csv","w",newline="") as f:
