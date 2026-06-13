@@ -51,12 +51,13 @@ object_draft_schematic_space_weapon_wpn_advanced_ioncannon = object_draft_schema
 	complexity = 32,
 	size = 1,
 	factoryCrateSize = 0,
-
+	factoryCrateType = "object/factory/factory_crate_generic_items.iff",
+   
 	xpType = "shipwright",
 	xp = 625,
 
 	assemblySkill = "weapon_systems",
-	experimentingSkill = "weapons_systems_experimentation",
+	experimentingSkill = "weapon_systems_experimentation",
 	customizationSkill = "medicine_customization",
 
 	customizationOptions = {},

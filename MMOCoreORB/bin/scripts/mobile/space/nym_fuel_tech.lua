@@ -2,6 +2,7 @@ nym_fuel_tech = Creature:new {
 	objectName = "@npc_spawner_n:nym_fuel_tech",
 	socialGroup = "imperial",
 	faction = "imperial",
+	mobType = MOB_NPC,
 	level = 100,
 	chanceHit = 1,
 	damageMin = 645,
@@ -17,7 +18,7 @@ nym_fuel_tech = Creature:new {
 	hideAmount = 0,
 	boneType = "",
 	boneAmount = 0,
-	milk = 2 * 0,
+	milk = 0,
 	tamingChance = 0,
 	ferocity = 0,
 	pvpBitmask = NONE,
@@ -25,12 +26,19 @@ nym_fuel_tech = Creature:new {
 	optionsBitmask = AIENABLED,
 	diet = HERBIVORE,
 
-	templates = {"object/mobile/space_imperial_tier2_lok_fuel_tech.iff"},
+	templates = {"object/mobile/dressed_nym_technician_1.iff"},
 	lootGroups = {},
-	weapons = {},
+
+	-- Primary and secondary weapon should be different types (rifle/carbine, carbine/pistol, rifle/unarmed, etc)
+	-- Unarmed should be put on secondary unless the mobile doesn't use weapons, in which case "unarmed" should be put primary and "none" as secondary
+	primaryWeapon = "unarmed",
+	secondaryWeapon = "none",
 	conversationTemplate = "",
-	attacks = {
-	}
+	
+	-- primaryAttacks and secondaryAttacks should be separate skill groups specific to the weapon type listed in primaryWeapon and secondaryWeapon
+	-- Use merge() to merge groups in creatureskills.lua together. If a weapon is set to "none", set the attacks variable to empty brackets
+	primaryAttacks = {},
+	secondaryAttacks = { }
 }
 
 CreatureTemplates:addCreatureTemplate(nym_fuel_tech, "nym_fuel_tech")

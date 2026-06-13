@@ -50,12 +50,13 @@ object_draft_schematic_space_weapon_speed_limiter_upgrade_mk3 = object_draft_sch
    craftingToolTab = 131072, -- (See DraftSchematicObjectTemplate.h)
    complexity = 27, 
    size = 1, 
-
+   factoryCrateType = "object/factory/factory_crate_electronics.iff",
+   
    xpType = "shipwright", 
    xp = 125, 
 
    assemblySkill = "weapon_systems", 
-   experimentingSkill = "weapons_systems_experimentation", 
+   experimentingSkill = "weapon_systems_experimentation", 
    customizationSkill = "medicine_customization", 
 
    customizationOptions = {},
