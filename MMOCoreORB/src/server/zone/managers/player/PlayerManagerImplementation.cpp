@@ -24,6 +24,8 @@
 #include "server/zone/managers/collision/CollisionManager.h"
 #include "server/zone/objects/intangible/VehicleControlDevice.h"
 #include "server/zone/objects/tangible/threat/ThreatMap.h"
+#include "server/zone/objects/ship/ShipObject.h"
+#include "server/zone/objects/ship/ai/ShipAiAgent.h"
 #include "server/zone/objects/creature/VehicleObject.h"
 #include "server/login/packets/ErrorMessage.h"
 #include "server/zone/packets/player/LogoutMessage.h"
@@ -1530,8 +1532,123 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 // ShipAiAgent accessors not yet present in this tree; for now we safely clear the threat map
 // so ship destruction completes cleanly. (Stardust scaffold; expand when ship XP data lands.)
 void PlayerManagerImplementation::disseminateSpaceExperience(ShipAiAgent* destructedObject, ThreatMap* threatMap) {
-	if (threatMap != nullptr)
+	if (destructedObject == nullptr || threatMap == nullptr) {
+		if (threatMap != nullptr)
+			threatMap->removeAll();
+
+		return;
+	}
+
+	uint32 totalDamage = threatMap->getTotalDamage();
+
+	if (totalDamage == 0) {
 		threatMap->removeAll();
+		return;
+	}
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+
+	if (zoneServer == nullptr) {
+		threatMap->removeAll();
+		return;
+	}
+
+	uint32 shipTypeHash = destructedObject->getShipType().hashCode();
+	float experienceReward = destructedObject->getExperienceValue();
+
+	// All experience should be random with the exception of ISD and Corvette
+	if (shipTypeHash != STRING_HASHCODE("star_destroyer") && shipTypeHash != STRING_HASHCODE("corvette")) {
+		int bonus = experienceReward * 0.15f;
+
+		if (bonus > 0)
+			experienceReward += System::random(bonus);
+	}
+
+	for (int i = 0; i < threatMap->size(); ++i) {
+		ThreatMapEntry* entry = &threatMap->elementAt(i).getValue();
+		TangibleObject* attacker = threatMap->elementAt(i).getKey();
+
+		if (entry == nullptr || attacker == nullptr || !attacker->isPlayerShip()) {
+			continue;
+		}
+
+		if (entry->getTotalDamage() < 1) {
+			continue;
+		}
+
+		ShipObject* playerShip = attacker->asShipObject();
+
+		if (playerShip == nullptr) {
+			continue;
+		}
+
+		Locker shipLock(playerShip, destructedObject);
+
+		// Range check
+		if (!destructedObject->isInRange3dZoneless(playerShip, ZoneServer::SPACECLOSEOBJECTRANGE)) {
+			continue;
+		}
+
+		Vector<uint64> playersOnBoard = playerShip->getPlayersOnBoard();
+		int totalPlayers = playersOnBoard.size();
+
+		if (totalPlayers < 1) {
+			continue;
+		}
+
+		// Experience divided among players on ship
+		float shipExperience = (experienceReward / totalPlayers);
+
+		for (int j = 0; j < totalPlayers; ++j) {
+			uint64 shipMemberID = playersOnBoard.get(j);
+			ManagedReference<CreatureObject*> shipMember = zoneServer->getObject(shipMemberID).castTo<CreatureObject*>();
+
+			if (shipMember == nullptr) {
+				continue;
+			}
+
+			PlayerObject* ghost = shipMember->getPlayerObject();
+
+			if (ghost == nullptr) {
+				continue;
+			}
+
+			Locker playLock(shipMember, playerShip);
+
+			if (shipMember->hasSkill("pilot_neutral_master")) {
+				awardExperience(shipMember, "prestige_pilot", shipExperience, true, 1.f);
+			} else if (shipMember->hasSkill("pilot_rebel_navy_master")) {
+				awardExperience(shipMember, "prestige_rebel", shipExperience, true, 1.f);
+			} else if (shipMember->hasSkill("pilot_imperial_navy_master")) {
+				awardExperience(shipMember, "prestige_imperial", shipExperience, true, 1.f);
+			} else {
+				float aceMultiplier = 1.0f;
+
+				/*	130-132 rebel ace squadrons, 133-135 imperial ace squadrons, 136-138 neutral ace squadrons */
+				Vector<Vector<uint32> > aceBadges;
+				Vector<uint32> rebelAces; rebelAces.add(130); rebelAces.add(131); rebelAces.add(132);
+				Vector<uint32> imperialAces; imperialAces.add(133); imperialAces.add(134); imperialAces.add(135);
+				Vector<uint32> neutralAces; neutralAces.add(136); neutralAces.add(137); neutralAces.add(138);
+				aceBadges.add(rebelAces); aceBadges.add(imperialAces); aceBadges.add(neutralAces);
+
+				for (int b = 0; b < aceBadges.size(); ++b) {
+					Vector<uint32> badgeVec = aceBadges.get(b);
+
+					for (int k = 0; k < badgeVec.size(); ++k) {
+						if (ghost->hasBadge(badgeVec.get(k))) {
+							aceMultiplier += 1.f;
+							break;
+						}
+					}
+				}
+
+				awardExperience(shipMember, "space_combat_general", shipExperience, true, aceMultiplier);
+			}
+		}
+	}
+
+	// Lastly, clear the threat map
+	threatMap->removeAll();
 }
 
 bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, ArmorObject* armor) {
