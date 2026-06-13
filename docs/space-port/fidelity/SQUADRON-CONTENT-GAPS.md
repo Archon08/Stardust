@@ -24,7 +24,7 @@ mission/trainer content at all:
 
 | Faction | Squadron | Screenplay | Trainer convos | Tier chain present | Tier-cert wired |
 |---|---|---|---|---|---|
-| Rebel | **Akron's Havoc** | full (2.2k lines) | kreezo/viopa/aqzow/vrak | Tier 1–4 + Master | **Yes** (convo `incrementPilotTier` + screenplay `setPilotTier` — wired in F3) |
+| Rebel | **Akron's Havoc** | full (2.2k lines) | kreezo/viopa/aqzow/vrak | Tier 1–4 + Master | **Yes** (trainer convos call `incrementPilotTier` on tier completion) |
 | Rebel | Vortex | **stub only** | none | none | n/a (no content) |
 | Rebel | Crimson Phoenix | **stub only** | none | none | n/a (no content) |
 | Imperial | Inquisition | **stub only** | none | none | n/a (no content) |
@@ -38,22 +38,40 @@ mission/trainer content at all:
 **no missions, no recruiter conversation, and no quest data anywhere in the repo.** Wiring a tier grant
 into these would require first **authoring the entire mission chain**, which the no-invent rule forbids.
 
+### Critical: this exact state IS upstream Core3 @ pin `6856f315a80b5250635b2272695caec1d64204ed`
+
+The repo's `screenplays/space/` tree is held **byte-for-byte identical to the upstream pin** by the
+`space-lint.yml` "Content fidelity" gate (`diff -rq` against the pin; any divergence fails the lint).
+Verified against the pin:
+
+- Upstream **Havoc** has `setPilotTier` count = **0** — it grants pilot tiers purely through its trainer
+  **conversation handlers** (`incrementPilotTier`), not via the screenplay. This is genuine upstream/Live
+  behavior.
+- Upstream **CorSec** = 4 `setPilotTier`, **RSF** = 3 `setPilotTier` (in their `reset*Quests` reset
+  helpers). Those are upstream's own per-squadron choices, **not** a template Havoc was meant to follow.
+- The 6 stub squadrons are empty stubs **in upstream too** — upstream never authored them.
+
+**Consequence for "wire the missing 7 squadrons":** there is nothing to faithfully wire. Havoc already
+grants tiers exactly as upstream/Live does; adding `setPilotTier` to Havoc was attempted in F3, **failed
+the fidelity gate (it diverged from the pin), and was reverted** — doing so would have *invented* a
+divergence from original behavior. The other 6 have no chain to attach a grant to. The honest gap is
+**missing original content**, not missing wiring (see §3).
+
 ---
 
 ## 2. Per-squadron gap detail
 
-### 2.1 Tier-cert progression wiring (F3 — what was done vs deferred)
+### 2.1 Tier-cert progression wiring (F3 — finding)
 
-- **Havoc (rebel):** tier progression is granted on completion by the trainer conversation handlers
-  (`kreezo/viopa/aqzow` call `ghost:incrementPilotTier()` gated on
-  `SpaceHelpers:hasCompletedPilotTier(pPlayer, "rebel_navy", N)`). The screenplay's `reset*Quests`
-  functions were **missing** the `setPilotTier(N)` reset call that the CorSec/RSF templates have, leaving
-  pilot-tier state inconsistent after a quest reset. **Fixed in F3:** `setPilotTier(1..4)` added to
-  `resetKreezoQuests/resetViopaQuests/resetAqzowQuests/resetArkonQuests`, matching the
-  CorSec/RSF template exactly (faction key `rebel_navy`, tiers 1–4).
-- **CorSec / RSF:** already wired; left unchanged.
+- **Havoc (rebel):** tier progression IS already granted on completion by the trainer conversation
+  handlers (`kreezo/viopa/aqzow` call `ghost:incrementPilotTier()` gated on
+  `SpaceHelpers:hasCompletedPilotTier(pPlayer, "rebel_navy", N)`). This matches upstream/Live exactly.
+  **No wiring change needed or possible** — adding `setPilotTier` to the screenplay diverges from the
+  upstream pin (fidelity-gate failure) and was therefore reverted. Havoc is correct as-is.
+- **CorSec / RSF:** already wired (CorSec T1–4, RSF T1–3), identical to upstream; left unchanged.
 - **The 6 stub squadrons:** cannot be wired — there is no tier chain, no trainer, and no completion hook
-  point to attach a grant to. **Deferred:** requires authoring the chains (see §2.3).
+  point to attach a grant to (and the stubs are upstream-faithful). **Deferred:** requires authoring the
+  chains (see §2.3).
 
 ### 2.2 Master mission = Corvette-in-Kessel (Live §2.4) — gap in ALL implemented chains
 
@@ -127,10 +145,12 @@ mission data** is required and is **not present** in the current corpus
 
 ## 4. Status summary
 
-- **Wired in F3 (faithful, from proven template):** Havoc tier-cert progression (`setPilotTier 1–4`).
-- **Already wired (unchanged):** CorSec (T1–4), RSF (T1–3).
-- **Deferred (cannot do faithfully without data we lack — recorded, not faked):**
+- **No tier-cert wiring change was needed or made:** Havoc already grants tiers via its trainer
+  conversation handlers (`incrementPilotTier`), identical to upstream/Live; CorSec (T1–4) and RSF (T1–3)
+  were already wired. The `screenplays/space/` tree is fidelity-locked to the upstream pin, so any
+  divergence is both forbidden by the no-invent rule and rejected by `space-lint.yml`.
+- **Deferred (cannot do faithfully without original data we lack — recorded, not faked):**
   - Corvette-in-Kessel **master mission** for all chains (Havoc/CorSec/RSF + the 6 stubs).
   - **Full chains** for the 6 stub squadrons (Vortex, Crimson Phoenix, Inquisition, Storm,
-    Black Epsilon, Smuggler Alliance).
+    Black Epsilon, Smuggler Alliance) — empty stubs upstream too.
   - RSF **Tier 4** + master.
