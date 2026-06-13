@@ -45,6 +45,8 @@
 #include "server/zone/SpaceZone.h"
 #include "server/zone/ZoneServer.h"
 #include "server/chat/ChatManager.h"
+#include "server/zone/managers/name/NameManager.h"
+#include "server/db/ServerDatabase.h"
 #include "server/chat/StringIdChatParameter.h"
 #include "server/zone/objects/creature/variables/CommandQueueAction.h"
 #include "server/zone/objects/creature/commands/QueueCommand.h"
@@ -4203,13 +4205,175 @@ void CreatureObjectImplementation::setPostureChangeDelay(unsigned long long dela
 }
 
 String CreatureObjectImplementation::setFirstName(const String& newFirstName, bool skipVerify) {
-	// P2: PlayerManager name-change pipeline not present in this tree; rename is unavailable here.
-	return "Name change is not supported on this server.";
+	// P5: real rename pipeline (mirrors SetFirstNameCommand). Returns "" on success, else an error string.
+	if (!isPlayerCreature())
+		return "Can only set FirstName on players.";
+
+	ManagedReference<PlayerObject*> ghost = getPlayerObject();
+
+	if (ghost == nullptr)
+		return "missing ghost";
+
+	if (newFirstName.isEmpty())
+		return "First names may not be empty.";
+
+	ZoneServer* zoneServer = getZoneServer();
+
+	if (zoneServer == nullptr)
+		return "no zone server";
+
+	ManagedReference<PlayerManager*> playerManager = zoneServer->getPlayerManager();
+
+	if (playerManager == nullptr)
+		return "no player manager";
+
+	if (!skipVerify) {
+		NameManager* nameManager = zoneServer->getNameManager();
+
+		int result = nameManager->validateName(newFirstName, getSpecies());
+
+		switch (result) {
+		case NameManagerResult::ACCEPTED:
+			break;
+		case NameManagerResult::DECLINED_EMPTY:
+			return "First names may not be empty.";
+		case NameManagerResult::DECLINED_RACE_INAPP:
+			return "That name is inappropriate for the player's species.";
+		case NameManagerResult::DECLINED_PROFANE:
+			return "That name is profane.";
+		case NameManagerResult::DECLINED_DEVELOPER:
+			return "That is a developer's name.";
+		case NameManagerResult::DECLINED_FICT_RESERVED:
+			return "That name is a reserved fictional name.";
+		case NameManagerResult::DECLINED_RESERVED:
+			return "That name is reserved.";
+		case NameManagerResult::DECLINED_SYNTAX:
+			return "That name contains invalid syntax.";
+		default:
+			break;
+		}
+	}
+
+	if (playerManager->existsName(newFirstName))
+		return "That name is already in use";
+
+	String oldFirstName = getFirstName();
+	String oldLastName = getLastName();
+	String newFullName = newFirstName;
+
+	if (!oldLastName.isEmpty())
+		newFullName = newFirstName + " " + oldLastName;
+
+	setCustomObjectName(newFullName, true);
+
+	ChatManager* chatManager = zoneServer->getChatManager();
+
+	if (chatManager != nullptr) {
+		chatManager->removePlayer(oldFirstName);
+		chatManager->addPlayer(asCreatureObject());
+	}
+
+	playerManager->removePlayer(oldFirstName);
+	playerManager->addPlayer(asCreatureObject());
+
+	ghost->removeAllReverseFriends(oldFirstName);
+
+	String characterFirstName = getFirstName();
+	Database::escapeString(characterFirstName);
+
+	int galaxyID = zoneServer->getGalaxyID();
+
+	StringBuffer charDirtyQuery;
+	charDirtyQuery
+			<< "UPDATE `characters_dirty` SET `firstname` = '" << characterFirstName
+			<< "' WHERE `character_oid` = '" << getObjectID()
+			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+	ServerDatabase::instance()->executeStatement(charDirtyQuery);
+
+	StringBuffer charQuery;
+	charQuery
+			<< "UPDATE `characters` SET `firstname` = '" << characterFirstName
+			<< "' WHERE `character_oid` = '" << getObjectID()
+			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+	ServerDatabase::instance()->executeStatement(charQuery);
+
+	return "";
 }
 
 String CreatureObjectImplementation::setLastName(const String& newLastName, bool skipVerify) {
-	// P2: PlayerManager name-change pipeline not present in this tree; rename is unavailable here.
-	return "Name change is not supported on this server.";
+	// P5: real rename pipeline (mirrors setFirstName/last-name path). Returns "" on success, else an error string.
+	if (!isPlayerCreature())
+		return "Can only set LastName on players.";
+
+	ManagedReference<PlayerObject*> ghost = getPlayerObject();
+
+	if (ghost == nullptr)
+		return "missing ghost";
+
+	ZoneServer* zoneServer = getZoneServer();
+
+	if (zoneServer == nullptr)
+		return "no zone server";
+
+	ManagedReference<PlayerManager*> playerManager = zoneServer->getPlayerManager();
+
+	if (playerManager == nullptr)
+		return "no player manager";
+
+	if (!skipVerify && !newLastName.isEmpty()) {
+		NameManager* nameManager = zoneServer->getNameManager();
+
+		int result = nameManager->validateName(newLastName, getSpecies());
+
+		switch (result) {
+		case NameManagerResult::ACCEPTED:
+		case NameManagerResult::DECLINED_EMPTY:
+			break;
+		case NameManagerResult::DECLINED_RACE_INAPP:
+			return "That name is inappropriate for the player's species.";
+		case NameManagerResult::DECLINED_PROFANE:
+			return "That name is profane.";
+		case NameManagerResult::DECLINED_DEVELOPER:
+			return "That is a developer's name.";
+		case NameManagerResult::DECLINED_FICT_RESERVED:
+			return "That name is a reserved fictional name.";
+		case NameManagerResult::DECLINED_RESERVED:
+			return "That name is reserved.";
+		case NameManagerResult::DECLINED_SYNTAX:
+			return "That name contains invalid syntax.";
+		default:
+			break;
+		}
+	}
+
+	String firstName = getFirstName();
+	String newFullName = firstName;
+
+	if (!newLastName.isEmpty())
+		newFullName = firstName + " " + newLastName;
+
+	setCustomObjectName(newFullName, true);
+
+	String characterLastName = newLastName;
+	Database::escapeString(characterLastName);
+
+	int galaxyID = zoneServer->getGalaxyID();
+
+	StringBuffer charDirtyQuery;
+	charDirtyQuery
+			<< "UPDATE `characters_dirty` SET `surname` = '" << characterLastName
+			<< "' WHERE `character_oid` = '" << getObjectID()
+			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+	ServerDatabase::instance()->executeStatement(charDirtyQuery);
+
+	StringBuffer charQuery;
+	charQuery
+			<< "UPDATE `characters` SET `surname` = '" << characterLastName
+			<< "' WHERE `character_oid` = '" << getObjectID()
+			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+	ServerDatabase::instance()->executeStatement(charQuery);
+
+	return "";
 }
 
 bool CreatureObjectImplementation::healFactionChecks(CreatureObject* healerCreo, bool isPlayer) {
