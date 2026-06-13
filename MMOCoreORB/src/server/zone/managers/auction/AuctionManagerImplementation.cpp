@@ -1105,7 +1105,48 @@ bool AuctionManagerImplementation::checkItemCategory(int category, AuctionItem* 
 
 	return false;
 }
-AuctionQueryHeadersResponseMessage* AuctionManagerImplementation::fillAuctionQueryHeadersResponseMessage(CreatureObject* player, SceneObject* vendor, TerminalListVector* terminalList, int screen, uint32 category, int clientcounter, int offset) {
+// P5: apply auction search filter params (text/price/entrance-fee) on the browsable "All Auctions" path; mirrors upstream Core3 semantics.
+static bool passesAuctionFilter(CreatureObject* player, AuctionItem* item, const UnicodeString& filterText, int minPrice, int maxPrice, bool includeEntranceFee) {
+	if (item == nullptr)
+		return false;
+
+	if (minPrice != 0 || maxPrice != 0) {
+		int itemPrice = item->getPrice();
+
+		if (includeEntranceFee && player != nullptr) {
+			ManagedReference<SceneObject*> itemVendor = player->getZoneServer()->getObject(item->getVendorID());
+
+			if (itemVendor != nullptr && itemVendor->isVendor()) {
+				int accessFee = 0;
+				ManagedReference<SceneObject*> parent = itemVendor->getRootParent();
+
+				if (parent != nullptr && parent->isBuildingObject()) {
+					BuildingObject* building = cast<BuildingObject*>(parent.get());
+
+					if (building != nullptr)
+						accessFee = building->getAccessFee();
+				}
+
+				itemPrice += accessFee;
+			}
+		}
+
+		if ((minPrice != 0 && itemPrice < minPrice) || (maxPrice != 0 && itemPrice > maxPrice))
+			return false;
+	}
+
+	if (!filterText.isEmpty()) {
+		String lowerFilter = filterText.toString().toLowerCase();
+		String itemName = item->getItemName().toLowerCase();
+
+		if (itemName.indexOf(lowerFilter) == -1)
+			return false;
+	}
+
+	return true;
+}
+
+AuctionQueryHeadersResponseMessage* AuctionManagerImplementation::fillAuctionQueryHeadersResponseMessage(CreatureObject* player, SceneObject* vendor, TerminalListVector* terminalList, int screen, uint32 category, const UnicodeString& filterText, int minPrice, int maxPrice, bool includeEntranceFee, int clientcounter, int offset) {
 	AuctionQueryHeadersResponseMessage* reply = new AuctionQueryHeadersResponseMessage(screen, clientcounter, player);
 
 	String pname = player->getFirstName().toLowerCase();
@@ -1154,7 +1195,7 @@ AuctionQueryHeadersResponseMessage* AuctionManagerImplementation::fillAuctionQue
 					}
 				case 2: // All Auctions (Bazaar)
 					if (item->getStatus() == AuctionItem::FORSALE) {
-						if(checkItemCategory(category, item)) {
+						if(checkItemCategory(category, item) && passesAuctionFilter(player, item, filterText, minPrice, maxPrice, includeEntranceFee)) {
 							if (displaying >= offset) {
 								reply->addItemToList(item);
 							}
@@ -1311,7 +1352,7 @@ void AuctionManagerImplementation::getAuctionData(CreatureObject* player, SceneO
 		terminalList = auctionMap->getVendorTerminalData(planet, region, vendor);
 	}
 
-	AuctionQueryHeadersResponseMessage* msg = fillAuctionQueryHeadersResponseMessage(player, usedVendor, &terminalList, screen, category, clientcounter, offset);
+	AuctionQueryHeadersResponseMessage* msg = fillAuctionQueryHeadersResponseMessage(player, usedVendor, &terminalList, screen, category, filterText, minPrice, maxPrice, includeEntranceFee, clientcounter, offset);
 	player->sendMessage(msg);
 }
 
