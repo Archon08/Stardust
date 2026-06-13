@@ -20,6 +20,9 @@
 
 #include "gtest/gtest.h"
 
+#include <cmath>
+#include <cfloat>
+
 #include "server/zone/objects/ship/transform/SpaceMath.h"
 #include "server/zone/objects/ship/transform/SpaceTransform.h"
 
