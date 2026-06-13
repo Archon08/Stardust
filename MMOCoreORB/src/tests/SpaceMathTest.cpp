@@ -148,16 +148,34 @@ TEST_F(SpaceMathTest, VelocityRotationRoundTrip) {
 // overload is pure math (no appearance mesh) and runs headless.
 
 TEST_F(SpaceMathTest, IntersectionDirectHitNormalized) {
-	// Shooter at origin, firing straight down +X at unit speed over a distance of 10.
-	// Target sits at (5,0,0) -> intersection fraction ~0.5 of the segment.
+	// The formula's "difference" is velocity*distance (the segment END point) and a hit
+	// requires that end point to land within `radius` of the target's projected position.
+	// For a clean head-on hit, the target sits exactly at velocity*distance from the
+	// shooter: shooter at origin, velocity +X, distance 10 -> target at (10,0,0).
+	// Then dotProduct == sqrDistance -> intersection == 1.0 and iPosition == direction,
+	// so sqrDifference == 0 -> hit, returns the (clamped) fraction 1.0.
 	SpaceTransform shooter;
 	shooter.setPosition(Vector3(0.f, 0.f, 0.f));
 	shooter.setVelocity(Vector3(1.f, 0.f, 0.f));
 
-	float t = SpaceMath::getIntersection(shooter, Vector3(5.f, 0.f, 0.f), 10.f, 1.f);
+	float t = SpaceMath::getIntersection(shooter, Vector3(10.f, 0.f, 0.f), 10.f, 1.f);
+
+	ASSERT_LT(t, FLT_MAX);     // a hit (not FLT_MAX)
+	EXPECT_NEAR(t, 1.0f, 1e-3f);
+}
+
+TEST_F(SpaceMathTest, IntersectionPartialFractionWithinRadius) {
+	// Target slightly short of the segment end but within the hit radius. Target at
+	// (9.5,0,0), distance 10, radius 1: dot=95 < sqrDistance(100) -> fraction 0.95;
+	// iPosition=(9.5,0,0); difference=(10,0,0); sqrDifference=0.25 < sqrRadius(1) -> hit.
+	SpaceTransform shooter;
+	shooter.setPosition(Vector3(0.f, 0.f, 0.f));
+	shooter.setVelocity(Vector3(1.f, 0.f, 0.f));
+
+	float t = SpaceMath::getIntersection(shooter, Vector3(9.5f, 0.f, 0.f), 10.f, 1.f);
 
 	ASSERT_LT(t, FLT_MAX);
-	EXPECT_NEAR(t, 0.5f, 1e-2f);
+	EXPECT_NEAR(t, 0.95f, 1e-2f);
 }
 
 TEST_F(SpaceMathTest, IntersectionMissReturnsFltMax) {
