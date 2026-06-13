@@ -347,11 +347,12 @@ class AiAgent extends CreatureObject {
 	@preLocked
 	public abstract native void activateRecovery();
 
-	@preLocked
-	public native void activateMovementEvent();
+	// P2: declared but never implemented (no upstream equivalent); inert inline bodies so ORB stubs link.
+	public void activateMovementEvent() {
+	}
 
-	@preLocked
-	public native void activateInterrupt(SceneObject source, long msg);
+	public void activateInterrupt(SceneObject source, long msg) {
+	}
 
 	/**
 	 * Schedules the next movement event
@@ -476,11 +477,14 @@ class AiAgent extends CreatureObject {
 	@dirty
 	public native boolean isCamouflaged(CreatureObject target);
 
-	@dirty
-	protected native boolean isScentMasked(CreatureObject target);
+	// P2: declared but never implemented (no upstream equivalent); default to "not hidden".
+	protected boolean isScentMasked(CreatureObject target) {
+		return false;
+	}
 
-	@dirty
-	protected native boolean isConcealed(CreatureObject target);
+	protected boolean isConcealed(CreatureObject target) {
+		return false;
+	}
 
 	@mock
 	@preLocked

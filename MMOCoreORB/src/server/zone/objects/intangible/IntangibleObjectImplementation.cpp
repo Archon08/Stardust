@@ -4,6 +4,7 @@
 
 #include "server/zone/objects/intangible/IntangibleObject.h"
 #include "server/zone/objects/intangible/TheaterObject.h"
+#include "server/zone/packets/scene/AttributeListMessage.h"
 
 #include "server/zone/packets/intangible/IntangibleObjectMessage3.h"
 #include "server/zone/packets/intangible/IntangibleObjectMessage6.h"
@@ -70,4 +71,26 @@ void IntangibleObjectImplementation::setCustomObjectName(const UnicodeString& na
 	ditno3->close();
 
 	broadcastMessage(ditno3, true);
+}
+
+// ===== P2: ported missing method implementations (link-stage undefined symbols) =====
+// Droid-command chip attribute display + setters. Delta-message broadcast classes for these
+// fields are not present in this tree, so setters update state without a client delta (acceptable;
+// values are sent on next full update).
+void IntangibleObjectImplementation::fillAttributeList(AttributeListMessage* alm, CreatureObject* player) {
+	if (datapadSize > 0) {
+		alm->insertAttribute("droid_command_program_size", datapadSize);
+	}
+
+	if (!itemIdentifier.isEmpty()) {
+		alm->insertAttribute("droid_command_name", itemIdentifier);
+	}
+}
+
+void IntangibleObjectImplementation::setDataSize(const float dataSize, bool notifyClient) {
+	datapadSize = dataSize;
+}
+
+void IntangibleObjectImplementation::setItemIdentifier(const String& itemName, bool notifyClient) {
+	itemIdentifier = itemName;
 }

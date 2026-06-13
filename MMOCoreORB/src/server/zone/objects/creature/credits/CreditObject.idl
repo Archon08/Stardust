@@ -9,6 +9,8 @@ import engine.core.ManagedObject;
 import server.zone.objects.creature.CreatureObject;
 
 class CreditObject extends ManagedObject {
+	public static final int CREDITCAP = 2000000000; // 2 billion, client does not support anything larger than a signed int
+
 	protected int bankCredits;
 	protected int cashCredits;
 
@@ -75,6 +77,33 @@ class CreditObject extends ManagedObject {
 
 		return true;
 	}
+
+	// P2: ported from upstream (CreatureObject credit methods depend on these).
+	public void clearBankCredits(boolean notifyClient = true) {
+		setBankCredits(0, notifyClient);
+	}
+
+	@preLocked
+	public void clearCashCredits(boolean notifyClient = true) {
+		setCashCredits(0, notifyClient);
+	}
+
+	@dirty
+	public boolean verifyCredits(int credits) {
+		if (credits < 0)
+			return false;
+
+		if (getCashCredits() + getBankCredits() < credits)
+			return false;
+
+		return true;
+	}
+
+	@preLocked
+	public native boolean subtractCredits(int credits, boolean notifyClient = true, boolean bankFirst = false);
+
+	@preLocked
+	public native void transferCredits(int cash, int bank, boolean notifyClient = true);
 
 	@local
 	@dereferenced

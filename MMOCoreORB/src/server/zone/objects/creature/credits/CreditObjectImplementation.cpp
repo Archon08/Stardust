@@ -74,3 +74,49 @@ void CreditObjectImplementation::notifyLoadFromDatabase() {
 	if (bankCredits < 0)
 		bankCredits = 0;
 }
+// ===== P2: ported from upstream (link-stage undefined symbols; CreatureObject credit methods depend on these) =====
+void CreditObjectImplementation::transferCredits(int cash, int bank, bool notifyClient) {
+	if (cash < 0 || bank < 0 || cash > CreditObject::CREDITCAP || bank > CreditObject::CREDITCAP) {
+		error() << "ERROR: invalid call to transferCredits(cash=" << cash << ", bank=" << bank << ")";
+		return;
+	}
+
+	if ((uint32) cashCredits + (uint32) bankCredits != (uint32) cash + (uint32) bank) {
+		error() << "WARNING: unbalanced call to transferCredits(cash=" << cash << ", bank=" << bank << ")";
+		return;
+	}
+
+	setCashCredits(cash, notifyClient);
+	setBankCredits(bank, notifyClient);
+}
+
+bool CreditObjectImplementation::subtractCredits(int credits, bool notifyClient, bool bankFirst) {
+	if (credits < 0) {
+		error() << "WARNING: Negative subtractCredits(credits=" << credits << ")";
+		return false;
+	}
+
+	if (credits > cashCredits + bankCredits) {
+		return false;
+	}
+
+	if (bankFirst) {
+		if (bankCredits > credits) {
+			subtractBankCredits(credits, notifyClient);
+		} else {
+			credits -= bankCredits;
+			clearBankCredits(notifyClient);
+			subtractCashCredits(credits, notifyClient);
+		}
+	} else {
+		if (cashCredits > credits) {
+			subtractCashCredits(credits, notifyClient);
+		} else {
+			credits -= cashCredits;
+			clearCashCredits(notifyClient);
+			subtractBankCredits(credits, notifyClient);
+		}
+	}
+
+	return true;
+}
