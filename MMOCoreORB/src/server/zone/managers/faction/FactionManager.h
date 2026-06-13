@@ -41,6 +41,14 @@ public:
 	void awardPvpFactionPoints(TangibleObject* killer, CreatureObject* destructedObject);
 
 	/**
+	 * Awards/loses GCW + space faction standing for an overt player on a space kill.
+	 * Ported additively from upstream Core3@6856f31 disseminateSpaceExperience faction-reward path.
+	 * @pre: player locked
+	 * @post: player locked
+	 */
+	void awardSpaceFactionPoints(CreatureObject* player, uint32 shipTypeHash, const String& factionName, uint32 shipLevel, int totalShipmates, int imperialReward, int rebelReward);
+
+	/**
 	 * Gets a list of enemy factions to the faction passed to the method.
 	 * @param faction The faction to check for enemies.
 	 */
