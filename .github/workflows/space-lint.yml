@@ -25,9 +25,7 @@ jobs:
         shell: bash
         run: |
           cd MMOCoreORB/bin/scripts
-          FAIL=0
-          CHECKED=0
-          # all dropped space content
+          FAIL=0; CHECKED=0
           while IFS= read -r -d '' f; do
             luac5.3 -p "$f" 2>/tmp/e || { echo "SYNTAX FAIL: $f"; cat /tmp/e; FAIL=1; }
             CHECKED=$((CHECKED+1))
@@ -36,30 +34,44 @@ jobs:
                         object/tangible/space object/static/space object/draft_schematic/space \
                         loot/groups/ship loot/groups/space loot/items/ship loot/items/space \
                         -name '*.lua' -print0 2>/dev/null)
-          # the registration files we merged into
           for r in loot/items.lua loot/groups.lua object/serverobjects.lua screenplays/screenplays.lua; do
-            [ -f "$r" ] && { luac5.3 -p "$r" 2>/tmp/e || { echo "SYNTAX FAIL (registration): $r"; cat /tmp/e; FAIL=1; }; CHECKED=$((CHECKED+1)); }
+            [ -f "$r" ] && { luac5.3 -p "$r" 2>/tmp/e || { echo "SYNTAX FAIL (reg): $r"; cat /tmp/e; FAIL=1; }; CHECKED=$((CHECKED+1)); }
           done
           echo "lua-parsed $CHECKED files"
           [ $FAIL -eq 0 ] && echo "LUA SYNTAX: PASS" || { echo "LUA SYNTAX: FAIL"; exit 1; }
 
-      - name: Resolve every includeFile() path in registration files
+      - name: Resolve SPACE includeFile() chains (correct per-subsystem base; only ship/space includes)
         shell: bash
         run: |
           cd MMOCoreORB/bin/scripts
-          MISS=0
-          TOTAL=0
-          for r in loot/items.lua loot/groups.lua object/serverobjects.lua screenplays/screenplays.lua screenplays/space/screenplays.lua; do
-            [ -f "$r" ] || continue
-            base=$(dirname "$r")
-            # extract includeFile("path") args
-            grep -oE 'includeFile\("[^"]+"' "$r" | sed 's/includeFile("//; s/"$//' | while read -r inc; do
-              # includeFile paths are relative to scripts/ root OR to the including file's dir; try both
-              if [ -f "$inc" ] || [ -f "$base/$inc" ]; then :; else echo "MISSING INCLUDE in $r -> $inc"; fi
-            done
-          done > /tmp/missing.txt
-          # second pass to count (the while-subshell can't export counters)
-          CNT=$(grep -c "MISSING INCLUDE" /tmp/missing.txt || true)
-          cat /tmp/missing.txt
-          echo "unresolved includeFile paths: $CNT"
-          [ "$CNT" -eq 0 ] && echo "INCLUDE RESOLUTION: PASS" || { echo "INCLUDE RESOLUTION: FAIL"; exit 1; }
+          # Core3 includeFile base is the top-level subsystem dir (screenplays/, loot/, object/, managers/, mobile/).
+          # Recursively follow includes, but only REPORT failures on paths containing ship/space (our P4 work);
+          # pre-existing Stardust broken includes (e.g. items/smuggler/*) are out of scope.
+          python3 - <<'PY'
+          import os, re
+          roots = ['screenplays/screenplays.lua','loot/items.lua','loot/groups.lua','object/serverobjects.lua']
+          def base_of(path):
+              top = path.split('/')[0]
+              return top  # includeFile paths are relative to the subsystem top dir
+          seen=set(); missing=[]; checked=0
+          def walk(f):
+              global checked
+              if f in seen or not os.path.isfile(f): return
+              seen.add(f)
+              top=f.split('/')[0]
+              try: txt=open(f,encoding='utf-8',errors='ignore').read()
+              except: return
+              for m in re.findall(r'includeFile\("([^"]+)"', txt):
+                  target=os.path.join(top, m)
+                  isspace = ('ship' in m) or ('space' in m)
+                  if os.path.isfile(target):
+                      checked+=1
+                      if target.endswith('.lua'): walk(target)
+                  else:
+                      if isspace: missing.append((f,m,target))
+          for r in roots: walk(r)
+          print(f"resolved {checked} includes (recursive)")
+          for f,m,t in missing: print(f"MISSING SPACE INCLUDE: {f} -> {m}  (expected {t})")
+          print("INCLUDE RESOLUTION: " + ("PASS" if not missing else "FAIL"))
+          import sys; sys.exit(1 if missing else 0)
+          PY
