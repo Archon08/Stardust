@@ -222,7 +222,8 @@ int LuaMissionObject::setStartPosition(lua_State* L) {
 
 	Locker lock(realObject);
 
-	realObject->setStartPosition(x, z, y, zoneName);
+	// P2: this tree's MissionObject uses 2D (x,y,planet) positions; z is unused.
+	realObject->setStartPosition(x, y, zoneName);
 
 	return 0;
 }
@@ -242,7 +243,8 @@ int LuaMissionObject::setEndPosition(lua_State* L) {
 
 	Locker lock(realObject);
 
-	realObject->setEndPosition(x, z, y, zoneName);
+	// P2: this tree's MissionObject uses 2D (x,y,planet) positions; z is unused.
+	realObject->setEndPosition(x, y, zoneName);
 
 	return 0;
 }
