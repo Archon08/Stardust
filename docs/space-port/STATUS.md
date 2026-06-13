@@ -89,3 +89,52 @@ this (no client assets). This is the same operator step flagged for G1.
 P0 ✅ · P1 ✅ (green) · P2+P3 ✅ (green, tag p2p3-green) · P4 ✅ (CI-validated; operator boot
 pending) · P5 (Stardust reconciliation: pilot trees/rewards) pending · P6 (verification/
 balance/fidelity — where space becomes *playable*) pending.
+
+## 2026-06-13 — P5 + P6 ENGINEERING complete (cloud-validated) ✅
+
+Constraint: no local build/boot — all validated via cloud CI.
+
+### Phase 5 — Stardust reconciliation (build GREEN, run 27462550506, HEAD 2e252d58)
+- `disseminateSpaceExperience`: real body (was stub) — pilot XP to participating player ships on
+  space kills, ace-badge (130-138) multiplier, adapted to this tree's 6-arg awardExperience.
+- `setFirstName`/`setLastName`: real rename pipeline (NameManager validate → setCustomObjectName →
+  re-register → SQL update), mirroring Stardust's SetFirstNameCommand path.
+- AuctionManager getAuctionData: filterText/min/maxPrice/entranceFee now actually applied.
+- **Real defect fixed:** LuaPlayerObject pilot bindings (get/setPilotTier, get/setPilotSquadron)
+  had been dropped — squadron screenplays' setPilotTier would fail at runtime. Restored.
+- Audits clean (no fix needed): mind-pool (space combat uses ship-component stats, not creature
+  HAM); DB migration (ships persist in schemaless BDB, registration == upstream); badge-Jedi
+  (JTL ace badges can't trip Stardust's village/hologrind Jedi gates).
+- bandSong + AiMap counters: verified present, no change.
+
+### Phase 6 — verification harness (space-tests GREEN, run 27465544543: 29/29 pass)
+- **CI unit tests (headless, run every build):** SpaceMathTest (ray/segment intersection, lead
+  prediction, world↔local, quaternion/rotation-rate wrap), SpaceTransformTest. + ported upstream
+  SpaceZoneTest/LuaShipAgentTest (server-needed → non-fatal step, documented).
+- **Balance sim:** SpaceBalanceSimTest — Monte Carlo duels over SpaceCombatManager damage model;
+  **interceptor death-spiral is a regression-guarded assertion** (0.0% vs Gunship on synthetic
+  stats) + dominant-strategy scan. Docs in docs/space-port/balance/.
+- **Fidelity (clean-room) tooling+spec:** tools/fidelity/extract_ship_datatables.py +
+  docs/space-port/fidelity/PROVENANCE-SPEC.md (Proposer/Verifier/Arbiter, data-only rules, exact
+  datatable targets). Runs operator-side against TREs.
+- **Scenario matrix:** docs/space-port/verification/SCENARIO-MATRIX.md — 10 zones × 9 squadrons ×
+  6 mission types × 6 ship classes, prioritized 50-cell gate for a client/operator harness.
+- Workflow `.github/workflows/space-tests.yml` (COMPILE_TESTS=ON).
+- Honest findings: quarantined 3 pre-existing rotted tests (Behavior/LuaMobile/Zone — P1 engine
+  drift, unrelated to space, CI-only mv); fixed core3 pthread_exit exit-code masking (gate now
+  parses gtest [FAILED]/[PASSED]).
+
+### Intelligence surfaced (answers the original "receipts" open question)
+The 2025 receipts asked: are JTL squadron chains authored-and-working or authored-but-untested?
+**Answer (from the port): 2 of 9 are wired (Corsec, Rsf); the other 7 are byte-identical to
+upstream Core3 — i.e. upstream itself never finished them.** Authoring those 7 chains is content
+work, not port reconciliation.
+
+### Remaining = playtest/content, not engineering
+Flight feel / "plays like Live", pilot-cert end-to-end run, squadron reward economy numbers
+(prefer Stardust scale — design call), skills.iff pilot-box load, real fidelity-curve extraction,
+awardSpaceFactionPoints (needs the newer space-faction subsystem ported). All need a live
+client/server, not repo engineering.
+
+### Phase ledger — FINAL
+P0 ✅ · P1 ✅ · P2 ✅ · P3 ✅ · P4 ✅ · P5 ✅ · P6 ✅ (engineering; live playtest is operator/content).
