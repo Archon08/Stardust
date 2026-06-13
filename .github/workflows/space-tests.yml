@@ -127,9 +127,18 @@ jobs:
           BIN='${{ steps.findbin.outputs.bin }}'
           test -n "$BIN" || { echo 'core3 binary not found'; exit 1; }
           # Pure-math / standalone-sim tests: no DB, no TRE, no Lua.
+          # NOTE: core3 main() ends with pthread_exit(), so its PROCESS exit code does NOT
+          # reflect RUN_ALL_TESTS()'s result -- we must parse the gtest output ourselves.
           "$BIN" runUnitTests \
             --gtest_filter='SpaceMathTest.*:SpaceTransformTest.*:SpaceBalanceSimTest.*' \
             --gtest_color=no 2>&1 | tee ../space-headless.log
+          # Honest gate: fail unless gtest reported a clean pass and no failures.
+          if grep -qE '\[  FAILED  \]' ../space-headless.log; then
+            echo '::error::headless space tests reported FAILED cases'; exit 1
+          fi
+          if ! grep -qE '\[  PASSED  \]' ../space-headless.log; then
+            echo '::error::no gtest PASSED summary found (tests did not run)'; exit 1
+          fi
 
       - name: Run broader space/ship tests (NON-FATAL; may need DB/TRE)
         if: always()
