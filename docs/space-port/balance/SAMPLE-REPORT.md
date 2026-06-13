@@ -5,6 +5,10 @@
 > demonstration, **NOT** a balance verdict on real ships — real stat curves arrive from
 > Phase 6.B (`tools/fidelity/`). Reproduced deterministically (fixed-seed LCG); CI prints
 > the live version to `space-headless.log`.
+>
+> **CI-verified:** these exact numbers were reproduced by the C++ harness running in CI
+> (workflow `space-tests`, headless GREEN GATE). The matrix, the 0.0% death-spiral probe,
+> and the Bomber `dominatesAll=YES` warning below are copied verbatim from the CI log.
 
 ## Win-rate matrix (row attacks column, 300 trials/cell)
 
