@@ -1,0 +1,137 @@
+name: space-tests
+
+# Phase 6.A -- compiles the core3 unit-test library (COMPILE_TESTS=ON) and runs the
+# space-related gtest suites headless. The GREEN gate is the pure-math/headless filter
+# (SpaceMath, SpaceTransform, SpaceBalanceSim) which needs no DB/TRE/Lua. A second,
+# NON-FATAL step attempts the broader *Space*:*Ship* filter (which pulls in
+# SpaceZoneTest / LuaShipAgentTest -- these may require config/DB/TRE in CI) and
+# uploads its log for inspection. See docs/space-port/verification/SCENARIO-MATRIX.md
+# for what requires a live client/server.
+
+on:
+  push:
+    branches: ['space-port/**']
+    paths:
+      - 'MMOCoreORB/src/tests/**'
+      - '.github/workflows/space-tests.yml'
+      - 'MMOCoreORB/src/server/zone/objects/ship/transform/**'
+      - 'MMOCoreORB/src/server/zone/managers/spacecombat/**'
+  workflow_dispatch:
+
+jobs:
+  space-tests:
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    timeout-minutes: 350
+    steps:
+      - name: Install toolchain & deps
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates cmake ninja-build g++ gcc make ccache \
+            default-jre-headless \
+            liblua5.3-dev lua5.3 \
+            libdb5.3-dev db5.3-util \
+            libmariadb-dev libmariadb-dev-compat \
+            libssl-dev zlib1g-dev libpcre3-dev libreadline-dev \
+            libboost-dev libboost-thread-dev libboost-system-dev libjemalloc-dev
+          apt-get install -y wget gnupg lsb-release software-properties-common
+          wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x /tmp/llvm.sh
+          /tmp/llvm.sh 17 || /tmp/llvm.sh 17
+          ln -sf /usr/bin/clang-17 /usr/local/bin/clang
+          ln -sf /usr/bin/clang++-17 /usr/local/bin/clang++
+          ln -sf /usr/bin/ld.lld-17 /usr/local/bin/ld.lld
+          clang++ --version
+
+      - name: Checkout (with engine3 submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-tests-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ccache-tests-${{ github.ref_name }}-
+            ccache-tests-
+            ccache-${{ github.ref_name }}-
+            ccache-
+
+      - name: Configure (COMPILE_TESTS=ON)
+        working-directory: MMOCoreORB
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCOMPILE_TESTS=ON \
+            -DENABLE_NATIVE=OFF \
+            -DENABLE_BUILD_CLIENT=OFF \
+            2>&1 | tee ../configure.log
+
+      - name: Build core3 (links core3tests)
+        working-directory: MMOCoreORB
+        shell: bash
+        run: |
+          set -o pipefail
+          ninja -C build -k 50 2>&1 | tee ../build.log
+
+      - name: Locate core3 binary
+        id: findbin
+        working-directory: MMOCoreORB
+        shell: bash
+        run: |
+          BIN="$(find . -type f -name core3 -perm -u+x | head -1)"
+          if [ -z "$BIN" ]; then BIN="$(find . -type f -name core3 | head -1)"; fi
+          echo "core3 binary: $BIN"
+          echo "bin=$BIN" >> "$GITHUB_OUTPUT"
+
+      - name: Run headless space tests (GREEN GATE)
+        working-directory: MMOCoreORB
+        shell: bash
+        run: |
+          set -o pipefail
+          BIN='${{ steps.findbin.outputs.bin }}'
+          test -n "$BIN" || { echo 'core3 binary not found'; exit 1; }
+          # Pure-math / standalone-sim tests: no DB, no TRE, no Lua.
+          "$BIN" runUnitTests \
+            --gtest_filter='SpaceMathTest.*:SpaceTransformTest.*:SpaceBalanceSimTest.*' \
+            --gtest_color=no 2>&1 | tee ../space-headless.log
+
+      - name: Run broader space/ship tests (NON-FATAL; may need DB/TRE)
+        if: always()
+        working-directory: MMOCoreORB
+        shell: bash
+        run: |
+          BIN='${{ steps.findbin.outputs.bin }}'
+          if [ -z "$BIN" ]; then echo 'no binary; skipping'; exit 0; fi
+          echo '== Attempting *Space*:*Ship* (SpaceZoneTest/LuaShipAgentTest may abort without config/DB/TRE) =='
+          "$BIN" runUnitTests \
+            --gtest_filter='*Space*:*Ship*' \
+            --gtest_color=no 2>&1 | tee ../space-broad.log || true
+          echo '== broad-suite exit captured; see space-broad.log artifact =='
+
+      - name: Error digest (always)
+        if: always()
+        shell: bash
+        run: |
+          echo '== BUILD ERRORS =='
+          grep -nE 'error:|FAILED:' build.log configure.log 2>/dev/null | head -80 || echo 'no build errors'
+          echo '== HEADLESS TEST RESULT =='
+          grep -nE '\[  PASSED  \]|\[  FAILED  \]|FAILED TEST|tests? ran' space-headless.log 2>/dev/null | tail -40 || echo 'no headless result'
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: space-test-logs-${{ github.run_number }}
+          path: |
+            configure.log
+            build.log
+            space-headless.log
+            space-broad.log
+          retention-days: 14
