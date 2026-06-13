@@ -2067,6 +2067,14 @@ function HavocSquadronScreenplay:resetKreezoQuests(pPlayer)
 		return
 	end
 
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	PlayerObject(pGhost):setPilotTier(1)
+
 	-- Mission 1
 	patrol_corellia_rebel_1:resetQuest(pPlayer)
 	destroy_surpriseattack_corellia_rebel_1:resetQuest(pPlayer)
@@ -2105,6 +2113,14 @@ function HavocSquadronScreenplay:resetViopaQuests(pPlayer)
 		return
 	end
 
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	PlayerObject(pGhost):setPilotTier(2)
+
 	-- Mission 1
 	inspect_viopa_rebel_1:resetQuest(pPlayer)
 	SpaceHelpers:clearSpaceQuest(pPlayer, self.TIER2_QUEST_STRING_1.type, self.TIER2_QUEST_STRING_1.name, false)
@@ -2139,6 +2155,14 @@ function HavocSquadronScreenplay:resetAqzowQuests(pPlayer)
 	if (pPlayer == nil) then
 		return
 	end
+
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	PlayerObject(pGhost):setPilotTier(3)
 
 	-- Mission 1
 	recovery_corellia_rebel_tier3_1:resetQuest(pPlayer)
@@ -2200,6 +2224,14 @@ function HavocSquadronScreenplay:resetArkonQuests(pPlayer)
 	if (pPlayer == nil) then
 		return
 	end
+
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	PlayerObject(pGhost):setPilotTier(4)
 
 	-- Mission 1
 	survival_corellia_rebel_tier4_1:resetQuest(pPlayer)
