@@ -1703,3 +1703,8 @@ String BuildingObjectImplementation::getCellName(uint64 cellID) const {
 
 	return cellProperty->getName();
 }
+
+// P2: COV position-update hook declared in IDL but unimplemented; delegate to parent (no quad-range cells logic in this tree).
+void BuildingObjectImplementation::notifyPositionUpdate(TreeEntry* entry) {
+	TangibleObjectImplementation::notifyPositionUpdate(entry);
+}

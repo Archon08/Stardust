@@ -4518,3 +4518,24 @@ bool CreatureObjectImplementation::isMissionRangeObject(const uint64& objectID) 
 
 	return index != -1;
 }
+// ===== P2: additional missing method bodies (link-stage round 2) =====
+void CreatureObjectImplementation::notifyDissapear(TreeEntry* obj) {
+	SceneObject* entryObject = static_cast<SceneObject*>(obj);
+
+	if (entryObject == nullptr)
+		return;
+
+	TangibleObjectImplementation::notifyDissapear(obj);
+}
+
+WeaponObject* CreatureObjectImplementation::getDefaultWeapon() {
+	return getSlottedObject("default_weapon").castTo<WeaponObject*>();
+}
+
+String CreatureObjectImplementation::setFirstName(const String& newFirstName) {
+	return setFirstName(newFirstName, false);
+}
+
+String CreatureObjectImplementation::setLastName(const String& newLastName) {
+	return setLastName(newLastName, false);
+}

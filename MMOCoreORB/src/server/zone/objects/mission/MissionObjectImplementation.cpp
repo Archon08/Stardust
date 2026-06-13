@@ -335,3 +335,18 @@ void MissionObjectImplementation::setCreatorName(const String& name, bool notify
 		player->sendMessage(delta);
 	}
 }
+
+// P2: space-quest CRC (ported from upstream)
+uint32 MissionObjectImplementation::getQuestCRC() const {
+	uint32 questCRC = 0;
+
+	if (questName.isEmpty()) {
+		return questCRC;
+	}
+
+	String questString = "spacequest/" + questType + "/" + questName;
+
+	questCRC = questString.hashCode();
+
+	return questCRC;
+}

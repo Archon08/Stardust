@@ -25,6 +25,11 @@ class MissionObject extends IntangibleObject {
 	protected MissionObjective missionObjective;
 
 	protected unsigned int typeCRC;
+
+	// P2: space-quest / space-duty mission fields (ported from upstream for LuaMissionObject)
+	protected string questType;
+	protected string questName;
+	protected boolean spaceDutyMission;
 	protected int difficultyLevel;
 	protected int difficultyDisplay;
 	protected int difficulty;
@@ -70,6 +75,7 @@ class MissionObject extends IntangibleObject {
 
 	public MissionObject() {
 		typeCRC = MissionTypes.SURVEY;
+		spaceDutyMission = false;
                 
 		refreshCounter = 0;
 
@@ -281,6 +287,25 @@ class MissionObject extends IntangibleObject {
 	@read
 	public unsigned int getTypeCRC() {
 		return typeCRC;
+	}
+
+	// P2: space-quest / space-duty mission accessors (ported from upstream)
+	public void setQuestType(final string type) {
+		questType = type;
+	}
+
+	public void setQuestName(final string name) {
+		questName = name;
+	}
+
+	public native unsigned int getQuestCRC();
+
+	public void setSpaceDutyMission() {
+		spaceDutyMission = true;
+	}
+
+	public boolean isSpaceDutyMission() {
+		return spaceDutyMission;
 	}
 
 	@read
