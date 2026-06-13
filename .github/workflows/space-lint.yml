@@ -6,7 +6,7 @@ on:
       branch:
         description: 'Branch to lint'
         required: true
-        default: 'space-port/phase-2'
+        default: 'stardust-space'
 
 env:
   CORE3_PIN: 6856f315a80b5250635b2272695caec1d64204ed
@@ -46,11 +46,12 @@ jobs:
           echo "lua-parsed $CHECKED files"
           [ $FAIL -eq 0 ] && echo "LUA SYNTAX: PASS" || { echo "LUA SYNTAX: FAIL"; exit 1; }
 
-      - name: Content fidelity — every dropped space dir must equal upstream pin
+      - name: Content fidelity — unchanged space dirs must equal upstream pin (authored paths allowlisted)
         shell: bash
         run: |
           cd MMOCoreORB/bin/scripts
           UP=/tmp/core3/MMOCoreORB/bin/scripts
+          ALLOW="$GITHUB_WORKSPACE/tools/fidelity/authored-allowlist.txt"
           FAIL=0
           for d in ai_space managers/space ship_mobile mobile/space mobile/conversations/space \
                    screenplays/space object/ship object/intangible/ship object/tangible/ship \
@@ -58,15 +59,17 @@ jobs:
                    loot/groups/ship loot/groups/space loot/items/ship loot/items/space; do
             if [ ! -d "$UP/$d" ]; then echo "NOTE: upstream lacks $d (skip)"; continue; fi
             OUT=$(diff -rq "$UP/$d" "$d" 2>&1)
-            if [ -n "$OUT" ]; then echo "FIDELITY DIFF in $d:"; echo "$OUT" | head -20; FAIL=1; fi
+            # drop intentionally-authored (allowlisted) paths from the must-match-upstream requirement
+            if [ -f "$ALLOW" ]; then OUT=$(printf '%s\n' "$OUT" | grep -vE -f "$ALLOW" || true); fi
+            OUT=$(printf '%s\n' "$OUT" | grep -v '^[[:space:]]*$' || true)
+            if [ -n "$OUT" ]; then echo "FIDELITY DIFF in $d (non-allowlisted):"; echo "$OUT" | head -20; FAIL=1; fi
           done
-          [ $FAIL -eq 0 ] && echo "CONTENT FIDELITY: PASS (drop == upstream pin)" || { echo "CONTENT FIDELITY: FAIL"; exit 1; }
+          [ $FAIL -eq 0 ] && echo "CONTENT FIDELITY: PASS (unchanged==upstream; authored squadron paths allowlisted)" || { echo "CONTENT FIDELITY: FAIL"; exit 1; }
 
       - name: Registration — our space includes must resolve (failure only if upstream HAS the target = copy gap)
         shell: bash
         run: |
           cd MMOCoreORB/bin/scripts
-          UP=/tmp/core3/MMOCoreORB/bin/scripts
           UP=/tmp/core3/MMOCoreORB/bin/scripts python3 - <<'PY'
           import os, re
           UP=os.environ['UP']
@@ -85,7 +88,6 @@ jobs:
                       ok+=1
                       if tgt.endswith('.lua'): walk(tgt)
                   else:
-                      # missing in our tree: real copy-gap only if upstream HAS it
                       if os.path.isfile(os.path.join(UP,top,m)): real.append((f,m))
                       else: deadup+=1
           for r in roots: walk(r)
