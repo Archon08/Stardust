@@ -655,7 +655,6 @@ includeFile("treasure_map/TreasureMapMenuComponent.lua")
 includeFile("racetracks/racetracks.lua")
 
 --Space
-includeFile("space/space_chassis_dealer_conv_handler.lua")
 includeFile("space/screenplays.lua")
 
 --Record Keepers
