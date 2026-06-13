@@ -77,12 +77,10 @@ void CreditObjectImplementation::notifyLoadFromDatabase() {
 // ===== P2: ported from upstream (link-stage undefined symbols; CreatureObject credit methods depend on these) =====
 void CreditObjectImplementation::transferCredits(int cash, int bank, bool notifyClient) {
 	if (cash < 0 || bank < 0 || cash > CreditObject::CREDITCAP || bank > CreditObject::CREDITCAP) {
-		error() << "ERROR: invalid call to transferCredits(cash=" << cash << ", bank=" << bank << ")";
 		return;
 	}
 
 	if ((uint32) cashCredits + (uint32) bankCredits != (uint32) cash + (uint32) bank) {
-		error() << "WARNING: unbalanced call to transferCredits(cash=" << cash << ", bank=" << bank << ")";
 		return;
 	}
 
@@ -92,7 +90,6 @@ void CreditObjectImplementation::transferCredits(int cash, int bank, bool notify
 
 bool CreditObjectImplementation::subtractCredits(int credits, bool notifyClient, bool bankFirst) {
 	if (credits < 0) {
-		error() << "WARNING: Negative subtractCredits(credits=" << credits << ")";
 		return false;
 	}
 

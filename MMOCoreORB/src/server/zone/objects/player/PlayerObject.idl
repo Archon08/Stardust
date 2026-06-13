@@ -288,6 +288,9 @@ class PlayerObject extends IntangibleObject {
 	protected transient long sessionStatsLastCredits;
 	protected transient int sessionStatsLastSkillPoints;
 	protected transient unsigned long sessionStatsActivityXP;
+
+	// P2: high-water mark of close-objects-vector size (used by removeOutOfRangeObjects metrics)
+	protected transient int countMaxCov;
 	protected transient unsigned long sessionStatsActivityMovement;
 	protected transient unsigned long sessionStatsTotalMovement;
 	protected transient unsigned long sessionStatsTotalCredits;
@@ -450,6 +453,15 @@ class PlayerObject extends IntangibleObject {
 		if(obj.getObjectID() == getDeclaredResidence())
 			setDeclaredResidence(null);
 
+	}
+
+	@dirty
+	public int getCountMaxCov() {
+		return countMaxCov;
+	}
+
+	public void setCountMaxCov(int newMaxCov) {
+		countMaxCov = newMaxCov;
 	}
 
 	@dirty

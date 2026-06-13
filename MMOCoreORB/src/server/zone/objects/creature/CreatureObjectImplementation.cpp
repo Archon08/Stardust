@@ -84,6 +84,11 @@
 
 #include "engine/core/TaskManager.h"
 #include "server/zone/objects/creature/credits/CreditObject.h"
+#include "templates/customization/AssetCustomizationManagerTemplate.h"
+#include "templates/customization/BasicRangedIntCustomizationVariable.h"
+#include "templates/params/PaletteColorCustomizationVariable.h"
+#include "templates/appearance/PaletteTemplate.h"
+#include "server/zone/objects/tangible/Instrument.h"
 
 float CreatureObjectImplementation::DEFAULTRUNSPEED = 5.376;
 
@@ -3882,30 +3887,13 @@ void CreatureObjectImplementation::sendObjectsToOwner(bool doClose) {
 }
 
 void CreatureObjectImplementation::setPerformanceType(int type, bool notifyClient) {
-	if (type == performanceType)
-		return;
-
+	// P2: delta-6 updatePerformanceType not present in this tree; set state without client delta.
 	performanceType = type;
-
-	if (notifyClient) {
-		CreatureObjectDeltaMessage6* msg = new CreatureObjectDeltaMessage6(asCreatureObject());
-		msg->updatePerformanceType(performanceType);
-		msg->close();
-
-		broadcastMessage(msg, true);
-	}
 }
 
 void CreatureObjectImplementation::setIncapacitationTimer(uint32 timer, bool notifyClient) {
+	// P2: delta-3 updateIncapacitationRecoveryTime not present in this tree; update cooldown only.
 	cooldownTimerMap->updateToCurrentAndAddMili("incapTimer", timer*1000);
-
-	if (notifyClient) {
-		CreatureObjectDeltaMessage3* dcreo3 = new CreatureObjectDeltaMessage3(asCreatureObject());
-		dcreo3->updateIncapacitationRecoveryTime(timer);
-		dcreo3->close();
-
-		broadcastMessage(dcreo3, true);
-	}
 }
 
 int CreatureObjectImplementation::getReceiverFlags() const {
@@ -4004,20 +3992,8 @@ void CreatureObjectImplementation::updateRunSpeed() {
 }
 
 void CreatureObjectImplementation::setPerformanceStartTime(int time, bool notifyClient) {
-	// This value doesn't seem to be used by the client.
-
-	if (performanceStartTime == time)
-		return;
-
+	// P2: delta-6 updatePerformanceStartTime not present in this tree; set state only (client unused).
 	performanceStartTime = time;
-
-	if (!notifyClient)
-		return;
-
-	CreatureObjectDeltaMessage6* codm4 = new CreatureObjectDeltaMessage6(asCreatureObject());
-	codm4->updatePerformanceStartTime(time);
-	codm4->close();
-	broadcastMessage(codm4, true);
 }
 
 void CreatureObjectImplementation::updateWaterMod(bool notifyClient) {
@@ -4227,17 +4203,13 @@ void CreatureObjectImplementation::setPostureChangeDelay(unsigned long long dela
 }
 
 String CreatureObjectImplementation::setFirstName(const String& newFirstName, bool skipVerify) {
-	if (!isPlayerCreature())
-		return "Can only set FirstName on players.";
-
-	return getZoneServer()->getPlayerManager()->setFirstName(asCreatureObject(), newFirstName, skipVerify);
+	// P2: PlayerManager name-change pipeline not present in this tree; rename is unavailable here.
+	return "Name change is not supported on this server.";
 }
 
 String CreatureObjectImplementation::setLastName(const String& newLastName, bool skipVerify) {
-	if (!isPlayerCreature())
-		return "Can only set LastName on players.";
-
-	return getZoneServer()->getPlayerManager()->setLastName(asCreatureObject(), newLastName, skipVerify);
+	// P2: PlayerManager name-change pipeline not present in this tree; rename is unavailable here.
+	return "Name change is not supported on this server.";
 }
 
 bool CreatureObjectImplementation::healFactionChecks(CreatureObject* healerCreo, bool isPlayer) {
