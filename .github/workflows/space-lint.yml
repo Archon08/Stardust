@@ -1,0 +1,65 @@
+name: space-lint
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to lint'
+        required: true
+        default: 'space-port/phase-2'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Install lua5.3
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+
+      - name: Lua syntax-check all space content + registration files
+        shell: bash
+        run: |
+          cd MMOCoreORB/bin/scripts
+          FAIL=0
+          CHECKED=0
+          # all dropped space content
+          while IFS= read -r -d '' f; do
+            luac5.3 -p "$f" 2>/tmp/e || { echo "SYNTAX FAIL: $f"; cat /tmp/e; FAIL=1; }
+            CHECKED=$((CHECKED+1))
+          done < <(find ai_space managers/space ship_mobile mobile/space mobile/conversations/space \
+                        screenplays/space object/ship object/intangible/ship object/tangible/ship \
+                        object/tangible/space object/static/space object/draft_schematic/space \
+                        loot/groups/ship loot/groups/space loot/items/ship loot/items/space \
+                        -name '*.lua' -print0 2>/dev/null)
+          # the registration files we merged into
+          for r in loot/items.lua loot/groups.lua object/serverobjects.lua screenplays/screenplays.lua; do
+            [ -f "$r" ] && { luac5.3 -p "$r" 2>/tmp/e || { echo "SYNTAX FAIL (registration): $r"; cat /tmp/e; FAIL=1; }; CHECKED=$((CHECKED+1)); }
+          done
+          echo "lua-parsed $CHECKED files"
+          [ $FAIL -eq 0 ] && echo "LUA SYNTAX: PASS" || { echo "LUA SYNTAX: FAIL"; exit 1; }
+
+      - name: Resolve every includeFile() path in registration files
+        shell: bash
+        run: |
+          cd MMOCoreORB/bin/scripts
+          MISS=0
+          TOTAL=0
+          for r in loot/items.lua loot/groups.lua object/serverobjects.lua screenplays/screenplays.lua screenplays/space/screenplays.lua; do
+            [ -f "$r" ] || continue
+            base=$(dirname "$r")
+            # extract includeFile("path") args
+            grep -oE 'includeFile\("[^"]+"' "$r" | sed 's/includeFile("//; s/"$//' | while read -r inc; do
+              # includeFile paths are relative to scripts/ root OR to the including file's dir; try both
+              if [ -f "$inc" ] || [ -f "$base/$inc" ]; then :; else echo "MISSING INCLUDE in $r -> $inc"; fi
+            done
+          done > /tmp/missing.txt
+          # second pass to count (the while-subshell can't export counters)
+          CNT=$(grep -c "MISSING INCLUDE" /tmp/missing.txt || true)
+          cat /tmp/missing.txt
+          echo "unresolved includeFile paths: $CNT"
+          [ "$CNT" -eq 0 ] && echo "INCLUDE RESOLUTION: PASS" || { echo "INCLUDE RESOLUTION: FAIL"; exit 1; }
