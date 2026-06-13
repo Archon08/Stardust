@@ -1,0 +1,8 @@
+SquadronScreenplay\.lua
+inquisition_squadron
+storm_squadron
+black_epsilon_squadron
+vortex_squadron
+crimson_phoenix_squadron
+smuggler_squadron
+screenplays/space/screenplays\.lua
