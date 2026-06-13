@@ -51,6 +51,10 @@ namespace player {
 		int getForcePower(lua_State* L);
 		int getForcePowerMax(lua_State* L);
 		int setForcePower(lua_State* L);
+		int getPilotTier(lua_State* L);
+		int setPilotTier(lua_State* L);
+		int getPilotSquadron(lua_State* L);
+		int setPilotSquadron(lua_State* L);
 		int isJedi(lua_State* L);
 		int isJediLight(lua_State* L);
 		int isJediDark(lua_State* L);
