@@ -67,8 +67,9 @@ jobs:
         run: |
           cd MMOCoreORB/bin/scripts
           UP=/tmp/core3/MMOCoreORB/bin/scripts
-          python3 - <<'PY'
+          UP=/tmp/core3/MMOCoreORB/bin/scripts python3 - <<'PY'
           import os, re
+          UP=os.environ['UP']
           roots=['screenplays/screenplays.lua','loot/items.lua','loot/groups.lua','object/serverobjects.lua']
           seen=set(); real=[]; deadup=0; ok=0
           def walk(f):
