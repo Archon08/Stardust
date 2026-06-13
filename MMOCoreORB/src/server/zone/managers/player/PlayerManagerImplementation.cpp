@@ -1556,6 +1556,12 @@ void PlayerManagerImplementation::disseminateSpaceExperience(ShipAiAgent* destru
 	uint32 shipTypeHash = destructedObject->getShipType().hashCode();
 	float experienceReward = destructedObject->getExperienceValue();
 
+	// F2: restored from upstream Core3@6856f31 -- space GCW/faction reward inputs.
+	uint32 shipDifficulty = destructedObject->getShipDifficulty().hashCode();
+	String factionName = destructedObject->getShipFactionString();
+	int imperialReward = destructedObject->getImperialFactionReward();
+	int rebelReward = destructedObject->getRebelFactionReward();
+
 	// All experience should be random with the exception of ISD and Corvette
 	if (shipTypeHash != STRING_HASHCODE("star_destroyer") && shipTypeHash != STRING_HASHCODE("corvette")) {
 		int bonus = experienceReward * 0.15f;
@@ -1614,6 +1620,12 @@ void PlayerManagerImplementation::disseminateSpaceExperience(ShipAiAgent* destru
 			}
 
 			Locker playLock(shipMember, playerShip);
+
+			// F2: restored from upstream Core3@6856f31 -- award space GCW/faction points to overt players.
+			if (shipMember->getFactionStatus() == FactionStatus::OVERT && (imperialReward != 0 || rebelReward != 0)) {
+				FactionManager* factionManager = FactionManager::instance();
+				factionManager->awardSpaceFactionPoints(shipMember, shipTypeHash, factionName, shipDifficulty, totalPlayers, imperialReward, rebelReward);
+			}
 
 			if (shipMember->hasSkill("pilot_neutral_master")) {
 				awardExperience(shipMember, "prestige_pilot", shipExperience, true, 1.f);
