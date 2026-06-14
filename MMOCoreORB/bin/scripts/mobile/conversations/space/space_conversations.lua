@@ -90,5 +90,8 @@ includeFile("conversations/space/rebel/havoc_squadron/aqzow_convo.lua")
 -- Imperial Pilot
 
 -- Black Epsilon Squadron
+
 -- Imperial Inquisition Squadron
+includeFile("conversations/space/imperial/inquisition_squadron/barn_sinkko_convo.lua")
+
 -- Storm Squadron
