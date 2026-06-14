@@ -138,3 +138,18 @@ client/server, not repo engineering.
 
 ### Phase ledger — FINAL
 P0 ✅ · P1 ✅ · P2 ✅ · P3 ✅ · P4 ✅ · P5 ✅ · P6 ✅ (engineering; live playtest is operator/content).
+
+## 2026-06-14 — FINISH-SPACE: all in-repo phases complete (Live-faithful, CI-green)
+
+Branch `stardust-space` @ `47765bf`; build `27488833409` = success (1488/1488), lint 3-gate green.
+- **F0** Fidelity Lock: 6/6 MATCH Live, 0 invented balance; death-spiral authentic (preserve).
+- **F2** GCW: `awardSpaceFactionPoints` restored.
+- **F3** Squadrons: all 9 full Live-faithful chains (3 SOE + 6 reconstructed); Imperial themepark now exists.
+- **F3** Kessel Master: two-stage chain wired (corvette + tier-5 gunboat escorts, documented coords); Havoc fixed.
+- **F4** Systems: POB multi-crew (fixed LeaveStationCommand stub), hyperspace (data-driven), launch/land — byte-faithful to pin.
+
+### Remainders to "workable like Live"
+1. Runtime boot (one human step): `tools/boot/space-boot-capture.sh` -> F2 defect sweep.
+2. Four original-data gaps: `space_kessel` `.trn`; engine subsystem-hit observer; Kessel spawn-timer values; Master reward STF.
+
+All authored in-repo, zero invented balance, every value traced to original SWG data or surviving SOE templates.
