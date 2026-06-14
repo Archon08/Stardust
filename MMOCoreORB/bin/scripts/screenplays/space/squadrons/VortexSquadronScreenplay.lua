@@ -1800,31 +1800,10 @@ space_battle_naboo_rebel_tier4_4_c = SpaceBattleScreenplay:new {
 
 registerScreenPlay("space_battle_naboo_rebel_tier4_4_c", true)
 
--- Master Mission: Destroy
-destroy_master_rebel_1 = SpaceDestroyScreenplay:new {
-	className = "destroy_master_rebel_1",
-
-	questName = "master_rebel_1",
-	questType = "destroy",
-
-	questZone = "space_naboo",
-
-	creditReward = 10000,
-
-	sideQuest = false,
-	sideQuestType = "",
-
-	killsRequired = 10,
-
-	shipLocations = {},
-
-	shipTypes = {
-		"imp_tie_fighter_tier4", "imp_tie_fighter_tier5", "imp_tie_bomber_tier4", "imp_tie_bomber_tier5",
-		"imp_tie_interceptor_tier4", "imp_tie_interceptor_tier5", "imp_tie_advanced_tier4", "imp_tie_advanced_tier5",
-	},
-}
-
-registerScreenPlay("destroy_master_rebel_1", true)
+-- Master Mission (two-stage Kessel encounter): destroy_master_rebel_1 (Kessel: destroy
+-- 30 Imperial fighters) and destroy_master_rebel_2 (Kessel: destroy the Imperial
+-- Corellian Corvette / Star Ravager command vessel) are defined in
+-- screenplays/space/squadrons/KesselMasterEncounterScreenplay.lua (loaded first).
 
 -- Tier 4 Duty Missions
 
@@ -2049,6 +2028,7 @@ VortexSquadronScreenplay = ScreenPlay:new {
 	TIER4_QUEST_STRING_4_SIDE2 = {type = "rescue", name = "rescue_naboo_rebel_tier4_4_b"},
 	TIER4_QUEST_STRING_4_SIDE3 = {type = "space_battle", name = "naboo_rebel_tier4_4_c"},
 	TIER4_QUEST_STRING_MASTER = {type = "destroy", name = "master_rebel_1"},
+	TIER4_QUEST_STRING_MASTER_2 = {type = "destroy", name = "master_rebel_2"},
 	TIER4_QUEST_STRING_DUTY_1 = {type = "escort_duty", name = "naboo_rebel_tier4_1"},
 	TIER4_QUEST_STRING_DUTY_2 = {type = "rescue_duty", name = "naboo_rebel_tier4_1"},
 	TIER4_QUEST_STRING_DUTY_3 = {type = "recovery_duty", name = "naboo_rebel_tier4_1"},
@@ -2235,9 +2215,11 @@ function VortexSquadronScreenplay:resetTier4Quests(pPlayer)
 	SpaceHelpers:clearSpaceQuest(pPlayer, self.TIER4_QUEST_STRING_4_SIDE2.type, self.TIER4_QUEST_STRING_4_SIDE2.name, false)
 	SpaceHelpers:clearSpaceQuest(pPlayer, self.TIER4_QUEST_STRING_4_SIDE3.type, self.TIER4_QUEST_STRING_4_SIDE3.name, false)
 
-	-- Master
+	-- Master (two-stage Kessel corvette encounter)
 	destroy_master_rebel_1:resetQuest(pPlayer)
+	destroy_master_rebel_2:resetQuest(pPlayer)
 	SpaceHelpers:clearSpaceQuest(pPlayer, self.TIER4_QUEST_STRING_MASTER.type, self.TIER4_QUEST_STRING_MASTER.name, false)
+	SpaceHelpers:clearSpaceQuest(pPlayer, self.TIER4_QUEST_STRING_MASTER_2.type, self.TIER4_QUEST_STRING_MASTER_2.name, false)
 
 	local playerID = SceneObject(pPlayer):getObjectID()
 
