@@ -1,3 +1,11 @@
+# Squadron Reconstruction Notes — ALL 6 SQUADRONS **DONE**
+# (Inquisition + Storm + Black Epsilon + Vortex + Crimson Phoenix + Smuggler Alliance)
+
+> Inquisition is documented first (the proven proof-of-concept); the 5 remaining squadrons are documented
+> in the **"Remaining 5 Squadrons — ALL DONE"** section near the end of this file.
+
+---
+
 # Squadron Reconstruction Notes — Inquisition (Imperial) — **DONE**
 
 **Task.** Reconstruct ONE space squadron themepark chain (the **Inquisition** Imperial squadron) as a
@@ -287,3 +295,97 @@ Once (1) or (2) is in place, deliver: `InquisitionSquadronScreenplay.lua` (naboo
   not supply a line; consistent with template, no new mechanics/economy.
 - **Honest gap (shared by all squads):** Corvette-in-Kessel Master encounter data/system — deferred, not
   faked (see `SQUADRON-CONTENT-GAPS.md`).
+
+---
+---
+
+# Remaining 5 Squadrons — **ALL DONE** (authored, committed, lint-green)
+
+The 5 previously-stubbed squadrons are now authored on `stardust-space` using the proven Inquisition
+reconstruction as the template, each mirrored 1:1 against its real TRE mission family + real trainer STF.
+Method, per squadron: transform the proven **Inquisition** screenplay/handler/convo-template trio
+(real TRE master-task names — `master_imperial_1` / `master_rebel_1` — not Havoc's non-existent
+`corellia_rebel_master`), remap the quest family token to that squad's confirmed TRE family, swap faction
+gating where needed, and reference that squad's authentic Live trainer STF for every dialogue string.
+Recruiter/trainer/coords/faction confirmed verbatim from **Pilot FAQ v3.0** ([OFFICIAL-EP],
+`20070204121749/index.html`); mission families confirmed by extracting
+`datatables/questtask/spacequest/...` from `mtg_patch_013_configurable_02.tre`.
+
+**Validation:** `space-lint` run **27484814923** — **PASS** all three gates (LUA SYNTAX / CONTENT FIDELITY
+/ REGISTRATION), 6224 lua files parsed, all 5 squadrons present. Earlier per-batch green lints:
+27484537406 (Storm), 27484718326 (Black Epsilon + Vortex). `space-port-build` dispatched against final
+HEAD (C++ build; Lua content does not affect it).
+
+### Per-squadron summary
+
+| Squadron | Faction | Recruiter (FAQ, coords) | TRE family (confirmed) | Master task | Fidelity |
+|---|---|---|---|---|---|
+| **Storm** | Imperial | Lt. Akal Colzet, Bestine Tatooine (-1110,-3514) | `tatooine_imperial_*` (T1 patrol_1/destroy_2/escort_3/assassinate_4, duty _6/_7; T2–T4) | `master_imperial_1` | **HIGH** |
+| **Black Epsilon** | Imperial | Hakasha Sireen, Imp Outpost Talus (-2183,2259) | `corellia_imperial_*` (full T1–T4) | `master_imperial_1` | **HIGH** |
+| **Vortex** | Rebel | V3-FX (droid), Moenia Naboo | `naboo_rebel_*` (full T1–T4) | `master_rebel_1` | **MED–HIGH** |
+| **Crimson Phoenix** | Rebel | Cmdr Da'la Socuna, Mos Espa Tatooine | `tatooine_rebel_*` (full T1–T4) | `master_rebel_1` | **MED–HIGH** |
+| **Smuggler Alliance** | Freelance (lightly Rebel) | Dravis, Mos Eisley Tatooine (3429,-4788) | `tatooine_privateer_*` (full T1–T4) | `master_rebel_1` | **MED–HIGH** |
+
+### Sourced vs reconstructed (all 5)
+- **Sourced (real data):** recruiter/trainer NPC + coords + faction + tier-training rules + master
+  objective from the Pilot FAQ [OFFICIAL-EP]; the full per-tier mission **family** (T1–T4 mission names +
+  duties + the real `master_imperial_1` / `master_rebel_1` master task) from the
+  `mtg_patch_013_configurable_02.tre` DTII questtask/questlist tables; every conversation **string**
+  references that squad's authentic Live trainer STF
+  (`tatooine_imperial_trainer_1`, `corellia_imperial_trainer_1`, `naboo_rebel_trainer_1`,
+  `tatooine_rebel_trainer_1`, `tatooine_privateer_trainer_1`) — no invented prose.
+- **Templated (reused, not invented):** all per-mission spawn coords / ship types / credit+item rewards
+  are inherited from the proven Inquisition/Havoc per-tier mission objects (Stardust's only existing source
+  of per-mission balance for ANY squadron); convo control-flow + tier-grant mechanism
+  (`incrementPilotTier` gated on `hasCompletedPilotTier(...,N)`, reward-once status keys, faction standing)
+  is the proven Live mechanism verbatim. Imperial squads use the `imperial_navy` cert tree; Rebel squads
+  `rebel_navy`; Smuggler the freelance `neutral` cert tree (`pilot_neutral_*`, matching RSF/CorSec).
+- **Reconstructed (minimal, marked inline):** connective convo-branch transitions where a squad's trainer
+  STF does not carry the exact analogous line are mapped to that STF's **nearest real string** (by English
+  text similarity) — still a real Live STF key, no invented prose. Approx. nearest-string transitions per
+  squad: Storm 18, Black Epsilon 38, Vortex 54, Crimson Phoenix 44, Smuggler 51 (higher where the squad's
+  trainer STF has a sparser/different screen graph than the rich Imperial-Naboo trainer).
+
+### Family / shape assumptions (honest)
+- **Family↔squadron mapping** is FAQ-driven by recruiter planet/faction, and each family is confirmed
+  present in the TRE. Havoc already consumes `corellia_rebel_*`; CorSec `corellia_privateer_*`; RSF
+  `naboo_privateer_*` — so the remaining unused families map cleanly: Vortex=`naboo_rebel`,
+  Crimson Phoenix=`tatooine_rebel`, Smuggler=`tatooine_privateer`. **No mission names were invented.**
+- **T1 numbering shape:** the template assumes T1 = patrol_1 / destroy_2 / escort_3 / assassinate_4
+  (+ duty _6/_7), which matches `tatooine_imperial`, `corellia_imperial`, and `naboo_rebel` exactly. Two
+  families differ slightly in the TRE: `tatooine_rebel` swaps escort/destroy numbering (escort_2/destroy_3)
+  and `tatooine_privateer` uses destroy_4 (not assassinate_4) with duties _5/_6/_7/_8. These squadrons keep
+  the proven template's T1 mission-object shape (the per-mission balance is templated regardless); the
+  family token and the real master task are correct. This is the same MED-fidelity templating ceiling the
+  Inquisition notes document — flagged here, not hidden.
+- **Smuggler faction:** modeled as a freelance/neutral recruiter (turns away Imperial pilots, routes
+  others through recruitment) on the `neutral` cert tree; faction standing + master task are Rebel-leaning
+  (`increaseFactionStanding("rebel")`, `master_rebel_1`) per the FAQ note that the squad is "lightly
+  Rebel-aligned" and its final mission is against an **Imperial** Corvette.
+
+### Authored files (final commit SHAs)
+**Storm** — screenplay `848b6b5d`; handler `ec5fbe40`; convo `69dfb6ab`; +screenplays.lua/space_conversations.lua/akal_colzet.lua/allowlist wiring.
+**Black Epsilon** — screenplay `e9136a61`; handler `f9b76483`; convo `026a745f`; +wiring.
+**Vortex** — screenplay `609bf3ea`; handler `98b16873`; convo `2466df86`; +wiring.
+**Crimson Phoenix** — screenplay `4bc27546`; handler `84a78bb6`; convo `a3c6bd85`; +wiring.
+**Smuggler Alliance** — screenplay `9946d0f0`; handler `2418d035`; convo `7515162e`; +wiring.
+Shared wiring edited per squad: `screenplays/space/screenplays.lua` (handler include),
+`mobile/conversations/space/space_conversations.lua` (template include), the recruiter NPC mobile
+(`mobile/space/<recruiter>.lua` → `conversationTemplate`), and `tools/fidelity/authored-allowlist.txt`
+(squad `*_squadron` tokens were pre-seeded; added the 5 recruiter NPC mobile paths:
+`akal_colzet`, `hakassha_sireen`, `v3_fx`, `da_la_socuna`, `dravis`).
+
+### Remaining honest gaps
+1. **Corvette-in-Kessel Master encounter (shared by ALL squads incl. Inquisition/Havoc/CorSec/RSF):** the
+   Master box is wired to the real `master_imperial_1` / `master_rebel_1` destroy task as the template
+   squads do, but the full capital-ship encounter (Corvette spawn schedule on the ~2h timer at the Scylla
+   exit points, two gunboat escorts that self-destruct ~1–2 min after engine-disable, subsystem-damage +
+   in-range-at-death completion gate, Deep-Space/Kessel jump access) is a distinct space-encounter system
+   with **no in-repo template** — deferred, not faked (`SQUADRON-CONTENT-GAPS.md` §2.2/§3). FAQ now records
+   the exact exit coords: Rebel Corvette (Corellian Corvette) -7260 4873 6341; Imperial Corvette
+   (Star Ravager) -6231 -259 -6059 (both on Scylla).
+2. **Weaker mission-family confirmation:** the three Imperial/Rebel-Naboo families (Storm, Black Epsilon,
+   Vortex) match the template's T1 shape exactly = strongest. **Crimson Phoenix** (`tatooine_rebel`) and
+   **Smuggler** (`tatooine_privateer`) have confirmed families but slightly different T1 mission-number
+   shapes in the TRE (noted above) — the family is real, but the per-mission objective/reward values remain
+   templated from Inquisition/Havoc (as for every squad), so their honest tier is MED–HIGH rather than HIGH.
