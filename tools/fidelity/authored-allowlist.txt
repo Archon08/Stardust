@@ -6,3 +6,5 @@ vortex_squadron
 crimson_phoenix_squadron
 smuggler_squadron
 screenplays/space/screenplays\.lua
+mobile/conversations/space/space_conversations\.lua
+mobile/space/barn_sinkko\.lua
