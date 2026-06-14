@@ -90,6 +90,7 @@ includeFile("conversations/space/rebel/havoc_squadron/aqzow_convo.lua")
 -- Imperial Pilot
 
 -- Black Epsilon Squadron
+includeFile("conversations/space/imperial/black_epsilon_squadron/hakassha_sireen_convo.lua")
 
 -- Imperial Inquisition Squadron
 includeFile("conversations/space/imperial/inquisition_squadron/barn_sinkko_convo.lua")
