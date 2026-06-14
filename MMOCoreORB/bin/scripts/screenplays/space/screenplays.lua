@@ -149,6 +149,8 @@ includeFile("space/conversations/imperial/inquisition_squadron/barnSinkkoConvoHa
 -- Storm Squadron
 includeFile("space/squadrons/StormSquadronScreenplay.lua")
 
+includeFile("space/conversations/imperial/storm_squadron/akalColzetConvoHandler.lua")
+
 
 -- Spawning Sub Folder
 includeFile("space/spawning/screenplays.lua")
