@@ -141,6 +141,8 @@ includeFile("space/conversations/imperial/imperialBrokerConvoHandler.lua")
 -- Black Epsilon Squadron
 includeFile("space/squadrons/BlackEpsilonSquadronScreenplay.lua")
 
+includeFile("space/conversations/imperial/black_epsilon_squadron/hakasshaSireenConvoHandler.lua")
+
 -- Imperial Inquisition Squadron
 includeFile("space/squadrons/InquisitionSquadronScreenplay.lua")
 
