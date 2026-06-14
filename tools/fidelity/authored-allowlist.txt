@@ -1,4 +1,5 @@
 SquadronScreenplay\.lua
+KesselMasterEncounterScreenplay\.lua
 inquisition_squadron
 storm_squadron
 black_epsilon_squadron
