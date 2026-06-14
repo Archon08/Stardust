@@ -8,3 +8,8 @@ smuggler_squadron
 screenplays/space/screenplays\.lua
 mobile/conversations/space/space_conversations\.lua
 mobile/space/barn_sinkko\.lua
+mobile/space/akal_colzet\.lua
+mobile/space/hakassha_sireen\.lua
+mobile/space/v3_fx\.lua
+mobile/space/da_la_socuna\.lua
+mobile/space/dravis\.lua
