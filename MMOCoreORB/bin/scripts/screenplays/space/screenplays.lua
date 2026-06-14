@@ -144,6 +144,8 @@ includeFile("space/squadrons/BlackEpsilonSquadronScreenplay.lua")
 -- Imperial Inquisition Squadron
 includeFile("space/squadrons/InquisitionSquadronScreenplay.lua")
 
+includeFile("space/conversations/imperial/inquisition_squadron/barnSinkkoConvoHandler.lua")
+
 -- Storm Squadron
 includeFile("space/squadrons/StormSquadronScreenplay.lua")
 
