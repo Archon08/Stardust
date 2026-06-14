@@ -58,7 +58,7 @@ jobs:
                    object/tangible/space object/static/space object/draft_schematic/space \
                    loot/groups/ship loot/groups/space loot/items/ship loot/items/space; do
             if [ ! -d "$UP/$d" ]; then echo "NOTE: upstream lacks $d (skip)"; continue; fi
-            OUT=$(diff -rq "$UP/$d" "$d" 2>&1)
+            OUT=$(diff -rq "$UP/$d" "$d" 2>&1 || true)
             # drop intentionally-authored (allowlisted) paths from the must-match-upstream requirement
             if [ -f "$ALLOW" ]; then OUT=$(printf '%s\n' "$OUT" | grep -vE -f "$ALLOW" || true); fi
             OUT=$(printf '%s\n' "$OUT" | grep -v '^[[:space:]]*$' || true)
