@@ -21,6 +21,10 @@ includeFile("space/SpaceDutyPatrolScreenplay.lua")
 includeFile("space/SpaceDutyRecoveryScreenplay.lua")
 includeFile("space/SpaceDutyRescueScreenplay.lua")
 
+-- Master-tier Kessel Corvette encounter (defines destroy_master_{imperial,rebel}_{1,2}).
+-- Must load BEFORE the squadron screenplays, which reference these master objects.
+includeFile("space/squadrons/KesselMasterEncounterScreenplay.lua")
+
 includeFile("space/chassis_dealer.lua")
 
 --[[
