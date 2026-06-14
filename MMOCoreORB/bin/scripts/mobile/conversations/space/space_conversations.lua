@@ -95,3 +95,4 @@ includeFile("conversations/space/rebel/havoc_squadron/aqzow_convo.lua")
 includeFile("conversations/space/imperial/inquisition_squadron/barn_sinkko_convo.lua")
 
 -- Storm Squadron
+includeFile("conversations/space/imperial/storm_squadron/akal_colzet_convo.lua")
