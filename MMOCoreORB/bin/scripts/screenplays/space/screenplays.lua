@@ -98,6 +98,8 @@ includeFile("space/conversations/neutral/corsec_squadron/turoldineConvoHandler.l
 -- Smuggler Squadron
 includeFile("space/squadrons/SmugglerSquadronScreenplay.lua")
 
+includeFile("space/conversations/neutral/smuggler_squadron/dravisConvoHandler.lua")
+
 -- RSF Squadron
 includeFile("space/squadrons/RsfSquadronScreenplay.lua")
 
