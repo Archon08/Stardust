@@ -129,9 +129,9 @@ includeFile("space/conversations/rebel/havoc_squadron/aqzowConvoHandler.lua")
 -- Vortex Squadron
 includeFile("space/squadrons/VortexSquadronScreenplay.lua")
 
+includeFile("space/conversations/rebel/vortex_squadron/v3fxConvoHandler.lua")
 --includeFile("space/conversations/rebel/vortex_squadron/evinConvoHandler.lua")
 --includeFile("space/conversations/rebel/vortex_squadron/ezkielConvoHandler.lua")
---includeFile("space/conversations/rebel/vortex_squadron/v3fxConvoHandler.lua")
 --includeFile("space/conversations/rebel/vortex_squadron/vrovelConvoHandler.lua")
 
 
