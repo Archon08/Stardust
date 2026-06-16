@@ -834,6 +834,18 @@ class PlayerObject extends IntangibleObject {
 	@local
 	public native void setPlayerQuestData(unsigned int questHashCode, @dereferenced PlayerQuestData data, boolean notifyClient = true);
 
+	public native void activateJournalQuest(unsigned int questCrc, boolean notifyClient = true);
+	public native void completeJournalQuest(unsigned int questCrc, boolean notifyClient = true);
+	public native void clearJournalQuest(unsigned int questCrc, boolean notifyClient = true);
+	public native void activateJournalQuestTask(unsigned int questCrc, int taskNum, boolean notifyClient = true);
+	public native void completeJournalQuestTask(unsigned int questCrc, int taskNum, boolean notifyClient = true);
+	public native void clearJournalQuestTask(unsigned int questCrc, int taskNum, boolean notifyClient = true);
+	public native boolean isJournalQuestActive(unsigned int questCrc);
+	public native boolean isJournalQuestComplete(unsigned int questCrc);
+	public native boolean isJournalQuestTaskActive(unsigned int questCrc, int taskNum);
+	public native boolean isJournalQuestTaskComplete(unsigned int questCrc, int taskNum);
+	public native void clearPlayerQuestData(unsigned int questHashCode, boolean notifyClient = true);
+
 	/**
 	 * Gets the faction point list.
 	 */
@@ -1439,6 +1451,26 @@ class PlayerObject extends IntangibleObject {
 		}
 
 		pilotTier = tier;
+	}
+
+	public void setSquadronType(unsigned int squadron) {
+		pilotSquadron = squadron;
+	}
+
+	public unsigned int getSquadronType() {
+		return pilotSquadron;
+	}
+
+	public boolean isSquadronType(unsigned int squadron) {
+		return pilotSquadron == squadron;
+	}
+
+	public void incrementPilotTier() {
+		pilotTier = pilotTier + 1;
+	}
+
+	public void resetPilotTier() {
+		pilotTier = 0;
 	}
 
 	// P2: additive player log level getter (consumed by TransactionLog; mirror upstream)

@@ -82,6 +82,21 @@ Luna<LuaPlayerObject>::RegType LuaPlayerObject::Register[] = {
 		{ "setPilotTier", &LuaPlayerObject::setPilotTier },
 		{ "getPilotSquadron", &LuaPlayerObject::getPilotSquadron },
 		{ "setPilotSquadron", &LuaPlayerObject::setPilotSquadron },
+		{ "activateJournalQuest", &LuaPlayerObject::activateJournalQuest },
+		{ "completeJournalQuest", &LuaPlayerObject::completeJournalQuest },
+		{ "clearJournalQuest", &LuaPlayerObject::clearJournalQuest },
+		{ "activateJournalQuestTask", &LuaPlayerObject::activateJournalQuestTask },
+		{ "completeJournalQuestTask", &LuaPlayerObject::completeJournalQuestTask },
+		{ "clearJournalQuestTask", &LuaPlayerObject::clearJournalQuestTask },
+		{ "isJournalQuestActive", &LuaPlayerObject::isJournalQuestActive },
+		{ "isJournalQuestComplete", &LuaPlayerObject::isJournalQuestComplete },
+		{ "isJournalQuestTaskActive", &LuaPlayerObject::isJournalQuestTaskActive },
+		{ "isJournalQuestTaskComplete", &LuaPlayerObject::isJournalQuestTaskComplete },
+		{ "incrementPilotTier", &LuaPlayerObject::incrementPilotTier },
+		{ "resetPilotTier", &LuaPlayerObject::resetPilotTier },
+		{ "isSquadronType", &LuaPlayerObject::isSquadronType },
+		{ "setSquadronType", &LuaPlayerObject::setSquadronType },
+		{ "getSquadronType", &LuaPlayerObject::getSquadronType },
 		{ 0, 0 }
 };
 
@@ -726,6 +741,160 @@ int LuaPlayerObject::getFrsCouncil(lua_State* L) {
 	FrsData* frsData = realObject->getFrsData();
 
 	lua_pushinteger(L, frsData->getCouncilType());
+
+	return 1;
+}
+
+int LuaPlayerObject::activateJournalQuest(lua_State* L) {
+	int questCrc = lua_tointeger(L, -2);
+	bool notify = lua_toboolean(L, -1);
+
+	Locker locker(realObject);
+
+	realObject->activateJournalQuest(questCrc, notify);
+
+	return 0;
+}
+
+int LuaPlayerObject::completeJournalQuest(lua_State* L) {
+	int questCrc = lua_tointeger(L, -2);
+	bool notify = lua_toboolean(L, -1);
+
+	Locker locker(realObject);
+
+	realObject->completeJournalQuest(questCrc, notify);
+
+	return 0;
+}
+
+int LuaPlayerObject::clearJournalQuest(lua_State* L) {
+	int questCrc = lua_tointeger(L, -2);
+	bool notify = lua_toboolean(L, -1);
+
+	Locker locker(realObject);
+
+	realObject->clearJournalQuest(questCrc, notify);
+
+	return 0;
+}
+
+int LuaPlayerObject::activateJournalQuestTask(lua_State* L) {
+	int questCrc = lua_tointeger(L, -3);
+	int task = lua_tointeger(L, -2);
+	bool notify = lua_toboolean(L, -1);
+
+	Locker locker(realObject);
+
+	realObject->activateJournalQuestTask(questCrc, task, notify);
+
+	return 0;
+}
+
+int LuaPlayerObject::completeJournalQuestTask(lua_State* L) {
+	int questCrc = lua_tointeger(L, -3);
+	int task = lua_tointeger(L, -2);
+	bool notify = lua_toboolean(L, -1);
+
+	Locker locker(realObject);
+
+	realObject->completeJournalQuestTask(questCrc, task, notify);
+
+	return 0;
+}
+
+int LuaPlayerObject::clearJournalQuestTask(lua_State* L) {
+	int questCrc = lua_tointeger(L, -3);
+	int task = lua_tointeger(L, -2);
+	bool notify = lua_toboolean(L, -1);
+
+	Locker locker(realObject);
+
+	realObject->clearJournalQuestTask(questCrc, task, notify);
+
+	return 0;
+}
+
+int LuaPlayerObject::isJournalQuestActive(lua_State* L) {
+	int questCrc = lua_tointeger(L, -1);
+
+	lua_pushboolean(L, realObject->isJournalQuestActive(questCrc));
+
+	return 1;
+}
+
+int LuaPlayerObject::isJournalQuestComplete(lua_State* L) {
+	int questCrc = lua_tointeger(L, -1);
+
+	lua_pushboolean(L, realObject->isJournalQuestComplete(questCrc));
+
+	return 1;
+}
+
+int LuaPlayerObject::isJournalQuestTaskActive(lua_State* L) {
+	int questCrc = lua_tointeger(L, -2);
+	int task = lua_tointeger(L, -1);
+
+	lua_pushboolean(L, realObject->isJournalQuestTaskActive(questCrc, task));
+
+	return 1;
+}
+
+int LuaPlayerObject::isJournalQuestTaskComplete(lua_State* L) {
+	int questCrc = lua_tointeger(L, -2);
+	int task = lua_tointeger(L, -1);
+
+	lua_pushboolean(L, realObject->isJournalQuestTaskComplete(questCrc, task));
+
+	return 1;
+}
+
+int LuaPlayerObject::incrementPilotTier(lua_State* L) {
+	Locker lock(realObject);
+
+	realObject->incrementPilotTier();
+
+	return 0;
+}
+
+int LuaPlayerObject::resetPilotTier(lua_State* L) {
+	Locker lock(realObject);
+
+	realObject->resetPilotTier();
+
+	return 0;
+}
+
+int LuaPlayerObject::isSquadronType(lua_State* L) {
+	uint32 squadron = lua_tointeger(L, -1);
+	bool ret = false;
+
+	if (squadron > 0 && squadron < 10) {
+		ret = realObject->getPilotSquadron() == squadron;
+	}
+
+	lua_pushboolean(L, ret);
+
+	return 1;
+}
+
+int LuaPlayerObject::setSquadronType(lua_State* L) {
+	uint32 squadron = lua_tointeger(L, -1);
+
+	if (squadron < 1 || squadron > 9) {
+		return 0;
+	}
+
+	Locker lock(realObject);
+
+	realObject->setPilotSquadron(squadron);
+
+	return 0;
+}
+
+int LuaPlayerObject::getSquadronType(lua_State* L) {
+	uint32 squadronType = realObject->getPilotSquadron();
+
+	lua_pushinteger(L, squadronType);
 
 	return 1;
 }

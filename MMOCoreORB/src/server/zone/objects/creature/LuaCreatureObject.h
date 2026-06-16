@@ -119,6 +119,12 @@ namespace creature {
 		int getSkillMod(lua_State* L);
 		int getGender(lua_State* L);
 		int isRidingMount(lua_State* L);
+		int isRebelPilot(lua_State* L);
+		int isImperialPilot(lua_State* L);
+		int isNeutralPilot(lua_State* L);
+		int hasCertifiedShip(lua_State* L);
+		int removeQuestMission(lua_State* L);
+		int failQuestMission(lua_State* L);
 	private:
 		// The pointer to the 'real object' defined in object.cc
 		CreatureObject* realObject;

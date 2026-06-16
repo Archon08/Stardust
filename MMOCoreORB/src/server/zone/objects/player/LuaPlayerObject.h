@@ -90,6 +90,21 @@ namespace player {
 		int setFrsRank(lua_State* L);
 		int getFrsRank(lua_State* L);
 		int getFrsCouncil(lua_State* L);
+		int activateJournalQuest(lua_State* L);
+		int completeJournalQuest(lua_State* L);
+		int clearJournalQuest(lua_State* L);
+		int activateJournalQuestTask(lua_State* L);
+		int completeJournalQuestTask(lua_State* L);
+		int clearJournalQuestTask(lua_State* L);
+		int isJournalQuestActive(lua_State* L);
+		int isJournalQuestComplete(lua_State* L);
+		int isJournalQuestTaskActive(lua_State* L);
+		int isJournalQuestTaskComplete(lua_State* L);
+		int incrementPilotTier(lua_State* L);
+		int resetPilotTier(lua_State* L);
+		int isSquadronType(lua_State* L);
+		int setSquadronType(lua_State* L);
+		int getSquadronType(lua_State* L);
 
 	private:
 		// The pointer to the 'real object' defined in object.cc

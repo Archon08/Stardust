@@ -1575,6 +1575,10 @@ class ShipObject extends TangibleObject {
 		return shipFaction;
 	}
 
+	public unsigned int getShipFactionHash() {
+		return shipFaction;
+	}
+
 	@preLocked
 	public native void installAmmo(CreatureObject owner, SceneObject component, int slot, boolean notifyClient = false);
 
