@@ -96,3 +96,23 @@ jobs:
           print("REGISTRATION: " + ("PASS" if not real else "FAIL"))
           import sys; sys.exit(1 if real else 0)
           PY
+
+      - name: Lua require() resolution — required modules must exist locally
+        shell: bash
+        run: |
+          cd MMOCoreORB/bin/scripts
+          FAIL=0; CHECKED=0
+          while IFS= read -r -d '' f; do
+            while IFS= read -r mod; do
+              [ -z "$mod" ] && continue
+              tgt="$(echo "$mod" | tr '.' '/').lua"
+              CHECKED=$((CHECKED+1))
+              if [ ! -f "$tgt" ]; then
+                echo "MISSING REQUIRE: $f -> require(\"$mod\") expects $tgt"
+                FAIL=1
+              fi
+            done < <(grep -ohE 'require\("[^"]+"\)' "$f" 2>/dev/null | sed -E 's/.*require\("([^"]+)"\).*/\1/')
+          done < <(find ai_space managers/space ship_mobile mobile/space mobile/conversations/space \
+                        screenplays/space utils -name '*.lua' -print0 2>/dev/null)
+          echo "require-resolution checked $CHECKED calls"
+          [ $FAIL -eq 0 ] && echo "REQUIRE RESOLUTION: PASS" || { echo "REQUIRE RESOLUTION: FAIL (a require() target .lua is missing — would crash at runtime)"; exit 1; }
