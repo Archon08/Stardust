@@ -117,3 +117,45 @@ balance.
 4. **Reward unknown.** Stage-2 credit reward is a placeholder (25000); the authentic master reward is not
    in the archived scrapbook page and was not located in the TRE strings (only auto-reward STF keys exist,
    empty here). **Closing data:** the master mission reward row / autoreward STF body.
+
+---
+
+## RESOLUTION STATUS (2026-06-16) — verified via headless boot + scrapbook re-investigation
+
+The four §5 gaps were re-investigated against the upstream pin, the 26 loaded TREs (read with
+`tools/fidelity/tre_read.py`), and the Biophilia Pre-CU Scrapbook v5.1 (both Kessel guides:
+`data/20070127185616` MonsofoLexius spawn-info, `data/20070127191311` Zina FAQ v3.0b). Result:
+
+1. **`space_kessel` zone `.trn` — NON-ISSUE (left as the faithful workaround).** The upstream pin never
+   defined a `space_kessel` zone (`SpaceZonesEnabled` = the 10 standard zones, no Kessel), and **no
+   `space_kessel.trn` exists in any of the 26 TREs**. Kessel was a live-only *dynamic deep-space instance*
+   reached via `/comm "kessel"`, not a registered terrain zone. The current spawn-in-questZone workaround
+   (`KESSEL_TARGET_ZONE = ""`) is the correct fidelity-preserving choice. A genuine `space_kessel.trn` is
+   an asset that does not exist in the available corpus; do **not** author a fake one.
+
+2. **Engine subsystem-hit observer — NEEDS-C++, deferred as LOW priority.** No component/subsystem-hit
+   `ObserverEventType` exists in the pin or repo, and `SpaceCombatManager` applies component damage but
+   never fires an observer for a hit (only `SHIPDISABLED`/`SHIPDESTROYED`). A Lua `createObserver` cannot
+   subscribe to an event the engine never fires. **Also disputed in Live** (players completed it AFK/out
+   of range; SOE reduced the rule to "just damage the vette"), so the current in-zone + destroy gate is
+   already faithful to confirmed behavior. If ever wanted: add a `SHIPCOMPONENTDAMAGED` event +
+   `notifyObservers` in `applyComponentDamage` + `setGlobalInt` in DirectorManager + a Lua per-trip flag.
+
+3. **Kessel spawn-timer values — RESOLVED (Lua, scrapbook-sourced).** Authentic values from both guides
+   are now encoded as named constants in `KesselMasterEncounterScreenplay.lua` (`KESSEL_CORVETTE_DWELL_MS`
+   2700s, `RESPAWN_MS` 4500s, `CYCLE_MS` 7200s, `ALTERNATE_MS` 3600s, `ESCORT_SELFDESTRUCT_MS` 90s), and
+   the corvette now **hyperspaces out after ~45 min dwell** if not destroyed (despawns corvette+escorts,
+   clears the spawn flag so a later zone entry respawns) — `spawnCorvetteEncounter` schedules
+   `hyperspaceOutCorvette`. (A true global alternating-hour world spawn remains optional; the per-holder
+   instance spawn is acceptable.)
+
+4. **Master reward — RESOLVED (Lua/data).** Corrects §5.4: the reward **is** documented (Zina FAQ §VI:
+   an "ace" pilot **wearable title** + a Badge + a faction Helmet) and the wearable items exist in the TREs
+   (`shared_necklace_ace_pilot_{empire,rebel,neutral}_{m,f}.iff` in `mtg_patch_010_object_01.tre`).
+   Implemented: 6 base gendered server templates
+   (`object/tangible/wearables/necklace/necklace_ace_pilot_{empire,rebel,neutral}_{m,f}.lua`) + a
+   gender/faction-aware grant (`KesselCorvetteEncounter:grantAcePilotReward` on `completeQuest`, keyed by
+   `aceRewardFaction` + `getGender()`). `creditReward = 25000` retained (no authentic credit figure is
+   documented — flagged unsourced). **Remaining cosmetic follow-ups (need client visual validation):** the
+   Wookiee (`wke`) / Ithorian (`ith`) species mesh variants, the Badge award, the faction Helmet, and the
+   (purely cosmetic) `autoreward*` STF mail body (genuinely empty in the SOE TRE).

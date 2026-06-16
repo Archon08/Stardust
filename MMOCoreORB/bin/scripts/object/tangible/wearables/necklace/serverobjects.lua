@@ -47,6 +47,12 @@
 -- Server Objects
 includeFile("tangible/wearables/necklace/bestine_quest_badge.lua")
 includeFile("tangible/wearables/necklace/necklace_adorned_beads.lua")
+includeFile("tangible/wearables/necklace/necklace_ace_pilot_empire_m.lua")
+includeFile("tangible/wearables/necklace/necklace_ace_pilot_empire_f.lua")
+includeFile("tangible/wearables/necklace/necklace_ace_pilot_rebel_m.lua")
+includeFile("tangible/wearables/necklace/necklace_ace_pilot_rebel_f.lua")
+includeFile("tangible/wearables/necklace/necklace_ace_pilot_neutral_m.lua")
+includeFile("tangible/wearables/necklace/necklace_ace_pilot_neutral_f.lua")
 includeFile("tangible/wearables/necklace/necklace_base.lua")
 includeFile("tangible/wearables/necklace/necklace_blue_gadget.lua")
 includeFile("tangible/wearables/necklace/necklace_brass_charm.lua")
