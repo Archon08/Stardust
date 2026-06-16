@@ -1,8 +1,14 @@
 # Stardust — Full Client TRE Set (deployment spec)
 
 **Status:** assembled & verified from all sources available on the build machine (2026-06-16).
-**Canonical location:** `C:\Stardust-TREs\` (26 TRE files, 5.3 GB) + `live.cfg` (load order).
+**Canonical location:** `C:\Stardust-TREs\` (**27** TRE files) + `live.cfg` (load order).
 **This is the complete client asset set available locally.** Integrity: `tre_manifest.sha256`.
+
+> Update 2026-06-16: added **`mtg_patch_023.tre`** (pulled from the "Stardust 2.0 Dev Files" Drive — the only
+> server TRE missing locally). It's the **Kashyyyk + Mustafar** content patch (their snapshots/environment/
+> regions) plus a newer `datatables/player/quests.iff`. Verify-boot with the full 27-set is GREEN (core3 boots,
+> 0 new errors, 10 space zones, 307 quests unchanged). It's wired into `config.lua` `TreFiles` at top mtg-priority.
+> The full Drive dev-environment inventory is in `DRIVE-INVENTORY.md`.
 
 ---
 

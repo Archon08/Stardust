@@ -174,6 +174,7 @@ TreFiles = {
   	"stardust_03.tre",
   	"stardust_02.tre",
   	"stardust_01.tre",
+  	"mtg_patch_023.tre",
   	"mtg_patch_022.tre",
    	"mtg_planets.tre",
  	"mtg_patch_021.tre",
