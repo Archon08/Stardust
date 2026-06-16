@@ -1823,16 +1823,11 @@ schematics = {
 	
 	{path="object/draft_schematic/clothing/clothing_pants_nightsister_s01.iff"},
 	{path="object/draft_schematic/clothing/clothing_pants_nightsister_s02.iff"},
-	{path="object/draft_schematic/clothing/clothing_pants_nightsister_01.iff"},
-  {path="object/draft_schematic/clothing/clothing_pants_nightsister_02.iff"},
 	
 	{path="object/draft_schematic/clothing/clothing_shirt_nightsister_s01.iff"},
 	{path="object/draft_schematic/clothing/clothing_shirt_nightsister_s02.iff"},
 	{path="object/draft_schematic/clothing/clothing_shirt_nightsister_s03.iff"},
 	
-	{path="object/draft_schematic/clothing/clothing_shirt_nightsister_01.iff"},
-  {path="object/draft_schematic/clothing/clothing_shirt_nightsister_02.iff"},
-  {path="object/draft_schematic/clothing/clothing_shirt_nightsister_03.iff"},
 	
 	{path="object/draft_schematic/clothing/clothing_boots_nightsister.iff"},
 	{path="object/draft_schematic/clothing/clothing_dress_nightsister.iff"},

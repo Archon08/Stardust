@@ -156,6 +156,9 @@ The four §5 gaps were re-investigated against the upstream pin, the 26 loaded T
    (`object/tangible/wearables/necklace/necklace_ace_pilot_{empire,rebel,neutral}_{m,f}.lua`) + a
    gender/faction-aware grant (`KesselCorvetteEncounter:grantAcePilotReward` on `completeQuest`, keyed by
    `aceRewardFaction` + `getGender()`). `creditReward = 25000` retained (no authentic credit figure is
-   documented — flagged unsourced). **Remaining cosmetic follow-ups (need client visual validation):** the
-   Wookiee (`wke`) / Ithorian (`ith`) species mesh variants, the Badge award, the faction Helmet, and the
-   (purely cosmetic) `autoreward*` STF mail body (genuinely empty in the SOE TRE).
+   documented — flagged unsourced). **Wookiee/Ithorian species variants NOW IMPLEMENTED** (2026-06-16): 12 server templates
+   (`necklace_ace_pilot_<fac>_wke_<m/f>`, `ith_necklace_ace_pilot_<fac>_<m/f>`) + shared client templates +
+   species-aware grant (`getSpecies()` -> SPECIES_WOOKIEE/ITHORIAN). All ace-pilot reward species now covered.
+   **Remaining cosmetic (need authoring/asset):** the Badge award (no authentic ace-pilot/kessel badge id
+   found in TRE), the faction Helmet (no such helmet asset in any TRE), and the (cosmetic) `autoreward*` STF
+   mail body (genuinely empty in the SOE TRE).

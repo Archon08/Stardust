@@ -297,7 +297,18 @@ function KesselCorvetteEncounter:grantAcePilotReward(pPlayer)
 		gender = "f"
 	end
 
-	local item = "object/tangible/wearables/necklace/necklace_ace_pilot_" .. faction .. "_" .. gender .. ".iff"
+	-- Wookiee/Ithorian need their species mesh variant (the human-mesh necklace's playerRaces excludes them).
+	local species = CreatureObject(pPlayer):getSpecies()
+	local item
+
+	if (species == SPECIES_WOOKIEE) then
+		item = "object/tangible/wearables/necklace/necklace_ace_pilot_" .. faction .. "_wke_" .. gender .. ".iff"
+	elseif (species == SPECIES_ITHORIAN) then
+		item = "object/tangible/wearables/necklace/ith_necklace_ace_pilot_" .. faction .. "_" .. gender .. ".iff"
+	else
+		item = "object/tangible/wearables/necklace/necklace_ace_pilot_" .. faction .. "_" .. gender .. ".iff"
+	end
+
 	SpaceHelpers:spaceItemReward(pPlayer, item)
 end
 
