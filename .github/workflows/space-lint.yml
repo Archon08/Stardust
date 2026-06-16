@@ -107,8 +107,11 @@ jobs:
               [ -z "$mod" ] && continue
               tgt="$(echo "$mod" | tr '.' '/').lua"
               CHECKED=$((CHECKED+1))
-              if [ ! -f "$tgt" ]; then
-                echo "MISSING REQUIRE: $f -> require(\"$mod\") expects $tgt"
+              # lua package.path resolves modules from BOTH bin/scripts/ (cwd) and bin/ (../):
+              # "utils.space_helpers" -> scripts/utils/space_helpers.lua, and
+              # "scripts.managers.space.regions.regions" -> bin/scripts/managers/.../regions.lua are both valid.
+              if [ ! -f "$tgt" ] && [ ! -f "../$tgt" ]; then
+                echo "MISSING REQUIRE: $f -> require(\"$mod\") expects $tgt (checked bin/scripts/ and bin/)"
                 FAIL=1
               fi
             done < <(grep -ohE 'require\("[^"]+"\)' "$f" 2>/dev/null | sed -E 's/.*require\("([^"]+)"\).*/\1/')
