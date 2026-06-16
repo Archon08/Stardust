@@ -81,3 +81,26 @@ jobs:
             configure.log
             build.log
           retention-days: 14
+
+      - name: Upload core3 binary + runtime deps manifest
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p out
+          cp MMOCoreORB/build/src/core3 out/ 2>/dev/null && echo "got core3 ($(du -h out/core3 | cut -f1))" || echo "no core3 binary"
+          # any engine3 shared lib (if linked shared)
+          find MMOCoreORB -name 'libengine3*.so*' -exec cp {} out/ \; 2>/dev/null
+          ls -la out/
+          echo "=== ldd (exact runtime shared-lib deps for the runner container) ==="
+          ldd out/core3 2>&1 | tee out/core3.ldd.txt || true
+
+      - name: Upload core3 artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core3-binary-${{ github.run_number }}
+          path: |
+            out/core3
+            out/libengine3*
+            out/core3.ldd.txt
+          retention-days: 14
